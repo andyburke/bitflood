@@ -108,8 +108,8 @@ public class EncoderTest
         System.out.println("adding file: " + filesToAdd[i]);
         if(!floodFile.Add(filesToAdd[i]))
         {
-        	System.out.println("error adding file: " + filesToAdd[i]);
-        	System.exit(0);
+          System.out.println("error adding file: " + filesToAdd[i]);
+          System.exit(0);
         }
       }
     }

@@ -56,80 +56,80 @@ public class FloodFile
   
   public FloodFile(String filePath)
   {
-  	this.filePath = filePath;
-  	this.chunkSize = 256 * 1024; // default to 256K
+    this.filePath = filePath;
+    this.chunkSize = 256 * 1024; // default to 256K
 
     try
-		{
-	  	sha1Encoder = MessageDigest.getInstance("SHA-1");
-	  } 
-	  catch (Exception e) 
-		{ 
-	  	System.out.println(e.toString());
-		}
+    {
+      sha1Encoder = MessageDigest.getInstance("SHA-1");
+    } 
+    catch (Exception e) 
+    { 
+      System.out.println(e.toString());
+    }
 
   }
   
   public FloodFile(String filePath, int chunkSize)
   {
-  	this.filePath = filePath;
-  	this.chunkSize = chunkSize;
+    this.filePath = filePath;
+    this.chunkSize = chunkSize;
 
     try
-		{
-	  	sha1Encoder = MessageDigest.getInstance("SHA-1");
-	  } 
-	  catch (Exception e) 
-		{ 
-	  	System.out.println(e.toString());
-		}
+    {
+      sha1Encoder = MessageDigest.getInstance("SHA-1");
+    } 
+    catch (Exception e) 
+    { 
+      System.out.println(e.toString());
+    }
 
   }
   
   public FloodFile(String filePath, int chunkSize, String[] trackers)
   {
-  	this.filePath = filePath;
-  	this.chunkSize = chunkSize;
-  	this.trackers = trackers;
+    this.filePath = filePath;
+    this.chunkSize = chunkSize;
+    this.trackers = trackers;
 
     try
-		{
-	  	sha1Encoder = MessageDigest.getInstance("SHA-1");
-	  } 
-	  catch (Exception e) 
-		{ 
-	  	System.out.println(e.toString());
-		}
+    {
+      sha1Encoder = MessageDigest.getInstance("SHA-1");
+    } 
+    catch (Exception e) 
+    { 
+      System.out.println(e.toString());
+    }
   }
   
   public boolean Read()
   {
-  	InputStream inputFileStream = null;
-  	File inputFile = null;
-  	try
-		{
-  		inputFile = new File(filePath);
-  		inputFileStream = new FileInputStream(inputFile);
-		}
-  	catch(Exception e)
-		{
-  		System.out.println("Error: " + e);
-  		System.exit(0);
-		}
+    InputStream inputFileStream = null;
+    File inputFile = null;
+    try
+    {
+      inputFile = new File(filePath);
+      inputFileStream = new FileInputStream(inputFile);
+    }
+    catch(Exception e)
+    {
+      System.out.println("Error: " + e);
+      System.exit(0);
+    }
   	
-  	try
-		{
-  		DataInputStream dataStream = new DataInputStream(inputFileStream);
-  		FromXML(dataStream);
-  		inputFileStream.close();
-		}
-  	catch(IOException ioEx)
-		{
-  		System.out.println("Error: " + ioEx);
-  		System.exit(0);
-		}
+    try
+    {
+      DataInputStream dataStream = new DataInputStream(inputFileStream);
+      FromXML(dataStream);
+      inputFileStream.close();
+    }
+    catch(IOException ioEx)
+    {
+      System.out.println("Error: " + ioEx);
+      System.exit(0);
+    }
   	
-  	return true;
+    return true;
   }
   
   public boolean Write()
@@ -146,58 +146,58 @@ public class FloodFile
     }
 
     try
-		{
-//    	System.out.println(ToXML());
-    	outputFile.write(ToXML().getBytes());
+    {
+      //    	System.out.println(ToXML());
+      outputFile.write(ToXML().getBytes());
       outputFile.close();
-		}
+    }
     catch(IOException ioEx)
-		{
-    	System.out.println("Error: " + ioEx);
-    	System.exit(0);
-		}
+    {
+      System.out.println("Error: " + ioEx);
+      System.exit(0);
+    }
 
     return true;
   } 
   
   public void Dump()
   {
-  	if(files == null)
-  	{
-  		System.out.println("No files defined...");
-  		return;
-  	}
-  	if(trackers == null)
-  	{
-  		System.out.println("No trackers defined...");
-  		return;
-  	}
+    if(files == null)
+    {
+      System.out.println("No files defined...");
+      return;
+    }
+    if(trackers == null)
+    {
+      System.out.println("No trackers defined...");
+      return;
+    }
   	
-  	System.out.println("# Files   : " + files.length);
-  	System.out.println("# Trackers: " + trackers.length);
+    System.out.println("# Files   : " + files.length);
+    System.out.println("# Trackers: " + trackers.length);
   	
-  	System.out.println("Files:");
-  	for(int fileIndex = 0; fileIndex < files.length; fileIndex++)
-  	{
-  		if(files[fileIndex] == null)
-  		{
-  			break;
-  		}
-  		TargetFile file = files[fileIndex];
-  		System.out.println("  name: " + file.name);
-  		System.out.println("    size: " + file.size + " chunks:" + file.chunks.length);
-  	}
+    System.out.println("Files:");
+    for(int fileIndex = 0; fileIndex < files.length; fileIndex++)
+    {
+      if(files[fileIndex] == null)
+      {
+        break;
+      }
+      TargetFile file = files[fileIndex];
+      System.out.println("  name: " + file.name);
+      System.out.println("    size: " + file.size + " chunks:" + file.chunks.length);
+    }
   	
-  	System.out.println("Trackers:");
-  	for(int trackerIndex = 0; trackerIndex < trackers.length; trackerIndex++)
-  	{
-  		if(trackers[trackerIndex] == null)
-  		{
-  			break;
-  		}
+    System.out.println("Trackers:");
+    for(int trackerIndex = 0; trackerIndex < trackers.length; trackerIndex++)
+    {
+      if(trackers[trackerIndex] == null)
+      {
+        break;
+      }
   		
-  		System.out.println("  address: " + trackers[trackerIndex]);
-  	}
+      System.out.println("  address: " + trackers[trackerIndex]);
+    }
   }
   
   public String ToXML()
@@ -309,29 +309,29 @@ public class FloodFile
   {
     DOMParser parser = new DOMParser();
     try
-		{
-    	parser.setFeature("http://xml.org/sax/features/validation", false); // don't validate
+    {
+      parser.setFeature("http://xml.org/sax/features/validation", false); // don't validate
     }
     catch(Exception e)
-		{
-    	System.out.println("Error: " + e);
-			System.exit(0);
-		}
+    {
+      System.out.println("Error: " + e);
+      System.exit(0);
+    }
     
     try {
-    	parser.parse(new org.xml.sax.InputSource(inputStream));
-    	Document floodDataDoc = parser.getDocument();
+      parser.parse(new org.xml.sax.InputSource(inputStream));
+      Document floodDataDoc = parser.getDocument();
 
-    	// get all our files and fill out our 'files' array
-    	NodeList fileinfoList = floodDataDoc.getElementsByTagName("FileInfo");
-    	if(fileinfoList.getLength() == 1) { // should only be one fileinfo tag
+      // get all our files and fill out our 'files' array
+      NodeList fileinfoList = floodDataDoc.getElementsByTagName("FileInfo");
+      if(fileinfoList.getLength() == 1) { // should only be one fileinfo tag
         Element fileinfo = (Element) fileinfoList.item(0);
-    		NodeList fileList = fileinfo.getElementsByTagName("File");
+        NodeList fileList = fileinfo.getElementsByTagName("File");
         if ( fileList.getLength() > 0)
         {
-        	files = new TargetFile[fileList.getLength()];
+          files = new TargetFile[fileList.getLength()];
         	
-					for ( int fileIndex = 0; fileIndex < fileList.getLength(); fileIndex++ )
+          for ( int fileIndex = 0; fileIndex < fileList.getLength(); fileIndex++ )
           {
             Element file = (Element) fileList.item(fileIndex);
             TargetFile targetFile = new TargetFile();
@@ -344,7 +344,7 @@ public class FloodFile
             {
               targetFile.chunks = new Chunk[chunkList.getLength()]; 
 
-            	for ( int chunkIndex = 0; chunkIndex < chunkList.getLength(); chunkIndex++ )
+              for ( int chunkIndex = 0; chunkIndex < chunkList.getLength(); chunkIndex++ )
               {
                 Element chunk = (Element) chunkList.item(chunkIndex);
                 Chunk tempChunk = new Chunk();
@@ -356,8 +356,8 @@ public class FloodFile
 
                 if(tempChunk.index >= targetFile.chunks.length)
                 {
-                	System.out.println("Number of chunks incorrect!");
-                	System.exit(0);
+                  System.out.println("Number of chunks incorrect!");
+                  System.exit(0);
                 }
                 targetFile.chunks[tempChunk.index] = tempChunk;
               }
@@ -365,8 +365,8 @@ public class FloodFile
             
             if(fileIndex >= files.length)
             {
-            	System.out.println("Number of files incorrect!");
-            	System.exit(0);            	
+              System.out.println("Number of files incorrect!");
+              System.exit(0);            	
             }
             files[fileIndex] = targetFile;
           }
@@ -376,39 +376,39 @@ public class FloodFile
         NodeList trackersList = floodDataDoc.getElementsByTagName("Tracker");
         if ( trackersList.getLength() > 0)
         {
-        	trackers = new String[trackersList.getLength()];
-					for ( int trackerIndex = 0; trackerIndex < trackersList.getLength(); trackerIndex++ )
+          trackers = new String[trackersList.getLength()];
+          for ( int trackerIndex = 0; trackerIndex < trackersList.getLength(); trackerIndex++ )
           {
             Element tracker = (Element) trackersList.item(trackerIndex);
             Node child   = tracker.getFirstChild();
             if(trackerIndex >= trackers.length)
             {
-            	System.out.println("Too many trackers!");
-            	System.exit(0);
+              System.out.println("Too many trackers!");
+              System.exit(0);
             }
             trackers[trackerIndex] = child.getNodeValue().toString();
           }     	
         }
         else
         {
-        	System.out.println("No trackers in flood file?");
+          System.out.println("No trackers in flood file?");
         }
-    	}
+      }
     } catch (Exception e) {
-    	System.out.println("Error: " + e);
+      System.out.println("Error: " + e);
     }
   }
 
   public boolean AddTracker( final String trackerAddress)
   {
-  	// we find the next open spot in the trackers array
-  	int trackerIndex = 0;
+    // we find the next open spot in the trackers array
+    int trackerIndex = 0;
     for(; trackerIndex < trackers.length; trackerIndex++) 
     {
-    	if(trackers[trackerIndex] == null)
-    	{
-    		break;
-    	}
+      if(trackers[trackerIndex] == null)
+      {
+        break;
+      }
     }
 
     // grow our array of files if necessary
@@ -426,22 +426,22 @@ public class FloodFile
   
   public boolean Add( final String path )
   {
-  	File file = new File(path);
-  	boolean result = false;
+    File file = new File(path);
+    boolean result = false;
   	
-  	if(file.exists() && file.canRead())
-  	{
-  		if(file.isDirectory())
-  		{
-  			result = AddDirectory(file.getAbsolutePath());
-  		}
-  		else
-  		{
-  			result = AddFile(file.getAbsolutePath());
-  		}
-  	}
+    if(file.exists() && file.canRead())
+    {
+      if(file.isDirectory())
+      {
+        result = AddDirectory(file.getAbsolutePath());
+      }
+      else
+      {
+        result = AddFile(file.getAbsolutePath());
+      }
+    }
   	
-  	return result;
+    return result;
   }
   
   // FIXME this should throw exceptions
@@ -451,7 +451,7 @@ public class FloodFile
     
     if(!dirToAdd.isDirectory())
     {
-    	return false;
+      return false;
     }
     
     String absDirPath = dirToAdd.getAbsolutePath() + '/'; // change this to be the abs path for cleanup later on
@@ -463,16 +463,16 @@ public class FloodFile
 
     for(int childIndex = 0; childIndex < childFiles.length; childIndex++) 
     {
-    	if(childFiles[childIndex] == null)
-    	{
-    		break;
+      if(childFiles[childIndex] == null)
+      {
+        break;
       }
   			
-    	// FIXME i'm do a lot of shit on this one line...
-    	if(!AddFile(childFiles[childIndex],
-    							childFiles[childIndex].replaceFirst(absDirPath, absDirPath.substring(absDirPath.lastIndexOf('/')))))
+      // FIXME i'm do a lot of shit on this one line...
+      if(!AddFile(childFiles[childIndex],
+                  childFiles[childIndex].replaceFirst(absDirPath, absDirPath.substring(absDirPath.lastIndexOf('/')))))
       {
-    		return false;
+        return false;
       }
     }
     
@@ -481,40 +481,40 @@ public class FloodFile
   
   public boolean AddFile( final String localFilePath)
   {
-  	String localPath = null;
-  	String targetPath = null;
+    String localPath = null;
+    String targetPath = null;
 
-  	localPath = localFilePath.replace('\\', '/');
+    localPath = localFilePath.replace('\\', '/');
   	
-  	int lastSlash;
-  	if((lastSlash = localPath.lastIndexOf('/')) != -1)
-  	{
-  		targetPath = localPath.substring(lastSlash, localPath.length());
-  	}
-  	else
-  	{
-  		targetPath = localPath;
-  	}
+    int lastSlash;
+    if((lastSlash = localPath.lastIndexOf('/')) != -1)
+    {
+      targetPath = localPath.substring(lastSlash, localPath.length());
+    }
+    else
+    {
+      targetPath = localPath;
+    }
   	
-  	return AddFile(localPath, targetPath);
+    return AddFile(localPath, targetPath);
   }
   
   public boolean AddFile( final String localPath, final String targetPath)
   {
-  	File fileToAdd = new File(localPath);
-  	if(!fileToAdd.exists() || !fileToAdd.canRead())
-  	{
-  		return false;
-  	}
+    File fileToAdd = new File(localPath);
+    if(!fileToAdd.exists() || !fileToAdd.canRead())
+    {
+      return false;
+    }
   	
-  	// we find the next open spot in the files array
-  	int filesIndex = 0;
+    // we find the next open spot in the files array
+    int filesIndex = 0;
     for(; filesIndex < files.length; filesIndex++) 
     {
-    	if(files[filesIndex] == null)
-    	{
-    		break;
-    	}
+      if(files[filesIndex] == null)
+      {
+        break;
+      }
     }
 
     // grow our array of files if necessary

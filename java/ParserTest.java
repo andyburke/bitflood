@@ -7,7 +7,8 @@
  * @author burke
  *
  */
-public class ParserTest {
+public class ParserTest 
+{
   public static void main(String argv[]) 
   {
     String floodFilename = "";

@@ -2,6 +2,7 @@
 
 <project name="BitFlood" default="init" basedir=".">
   <property name="bin" location="bin"/>
+  <property name="test" location="test"/>
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -10,7 +11,7 @@
     <mkdir dir="${bin}"/>
   </target>
 
-  <target name="EncoderTest" depends="init" description="build the encoder " >
+  <target name="EncoderTest" depends="init" description="build the test encoder " >
     <javac destdir="${bin}"
     	   srcdir="."
            debug="true">
@@ -19,9 +20,80 @@
       	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
       </classpath>
       <include name="EncoderTest.java" />
-      <include name="Encoder.java" />
       <include name="FloodFile.java" />
     </javac>
+  </target>
+
+  <target name="ParserTest" depends="init" description="build the test parser " >
+    <javac destdir="${bin}"
+    	   srcdir="."
+           debug="true">
+      <classpath>
+    	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
+      	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
+      </classpath>
+      <include name="ParserTest.java" />
+      <include name="FloodFile.java" />
+    </javac>
+  </target>
+
+  <target name="ClientTest" depends="init" description="build the test client" >
+    <javac destdir="${bin}"
+    	   srcdir="."
+           debug="true">
+      <classpath>
+    	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
+      	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
+      </classpath>
+      <include name="ClientTest.java" />
+      <include name="FloodFile.java" />
+    </javac>
+  </target>
+
+  <target name="test_client" depends="init,ClientTest" description="test a client" >
+    <mkdir dir="${test}"/>
+    <java classname="ClientTest" dir="${test}" fork="true">
+      <arg value="-flood"/>
+      <arg value="test.mp3.flood"/>
+      <classpath>
+    	<pathelement path="${bin}" />
+    	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
+      	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
+      </classpath>
+    </java>
+  </target>
+
+  <target name="test_encode" depends="init,EncoderTest" description="test encoding .flood files" >
+    <mkdir dir="${test}"/>
+    <java classname="EncoderTest" dir="${test}" fork="true">
+      <arg value="-flood"/>
+      <arg value="test.mp3.flood"/>
+      <arg value="-tracker"/>
+      <arg value="http://vux.fdntech.com:10101/RPCSERV"/>
+      <arg value="-chunksize"/>
+      <arg value="262144"/>
+      <arg value="-weighting"/>
+      <arg value="topheavy"/>
+      <arg value="test.mp3"/>
+      <classpath>
+    	<pathelement path="${bin}" />
+    	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
+      	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
+      </classpath>
+    </java>
+  </target>
+
+  <target name="test_parse" depends="init,ParserTest" description="test parsing .flood files" >
+    <mkdir dir="${test}"/>
+    <java classname="ParserTest" dir="${test}" fork="true">
+      <arg value="-flood"/>
+      <arg value="test.mp3.flood"/>
+      <classpath>
+    	<pathelement path="${bin}" />
+    	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
+      	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
+      </classpath>
+    </java>
   </target>
 
   <target name="clean" depends="init" description="clean the output" >
