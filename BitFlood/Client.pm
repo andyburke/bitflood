@@ -38,7 +38,7 @@ __PACKAGE__->mk_accessors(qw(id socket port
 
 $| = 1; # FIXME buh?
 
-$SIG{PIPE} = sub { Debug("SIGPIPE: remote end closed suddenly during a read/write", 'net' };
+$SIG{PIPE} = sub { Debug("SIGPIPE: remote end closed suddenly during a read/write", 'net') };
 
 sub new {
   my $class = shift;
