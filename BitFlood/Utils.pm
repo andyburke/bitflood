@@ -14,9 +14,10 @@ sub CleanFilename {
 }
 
 sub LocalFilename {
-  my ($volume, $dirs, $filename) = File::Spec->splitpath(shift, 1);
-  my @directories = File::Spec->splitdir($dirs);
-  return File::Spec->catpath($volume, @directories, $filename);
+  return File::Spec->canonpath(shift);
+#  my ($volume, $dirs, $filename) = File::Spec->splitpath(shift, 1);
+#  my @directories = File::Spec->splitdir($dirs);
+#  return File::Spec->catpath($volume, @directories, $filename);
 }
 
 sub GetLocalPathFromFilename {
