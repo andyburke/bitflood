@@ -23,7 +23,7 @@ BEGIN {
 #  push(@INC, File::Spec->catfile($volume, @dirs, 'inc', 'lib'));
 #  push(@INC, File::Spec->catfile($volume, @dirs));
 #  $mainWindowDef = File::Spec->catfile($volume, @dirs, 'inc', 'guiClient.gld');
-#$mainWindowDef = File::Spec->catfile($volume, @dirs, 'guiClient.gld');
+#  $mainWindowDef = File::Spec->catfile($volume, @dirs, 'guiClient', 'guiClient.gld');
 #  print "dirs: @dirs\n";
   foreach my $incDir (@INC) {
     if(-e File::Spec->catfile($incDir, 'guiClient.gld')) {
@@ -33,6 +33,7 @@ BEGIN {
 }
 
 use BitFlood::Client;
+use BitFlood::Debug;
 
 ###########################
 ## floods_ --> Floods tab
@@ -86,9 +87,9 @@ while(1) {
 #  print "done\n";
 }
 
-#sub mainWindow_Terminate {
-#  -1;
-#}
+sub mainWindow_Terminate {
+  -1;
+}
 
 sub floods_QuitButton_Click { QuitButton_Click(); }
 sub QuitButton_Click {
@@ -109,7 +110,21 @@ sub floods_OpenButton_Click {
 				       );
 
   if(-e $foundFile) {
-    $client->AddFloodFile(File::Spec->abs2rel($foundFile));
+    my $localPath = GUI::BrowseForFolder(
+					 -owner => $mainWindow,
+					 -title  => "Save to...",
+					 -directory => File::Spec->rel2abs('.'),
+					 -editbox => 1,
+					 );
+    
+    if(-d $localPath)
+    {
+      $client->AddFloodFile(File::Spec->abs2rel($foundFile), $localPath);
+    }
+    else
+    {
+      Debug("The path specified ($localPath) does not exist!");
+    }
   }
 }
 
@@ -129,6 +144,8 @@ sub floods_StartButton_Click {
 
   $flood or return;
   $flood->paused(0);
+  $flood->sessionStartTime(time());
+  $flood->sessionDownloadBytes(0);
 }
 
 sub floods_RemoveButton_Click {
@@ -139,91 +156,151 @@ sub floods_RemoveButton_Click {
   delete $client->floods->{$flood};
 }
 
+sub config_ApplyButton_Click {
+  my $externalIP = $mainWindow->config_ExternalIPEntry->Text();
+  my $port = $mainWindow->config_PortEntry->Text();
+
+  $client->localIp($externalIP);
+  $client->port($port);
+
+  $client->OpenListenSocket();
+
+}
+
+sub config_RevertButton_Click {
+  $mainWindow->config_ExternalIPEntry->SelectAll();
+  $mainWindow->config_ExternalIPEntry->ReplaceSel($client->localIp);
+
+  $mainWindow->config_PortEntry->SelectAll();
+  $mainWindow->config_PortEntry->ReplaceSel($client->port);
+}
+
 sub UpdateDisplay {
-  my ($selected) = $mainWindow->floods_FloodsListView->SelectedItems();
-  $mainWindow->floods_FloodsListView->Clear();
 
-  my $floodIndex = 0;
-  foreach my $flood (values(%{$client->floods})) {
+  my $currentTab = $mainWindow->mainTabStrip->GetString($mainWindow->mainTabStrip->SelectedItem());
+
+  if($currentTab eq 'Floods') {
+    my ($selected) = $mainWindow->floods_FloodsListView->SelectedItems();
+    $mainWindow->floods_FloodsListView->Clear();
     
-    my $seeds = 0;
-    my $peers = 0;
-
-    foreach my $peer (@{$client->peers}) {
-      my $chunkMaps = $peer->chunkMaps->{$flood->contentHash};
-      if(defined($chunkMaps)) {
-	$peers++;
-
-	my $allFilesComplete = 1;
-	foreach my $filename (keys(%{$chunkMaps})) {
-	  if(!$chunkMaps->{$filename}->is_full()) {
-	    $allFilesComplete = 0;
+    my $floodIndex = 0;
+    foreach my $flood (values(%{$client->floods})) {
+      
+      my $seeds = 0;
+      my $peers = 0;
+      
+      foreach my $peer (@{$client->peers}) {
+	my $chunkMaps = $peer->chunkMaps->{$flood->contentHash};
+	if(defined($chunkMaps)) {
+	  $peers++;
+	  
+	  my $allFilesComplete = 1;
+	  foreach my $filename (keys(%{$chunkMaps})) {
+	    if(!$chunkMaps->{$filename}->is_full()) {
+	      $allFilesComplete = 0;
+	    }
 	  }
+	  
+	  $seeds++ if $allFilesComplete;
 	}
-	
-	$seeds++ if $allFilesComplete;
       }
-    }
 
-    my $complete = $flood->downloadBytes == $flood->totalBytes;
-    $mainWindow->floods_FloodsListView->InsertItem(-text => [
-							     $flood->filename,
-							     ReadableSize($flood->totalBytes),
-							     ReadableSize($flood->downloadBytes),
-							     $flood->totalBytes > 0 ? sprintf("%3.2f%%", 100 * $flood->downloadBytes / $flood->totalBytes) : '0%',
-							     !$complete ? ReadableTimeDelta(time() - $flood->startTime) : 'done',
-							     (!$complete and ($flood->downloadBytes > 0) and (time() - $flood->startTime > 0)) ? ReadableTimeDelta(($flood->totalBytes - $flood->downloadBytes) / ($flood->downloadBytes / (time() - $flood->startTime))) : $complete ? 'done' : 'unknown',
-							     (!$complete and time() - $flood->startTime > 0) ? sprintf("%s/s", ReadableSize($flood->downloadBytes / (time() - $flood->startTime))) : '0.0 K/s',
-							     $seeds, # FIXME: find complete peers
-							     $peers - $seeds, # FIXME: find incomplete peers
-							     'n/a',
-							     $complete ? 'complete' : $flood->paused ? 'paused' : 'incomplete',
-							    ]);
-
-    if($floodIndex == $selected) {
-      $mainWindow->floods_FloodsListView->Select($selected);
-
-      $mainWindow->floods_FloodFilenameDisplay->SelectAll();
-      $mainWindow->floods_FloodFilenameDisplay->ReplaceSel($flood->filename);
-
-      $mainWindow->floods_FloodHashDisplay->SelectAll();
-      $mainWindow->floods_FloodHashDisplay->ReplaceSel($flood->contentHash);
-
-      $mainWindow->floods_TrackersDisplay->SelectAll();
-      $mainWindow->floods_TrackersDisplay->ReplaceSel(join(',', @{$flood->data->{Tracker}}));
-
-      $mainWindow->floods_PercentCompleteDisplay->SelectAll();
-      $mainWindow->floods_PercentCompleteDisplay->ReplaceSel($flood->totalBytes > 0 ? sprintf("%3.2f%%", 100 * $flood->downloadBytes / $flood->totalBytes) : '0%');
-
-      $mainWindow->floods_TransferTimeDisplay->SelectAll();
-      $mainWindow->floods_TransferTimeDisplay->ReplaceSel(!$complete ? ReadableTimeDelta(time() - $flood->startTime) : 'done');
-
-      $mainWindow->floods_DownloadRateDisplay->SelectAll();
-      $mainWindow->floods_DownloadRateDisplay->ReplaceSel((!$complete and time() - $flood->startTime > 0) ? sprintf("%s/s", ReadableSize($flood->downloadBytes / (time() - $flood->startTime))) : '0.0 K/s');
-
-      $mainWindow->floods_ETCDisplay->SelectAll();
-      $mainWindow->floods_ETCDisplay->ReplaceSel((!$complete and ($flood->downloadBytes > 0) and (time() - $flood->startTime > 0)) ? ReadableTimeDelta(($flood->totalBytes - $flood->downloadBytes) / ($flood->downloadBytes / (time() - $flood->startTime))) : $complete ? 'done' : 'unknown');
-
-      $mainWindow->floods_SeedsDisplay->SelectAll();
-      $mainWindow->floods_SeedsDisplay->ReplaceSel($seeds);
-
-      $mainWindow->floods_PeersDisplay->SelectAll();
-      $mainWindow->floods_PeersDisplay->ReplaceSel($peers - $seeds);
+      my $complete = $flood->downloadBytes == $flood->totalBytes;
       
-      $mainWindow->floods_PriorityDisplay->SelectAll();
-      $mainWindow->floods_PriorityDisplay->ReplaceSel('n/a');
+      my $filename = $flood->filename;
+      my $totalSize = ReadableSize($flood->totalBytes);
+      my $downloadedBytes = ReadableSize($flood->downloadBytes);
+      my $percentComplete = $flood->totalBytes > 0 ? sprintf("%3.2f%%", 100 * $flood->downloadBytes / $flood->totalBytes) : '0%';
 
-      $mainWindow->floods_StatusDisplay->SelectAll();
-      $mainWindow->floods_StatusDisplay->ReplaceSel($complete ? 'complete' : $flood->paused ? 'paused' : 'incomplete');
-
-      $mainWindow->floods_ProgressDisplay->SetPos(int(100 * $flood->downloadBytes / $flood->totalBytes));
+      my $time;
+      my $etc;
+      my $status;
+      my $speed;
       
-      floods_ChunksDisplay_Paint();
-    }
+      if($complete)
+      {
+	$time = 'done';
+	$etc = 'done';
+	$status = 'complete';
+	$speed = 'n/a';
+      }
+      elsif($flood->paused)
+      {
+	$time = 'paused';
+	$etc = 'n/a';
+	$status = 'paused';
+	$speed = '0.0 K/s';
+      }
+      else
+      {
+	$time = ReadableTimeDelta(time() - $flood->startTime);
+	$etc = (time() - $flood->sessionStartTime > 0 and $flood->sessionDownloadBytes > 0) ? ReadableTimeDelta(($flood->totalBytes - $flood->downloadBytes) / ($flood->sessionDownloadBytes / (time() - $flood->sessionStartTime))) : 'unknown';
+	$status = 'incomplete';
+	$speed = time() - $flood->sessionStartTime > 0 ? sprintf("%s/s", ReadableSize($flood->sessionDownloadBytes / (time() - $flood->sessionStartTime))) : '0.0 K/s';
+      }
 
-    $floodIndex++;
+      $mainWindow->floods_FloodsListView->InsertItem(-text => [
+							       $filename,
+							       $totalSize,
+							       $downloadedBytes,
+							       $percentComplete,
+							       $time,
+							       $etc,
+							       $speed,
+							       $seeds, # FIXME: find complete peers
+							       $peers - $seeds, # FIXME: find incomplete peers
+							       'n/a',
+							       $status,
+							       ]);
+      
+      if($floodIndex == $selected) {
+	$mainWindow->floods_FloodsListView->Select($selected);
+	
+	$mainWindow->floods_FloodFilenameDisplay->SelectAll();
+	$mainWindow->floods_FloodFilenameDisplay->ReplaceSel($flood->filename);
+	
+	$mainWindow->floods_FloodHashDisplay->SelectAll();
+	$mainWindow->floods_FloodHashDisplay->ReplaceSel($flood->contentHash);
+	
+	$mainWindow->floods_TrackersDisplay->SelectAll();
+	$mainWindow->floods_TrackersDisplay->ReplaceSel(join(',', @{$flood->data->{Tracker}}));
+	
+	$mainWindow->floods_PercentCompleteDisplay->SelectAll();
+	$mainWindow->floods_PercentCompleteDisplay->ReplaceSel($flood->totalBytes > 0 ? sprintf("%3.2f%%", 100 * $flood->downloadBytes / $flood->totalBytes) : '0%');
+	
+	$mainWindow->floods_TransferTimeDisplay->SelectAll();
+	$mainWindow->floods_TransferTimeDisplay->ReplaceSel(!$complete ? ReadableTimeDelta(time() - $flood->startTime) : 'done');
+	
+	$mainWindow->floods_DownloadRateDisplay->SelectAll();
+	$mainWindow->floods_DownloadRateDisplay->ReplaceSel((!$complete and time() - $flood->startTime > 0) ? sprintf("%s/s", ReadableSize($flood->downloadBytes / (time() - $flood->startTime))) : '0.0 K/s');
+	
+	$mainWindow->floods_ETCDisplay->SelectAll();
+	$mainWindow->floods_ETCDisplay->ReplaceSel((!$complete and ($flood->downloadBytes > 0) and (time() - $flood->startTime > 0)) ? ReadableTimeDelta(($flood->totalBytes - $flood->downloadBytes) / ($flood->downloadBytes / (time() - $flood->startTime))) : $complete ? 'done' : 'unknown');
+	
+	$mainWindow->floods_SeedsDisplay->SelectAll();
+	$mainWindow->floods_SeedsDisplay->ReplaceSel($seeds);
+	
+	$mainWindow->floods_PeersDisplay->SelectAll();
+	$mainWindow->floods_PeersDisplay->ReplaceSel($peers - $seeds);
+	
+	$mainWindow->floods_PriorityDisplay->SelectAll();
+	$mainWindow->floods_PriorityDisplay->ReplaceSel('n/a');
+	
+	$mainWindow->floods_StatusDisplay->SelectAll();
+	$mainWindow->floods_StatusDisplay->ReplaceSel($complete ? 'complete' : $flood->paused ? 'paused' : 'incomplete');
+	
+	$mainWindow->floods_ProgressDisplay->SetPos(int(100 * $flood->downloadBytes / $flood->totalBytes));
+	
+	floods_ChunksDisplay_Paint();
+      }
+      
+      $floodIndex++;
+    }
   }
-
+  elsif($currentTab eq 'Config')
+  {
+    # update config tab...
+  }
 }
 
 sub floods_ChunksDisplay_Paint {
