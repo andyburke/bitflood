@@ -1,3 +1,4 @@
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -11,10 +12,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
+import org.apache.xerces.parsers.DOMParser;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.w3c.dom.*;
 
 import sdk.Base64.Base64;
 
@@ -48,6 +49,7 @@ public class FloodFile
   public TargetFile[]   files;
   public int            chunkSize;
   public String         filePath;
+  public String         contentHash;
 
   // for doing the sha1's of our chunks
   private MessageDigest sha1Encoder = null;
@@ -56,8 +58,6 @@ public class FloodFile
   {
   	this.filePath = filePath;
   	this.chunkSize = 256 * 1024; // default to 256K
-  	this.trackers = new String[4];
-  	this.files = new TargetFile[4];
 
     try
 		{
@@ -74,8 +74,6 @@ public class FloodFile
   {
   	this.filePath = filePath;
   	this.chunkSize = chunkSize;
-  	this.trackers = new String[4];
-  	this.files = new TargetFile[4];
 
     try
 		{
@@ -93,7 +91,6 @@ public class FloodFile
   	this.filePath = filePath;
   	this.chunkSize = chunkSize;
   	this.trackers = trackers;
-  	this.files = new TargetFile[4];
 
     try
 		{
@@ -103,6 +100,36 @@ public class FloodFile
 		{ 
 	  	System.out.println(e.toString());
 		}
+  }
+  
+  public boolean Read()
+  {
+  	InputStream inputFileStream = null;
+  	File inputFile = null;
+  	try
+		{
+  		inputFile = new File(filePath);
+  		inputFileStream = new FileInputStream(inputFile);
+		}
+  	catch(Exception e)
+		{
+  		System.out.println("Error: " + e);
+  		System.exit(0);
+		}
+  	
+  	try
+		{
+  		DataInputStream dataStream = new DataInputStream(inputFileStream);
+  		FromXML(dataStream);
+  		inputFileStream.close();
+		}
+  	catch(IOException ioEx)
+		{
+  		System.out.println("Error: " + ioEx);
+  		System.exit(0);
+		}
+  	
+  	return true;
   }
   
   public boolean Write()
@@ -132,6 +159,46 @@ public class FloodFile
 
     return true;
   } 
+  
+  public void Dump()
+  {
+  	if(files == null)
+  	{
+  		System.out.println("No files defined...");
+  		return;
+  	}
+  	if(trackers == null)
+  	{
+  		System.out.println("No trackers defined...");
+  		return;
+  	}
+  	
+  	System.out.println("# Files   : " + files.length);
+  	System.out.println("# Trackers: " + trackers.length);
+  	
+  	System.out.println("Files:");
+  	for(int fileIndex = 0; fileIndex < files.length; fileIndex++)
+  	{
+  		if(files[fileIndex] == null)
+  		{
+  			break;
+  		}
+  		TargetFile file = files[fileIndex];
+  		System.out.println("  name: " + file.name);
+  		System.out.println("    size: " + file.size + " chunks:" + file.chunks.length);
+  	}
+  	
+  	System.out.println("Trackers:");
+  	for(int trackerIndex = 0; trackerIndex < trackers.length; trackerIndex++)
+  	{
+  		if(trackers[trackerIndex] == null)
+  		{
+  			break;
+  		}
+  		
+  		System.out.println("  address: " + trackers[trackerIndex]);
+  	}
+  }
   
   public String ToXML()
   {
@@ -238,8 +305,98 @@ public class FloodFile
     return result;
   }
 
-  public void FromXML( final String i_xml )
+  public void FromXML( DataInputStream inputStream )
   {
+    DOMParser parser = new DOMParser();
+    try
+		{
+    	parser.setFeature("http://xml.org/sax/features/validation", false); // don't validate
+    }
+    catch(Exception e)
+		{
+    	System.out.println("Error: " + e);
+			System.exit(0);
+		}
+    
+    try {
+    	parser.parse(new org.xml.sax.InputSource(inputStream));
+    	Document floodDataDoc = parser.getDocument();
+
+    	// get all our files and fill out our 'files' array
+    	NodeList fileinfoList = floodDataDoc.getElementsByTagName("FileInfo");
+    	if(fileinfoList.getLength() == 1) { // should only be one fileinfo tag
+        Element fileinfo = (Element) fileinfoList.item(0);
+    		NodeList fileList = fileinfo.getElementsByTagName("File");
+        if ( fileList.getLength() > 0)
+        {
+        	files = new TargetFile[fileList.getLength()];
+        	
+					for ( int fileIndex = 0; fileIndex < fileList.getLength(); fileIndex++ )
+          {
+            Element file = (Element) fileList.item(fileIndex);
+            TargetFile targetFile = new TargetFile();
+            
+            targetFile.size = Long.parseLong(file.getAttribute("Size"));
+            targetFile.name = file.getAttribute("name");
+            
+            NodeList chunkList = file.getElementsByTagName("Chunk");
+            if ( chunkList.getLength() > 0 )
+            {
+              targetFile.chunks = new Chunk[chunkList.getLength()]; 
+
+            	for ( int chunkIndex = 0; chunkIndex < chunkList.getLength(); chunkIndex++ )
+              {
+                Element chunk = (Element) chunkList.item(chunkIndex);
+                Chunk tempChunk = new Chunk();
+
+                tempChunk.index  = Integer.parseInt(chunk.getAttribute("index"));
+                tempChunk.weight = Integer.parseInt(chunk.getAttribute("weight"));
+                tempChunk.size   = Integer.parseInt(chunk.getAttribute("size"));
+                tempChunk.hash   = chunk.getAttribute("hash");
+
+                if(tempChunk.index >= targetFile.chunks.length)
+                {
+                	System.out.println("Number of chunks incorrect!");
+                	System.exit(0);
+                }
+                targetFile.chunks[tempChunk.index] = tempChunk;
+              }
+            }
+            
+            if(fileIndex >= files.length)
+            {
+            	System.out.println("Number of files incorrect!");
+            	System.exit(0);            	
+            }
+            files[fileIndex] = targetFile;
+          }
+        }
+
+        // get all our trackers
+        NodeList trackersList = floodDataDoc.getElementsByTagName("Tracker");
+        if ( trackersList.getLength() > 0)
+        {
+        	trackers = new String[trackersList.getLength()];
+					for ( int trackerIndex = 0; trackerIndex < trackersList.getLength(); trackerIndex++ )
+          {
+            Element tracker = (Element) trackersList.item(trackerIndex);
+            Node child   = tracker.getFirstChild();
+            if(trackerIndex >= trackers.length)
+            {
+            	System.out.println("Too many trackers!");
+            	System.exit(0);
+            }
+            trackers[trackerIndex] = child.getNodeValue().toString();
+          }     	
+        }
+        else
+        {
+        	System.out.println("No trackers in flood file?");
+        }
+    	}
+    } catch (Exception e) {
+    	System.out.println("Error: " + e);
+    }
   }
 
   public boolean AddTracker( final String trackerAddress)
