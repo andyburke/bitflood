@@ -25,8 +25,10 @@ use Data::Dumper; # XXX
 
 use BitFlood::Utils;
 use BitFlood::Flood;
+use BitFlood::Peer;
 
-__PACKAGE__->mk_accessors(qw(floods trackers peers chunksToGet));
+__PACKAGE__->mk_accessors(qw(floods trackers peers chunksToGet localIp
+                             chunkPrioritizerClass chunkPrioritizer));
 
 $| = 1; # FIXME buh?
 
@@ -35,12 +37,21 @@ sub new {
   my %args = @_;
 
   my $self = RPC::XML::Server->new(port => $args{port} || 10101);
+  $self or die("Client already using this port?"); # FIXME robust error
   bless $self, $class;
 
   $self->floods({});
   $self->trackers({});
   $self->peers({});
+  $self->localIp(inet_ntoa(scalar gethostbyname(hostname())));
 
+  $self->chunkPrioritizerClass('BitFlood::ChunkPrioritizer::Basic');
+  eval "require " . $self->chunkPrioritizerClass;
+  if ($@) {
+    die "Couldn't load ChunkPrioritizer class " . $self->chunkPrioritizerClass . " : $@";
+  }
+  $self->chunkPrioritizer($self->chunkPrioritizerClass->new);
+  
   $self->add_method({
     name => 'RequestChunk', # the name of the method
     version => '0.0.1', # the method version
@@ -83,6 +94,23 @@ sub new {
 
   });
 
+  $self->add_method({
+    name => 'GetChunkMaps', # the name of the method
+    version => '0.0.1', # the method version
+    hidden => undef,    # is it hidden? undef = no, 1 = yes
+    signature => ['array string'], # return filename => chunkmaps hash, take floodhash
+    help => 'Get chunkmaps.', # help for this method
+    code => sub {
+      my $self = shift;
+      my $floodHash = shift;
+
+      my $flood = $self->floods->{$floodHash};
+      die("no flood!") if(!defined($flood));
+
+      return [ map { $_->{name} => $_->{chunkMap}->to_Hex() } values %{$flood->Files} ];
+    },
+  });
+
   $self->started('set'); # FIXME ???
 
   return $self;
@@ -115,6 +143,7 @@ sub AddFloodFile {
 }
 
 
+# FIXME take flood,file,chunk objects
 sub GetChunk {
   my $self = shift;
 
@@ -146,7 +175,7 @@ sub GetChunk {
 
   my $peerIndex = int(rand(@{$flood->peers}));
   my $peer = $flood->peers->[$peerIndex];
-  my ($peerHost) = $peer->{__request}->uri =~ m|http://(.*?)/|;
+  my $peerHost = $peer->Host();
 
   printf("%-30.30s#%d <= %-21.21s\r",
 	 $file->{name}, $chunk->{index}+1,
@@ -156,7 +185,7 @@ sub GetChunk {
 #  my $thread = threads->create(sub {
   my $targetFile = IO::File->new($file->{localFilename}, 'r+');
   $targetFile->seek($chunk->{offset}, 0);
-  my $chunkData = $peer->simple_request('RequestChunk', $floodFileHash, $targetFilename, $index); # FIXME choose which peer
+  my $chunkData = $peer->rpcClient->simple_request('RequestChunk', $floodFileHash, $targetFilename, $index); # FIXME choose which peer
   if (!$chunkData) {
     if ($RPC::XML::ERROR =~ /connection refused/i) {
       splice(@{$flood->peers}, $peerIndex, 1);
@@ -190,29 +219,15 @@ sub GetChunk {
 
 }
 
+# FIXME bad name, should be like "FigureOutWhatChunkToGetAndDoIt"
 sub GetChunks {
   my $self = shift;
 
-  my %incompleteFiles;
   foreach my $flood (values %{$self->floods}) {
-    my $files = [ grep { ! $_->{chunkMap}->is_full } values %{$flood->Files} ];
-    $incompleteFiles{$flood->contentHash} = $files if @$files;
-  }
-
-  if (%incompleteFiles) {
-
-    while (my ($floodFileHash, $files) = each %incompleteFiles) {
-      foreach my $file (@$files) {
-        #next if $self->floods->{$floodFileHash}->{totalDownloading}; # FIXME only getting one chunk at a time
-        my $chunkMap = $file->{chunkMap};
-        for (my $index = 0; $index < $chunkMap->Size; $index++) {
-          next if $chunkMap->bit_test($index);
-          $self->GetChunk($floodFileHash, $file->{name}, $index);
-          last;
-        }
-      }
+    my ($file, $chunk) = $self->chunkPrioritizer->FindChunk($flood);
+    if (defined $file) {
+      $self->GetChunk($flood->contentHash, $file->{name}, $chunk->{index});
     }
-    
   }
 
 }
@@ -243,10 +258,14 @@ sub UpdatePeerList {
     $flood->peers([]);
     my $peerListRef = $tracker->simple_request('RequestPeers', $flood->contentHash);
     if($peerListRef) {
-      foreach my $peerAddress (@{$peerListRef}) {
-        if ($peerAddress ne 'http://'.inet_ntoa(scalar gethostbyname(hostname())).':'.$self->port.'/RPCSERV') { # FIXME skip self (not robusto)
-	  push(@{$flood->peers}, RPC::XML::Client->new($peerAddress));
-        }
+      foreach my $peerRpcUrl (@{$peerListRef}) {
+        if ($peerRpcUrl ne $self->RpcUrl) { # FIXME skip self (not robusto)
+	  my $peer = BitFlood::Peer->new({
+					  rpcUrl => $peerRpcUrl,
+					 });
+	  push(@{$flood->peers}, $peer);
+	  $peer->UpdateChunkMaps($flood);
+	}
       }
     }
   }
@@ -267,6 +286,13 @@ sub Disconnect {
 	);
     }
   }
+}
+
+sub RpcUrl {
+  my $self = shift;
+  my $peerAddress = shift;
+  
+  return 'http://' . $self->localIp . ':' . $self->port . '/RPCSERV';
 }
 
 
