@@ -7,7 +7,6 @@ use base qw(Class::Accessor);
 use Digest::SHA1  qw(sha1 sha1_hex sha1_base64);
 use XML::Simple;
 use File::Find;
-use Time::Piece;
 
 use BitFlood::Utils;
 
