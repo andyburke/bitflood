@@ -7,8 +7,6 @@
  * @author burke
  *
  */
-public class PeerConnection {
-
-	public static void main(String[] args) {
-	}
+public class PeerConnection 
+{
 }

@@ -10,15 +10,16 @@
     <mkdir dir="${bin}"/>
   </target>
 
-  <target name="Encoder" depends="init" description="build the encoder " >
+  <target name="EncoderTest" depends="init" description="build the encoder " >
     <javac destdir="${bin}"
     	   srcdir=".">
       <classpath>
     	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
       	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
       </classpath>
-  	  <include name="EncoderTest.java" />
+      <include name="EncoderTest.java" />
       <include name="Encoder.java" />
+      <include name="FloodFile.java" />
     </javac>
   </target>
 </project> 

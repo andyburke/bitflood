@@ -91,7 +91,7 @@ namespace libBitFlood
     }
 
     static const byte s_Base64[] =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     Error::ErrorCode Base64Encode( const U8* i_data, U32 i_size, std::string& o_string )
     {
