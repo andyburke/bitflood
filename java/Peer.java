@@ -93,7 +93,7 @@ public class Peer
         PeerConnection peer = (PeerConnection) peeriter.next();
         if ( peer.disconnected )
         {
-          System.out.println( "Reaping " + peer.id + ":" + peer.hostname + ":" + peer.port + " (pending)");
+          System.out.println( "Reaping " + peer + " (pending)");
           peeriter.remove();
         }
       }

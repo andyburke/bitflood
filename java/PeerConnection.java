@@ -32,6 +32,11 @@ public class PeerConnection
   public Hashtable      chunkMaps         = new Hashtable();
   public int            chunksDownloading = 0;
 
+  public String toString()
+  {
+    return new String( id + ":" + hostname + ":" + port );
+  }
+  
   public PeerConnection()
   {
   }
@@ -51,11 +56,11 @@ public class PeerConnection
       socketChannel.configureBlocking( false );
       socketChannel.register( socketSelector, socketChannel.validOps() );
       socketChannel.connect( new InetSocketAddress( InetAddress.getByName( hostname ), port ) );
-      System.out.println( "Connecting to " + id + ":" + hostname + ":" + port );
+      System.out.println( "Connecting to: " + this );
     }
     catch ( Exception e )
     {
-      System.out.println( "Error connecting to (" + hostname + ":" + port + "): " + e );
+      System.out.println( "Error connecting to (" + this + "): " + e );
       disconnected = true;
       return;
     }
@@ -89,10 +94,13 @@ public class PeerConnection
 
     try
     {
+      hostname = socketChannel.socket().getInetAddress().getHostAddress();
+      
       socketSelector = Selector.open();
       socketChannel.configureBlocking( false );
       socketChannel.register( socketSelector, socketChannel.validOps() );
       connected = true;
+      System.out.println( "Connection from: " + this );
     }
     catch ( Exception e )
     {

@@ -89,7 +89,7 @@ public class SendChunkMethodHandler implements MethodHandler
       receiver.flood.bytesMissing -= downloadedChunk.size;
       
       Date now = new Date();
-      System.out.println( receiver.id + " sent chunk: " + targetFilename + "#" + chunkIndex + " " + chunkInfo.size / (now.getTime() - downloadedChunk.downloadStartDate.getTime()) + "K/s" );
+      System.out.println( receiver + " sent chunk: " + targetFilename + "#" + chunkIndex + " " + chunkInfo.size / (now.getTime() - downloadedChunk.downloadStartDate.getTime()) + "K/s" );
       
       
       Vector nhcParams = new Vector( 2 );
