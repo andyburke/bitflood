@@ -18,7 +18,7 @@ use BitFlood::Utils;
 use BitFlood::Debug;
 
 __PACKAGE__->mk_accessors(qw(data filename contentHash localPath 
-                             trackers peers startTime downloadBytes
+                             trackers peers startTime totalBytes downloadBytes
                              neededChunksByWeight));
 
 
@@ -29,6 +29,7 @@ sub new {
 
   $self->trackers([]);
   $self->peers([]);
+  $self->totalBytes(0);
   $self->downloadBytes(0);
   $self->neededChunksByWeight([]);
 
@@ -118,6 +119,7 @@ sub InitializeFiles {
   my $self = shift;
 
   foreach my $file (values %{$self->Files}) {
+    $self->totalBytes($self->totalBytes + $file->{size});
     if(!-f $file->{localFilename})   # file doesn't exist, initialize it to 0
     {
       print "Initializing target file: $file->{name}\n";
@@ -146,6 +148,7 @@ sub InitializeFiles {
         if($hash eq $chunk->{hash}) {
 	  $validChunkCount++;
           $file->{chunkMap}->Bit_On($chunk->{index});
+	  $self->downloadBytes($self->downloadBytes + $chunk->{length});
         } else {
 	  push(@{$self->neededChunksByWeight}, { filename => $file->{name}, chunk => $chunk});
 	}
