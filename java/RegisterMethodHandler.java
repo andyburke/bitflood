@@ -48,6 +48,10 @@ public class RegisterMethodHandler implements MethodHandler
     receiver.id = peerId;
     receiver.listenPort = peerListen.intValue();
     receiver.flood = flood;
+    
+    // ask for chunks
+    receiver.SendMethod( RequestChunkMapsMethodHandler.methodName, new Vector() );
+    
     flood.peerConnections.add( receiver );
   }
 }

@@ -31,6 +31,22 @@ public class Flood
     char[]               chunkMap      = null;
   }
 
+  public class ChunkKey
+  {
+    public RuntimeTargetFile runtimeTargetFile = null;
+    public int chunkIndex = 0;
+    
+    public ChunkKey( RuntimeTargetFile file, int index )
+    {
+      runtimeTargetFile = file;
+      chunkIndex = index;
+    }
+  }
+  public ChunkKey MakeChunkKey( RuntimeTargetFile file, int index )
+  {
+    return new ChunkKey( file, index );
+  }
+  
   public int                 totalBytes        = 0;
   public int                 bytesAtStartup    = 0;
   public int                 bytesMissing      = 0;
@@ -59,6 +75,9 @@ public class Flood
 
   public void LoopOnce()
   {
+    // get chunks
+    GetChunk();
+    
     // clone the peers Vector and then process them
     {
       Vector peerConnectionsClone = (Vector) peerConnections.clone();
@@ -213,6 +232,11 @@ public class Flood
             e.printStackTrace();
           }
 
+          if ( runtimeTargetFile.chunkMap[chunk.index] == '0' )
+          {
+            chunksToDownload.add( new ChunkKey( runtimeTargetFile, chunk.index ) );
+          }
+          
           nextOffset += chunk.size;
         }
       }
@@ -221,4 +245,55 @@ public class Flood
     // how many bytes are we currently missing
     bytesMissing = totalBytes - bytesAtStartup;
   }
+
+  protected void GetChunk(  )
+  {
+    boolean foundchunk = false;
+    PeerConnection todownload_from = null;
+    ChunkKey todownload_key = null;
+
+    // figure out what chunk to get from which peer and ask for it
+    Iterator chunkiter = chunksToDownload.iterator();
+    while ( chunkiter.hasNext() && !foundchunk )
+    {
+      ChunkKey chunkKey = (ChunkKey)chunkiter.next();
+      
+      if ( !chunksDownloading.contains( chunkKey ) )
+      {
+        RuntimeTargetFile runtimeTargetFile = chunkKey.runtimeTargetFile;
+        Iterator peeriter = peerConnections.iterator();
+        while( peeriter.hasNext() && !foundchunk )
+        {
+          PeerConnection peerConnection = (PeerConnection)peeriter.next();
+          if ( peerConnection.chunksDownloading < 1 )
+          {
+            char[] peerChunkMap = (char[])peerConnection.chunkMaps.get( runtimeTargetFile.targetFile.name );
+            if ( peerChunkMap != null )
+            {
+              if ( peerChunkMap[ chunkKey.chunkIndex ] == '1' )
+              {
+                foundchunk = true;
+                todownload_from  = peerConnection;
+                todownload_key   = chunkKey;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if ( foundchunk )
+    {
+      Vector parameters = new Vector( 2 );
+      parameters.add( todownload_key.runtimeTargetFile.targetFile.name );
+      parameters.add( new Integer( todownload_key.chunkIndex ) );
+      
+      todownload_from.chunksDownloading++;
+      todownload_from.SendMethod( RequestChunkMethodHandler.methodName, parameters );
+
+      chunksDownloading.add( todownload_key );
+    }
+  }
+
+
 }

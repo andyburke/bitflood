@@ -5,6 +5,7 @@
 
 import java.nio.channels.FileLock;
 import java.util.Vector;
+import java.util.Iterator;
 
 /**
  * @author burke
@@ -73,6 +74,22 @@ public class SendChunkMethodHandler implements MethodHandler
       runtimeTargetFile.fileHandle.seek(runtimeTargetFile.chunkOffsets[chunkIndex.intValue()]);
       runtimeTargetFile.fileHandle.write(chunkData);
       writeLock.release();
+      
+      Flood.ChunkKey chunkKey = receiver.flood.MakeChunkKey( runtimeTargetFile, chunkIndex.intValue() );
+      receiver.flood.chunksDownloading.remove( chunkKey );
+      receiver.flood.chunksToDownload.remove( chunkKey );
+      receiver.chunksDownloading--;
+      
+      Vector nhcParams = new Vector( 2 );
+      nhcParams.add( targetFilename );
+      nhcParams.add( chunkIndex );
+      
+      Iterator peerIter = receiver.flood.peerConnections.iterator();
+      while( peerIter.hasNext() )
+      {
+        PeerConnection peerConnection = (PeerConnection)peerIter.next();
+        peerConnection.SendMethod( NotifyHaveChunkMethodHandler.methodName, nhcParams );
+      }
     }
     else
     {

@@ -14,22 +14,23 @@ import java.util.*;
  */
 public class PeerConnection
 {
-  private Hashtable     messageHandlers = null;
-  private SocketChannel socketChannel   = null;
-  private Selector      socketSelector  = null;
-  private int           BUFFER_SIZE     = 256 * 1024 * 2;                    // 2 times thenormal chunk size
-  private ByteBuffer    readBuffer      = ByteBuffer.allocate( BUFFER_SIZE );
-  private int           readIndex       = 0;
-  private ByteBuffer    writeBuffer     = ByteBuffer.allocate( BUFFER_SIZE );
-  public Peer           localPeer       = null;
-  public boolean        connected       = false;
-  public boolean        disconnected    = false;
-  public String         hostname        = "";
-  public int            port            = 0;
-  public int            listenPort      = 0;
-  public String         id              = "";
-  public Flood          flood           = null;
-  public Hashtable      chunkMaps       = null;
+  private Hashtable     messageHandlers   = null;
+  private SocketChannel socketChannel     = null;
+  private Selector      socketSelector    = null;
+  private int           BUFFER_SIZE       = 256 * 1024 * 2;                    // 2 times thenormal chunk size
+  private ByteBuffer    readBuffer        = ByteBuffer.allocate( BUFFER_SIZE );
+  private int           readIndex         = 0;
+  private ByteBuffer    writeBuffer       = ByteBuffer.allocate( BUFFER_SIZE );
+  public Peer           localPeer         = null;
+  public boolean        connected         = false;
+  public boolean        disconnected      = false;
+  public String         hostname          = "";
+  public int            port              = 0;
+  public int            listenPort        = 0;
+  public String         id                = "";
+  public Flood          flood             = null;
+  public Hashtable      chunkMaps         = new Hashtable();
+  public int            chunksDownloading = 0;
 
   public PeerConnection()
   {
@@ -122,7 +123,7 @@ public class PeerConnection
 
         // Remove it from the list to indicate that it is being processed
         it.remove();
-        
+
         // 
         if ( selKey.isValid() && selKey.isConnectable() )
         {
@@ -227,7 +228,7 @@ public class PeerConnection
   {
     String out = XMLEnvelopeProcessor.encode( methodName, parameters );
     System.out.println( localPeer.id + " -> " + id + " (" + methodName + ")" );
-    
+
     writeBuffer.put( ( out.replaceAll( "\n", "" ) + "\n" ).getBytes() );
   }
 }
