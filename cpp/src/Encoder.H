@@ -4,7 +4,7 @@
 namespace libBitFlood
 {
   // forward declare
-  class Flood;
+  class FloodFile;
 
   // the encoder takes as input:
   //  - a list of files
@@ -21,7 +21,7 @@ namespace libBitFlood
       V_String m_trackers;
     };
 
-    Error::ErrorCode EncodeFile( const ToEncode& i_toencode, Flood& o_xml );
+    Error::ErrorCode EncodeFile( const ToEncode& i_toencode, FloodFile& o_xml );
   }
 };
 

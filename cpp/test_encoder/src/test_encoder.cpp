@@ -45,13 +45,13 @@ int main(int argc, char* argv[])
     Flood out;
     Encoder::EncodeFile( e, out );
 
-    std::wstring txt;
+    std::string txt;
     out.ToXML( txt );
 
     FILE* outfile = fopen( argv[3], "w" );
     if ( outfile )
     {
-      fprintf( outfile, "%ws", txt.c_str() );
+      fprintf( outfile, "%s", txt.c_str() );
       fclose( outfile );
     }
 

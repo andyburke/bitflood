@@ -14,11 +14,11 @@ namespace libBitFlood
   namespace Encoder
   {
     /*static*/
-    Error::ErrorCode EncodeFile( const ToEncode& i_toencode, Flood& o_flood )
+    Error::ErrorCode EncodeFile( const ToEncode& i_toencode, FloodFile& o_floodfile )
     {
       Error::ErrorCode ret = Error::NO_ERROR;
 
-      libBitFlood::Flood toReturn;
+      libBitFlood::FloodFile toReturn;
       toReturn.m_trackers = i_toencode.m_trackers;
 
       // check incoming data - move to a function in ToEncode?
@@ -48,7 +48,7 @@ namespace libBitFlood
           }
           else
           {
-            libBitFlood::Flood::File fileInfo;
+            libBitFlood::FloodFile::File fileInfo;
             fileInfo.m_name = *fileiter;
 
             U32 index = 0;
@@ -70,7 +70,7 @@ namespace libBitFlood
                 Base64Encoder encoder( new FileSink( out ), false );
                 shaFilter.TransferTo( encoder );
 
-                libBitFlood::Flood::Chunk chunk;
+                libBitFlood::FloodFile::Chunk chunk;
                 chunk.m_index = index;
                 chunk.m_size = bytesRead;
                 chunk.m_weight = 0;
@@ -95,7 +95,7 @@ namespace libBitFlood
 
       if ( ret == Error::NO_ERROR )
       {
-        o_flood = toReturn;
+        o_floodfile = toReturn;
       }
 
       return ret;

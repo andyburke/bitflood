@@ -3,65 +3,119 @@
 
 #include "stdafx.h"
 
+#include <WINSOCK2.H>
+#include <Ws2tcpip.h>
+#include <time.h>
+
 #include <Flood.H>
+#include <Client.H>
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
 #include <sstream>
+#include <XmlRpc.H>
 
 XERCES_CPP_NAMESPACE_USE
 
 using namespace libBitFlood;
 
+const U32 UPDATE_INTERVAL = 20;
+void ParseFloodFile( const std::string& file, FloodFile& floodfile );
+
 int main(int argc, char* argv[])
 {
-  if ( argc != 2 )
+  if ( argc != 2 && argc != 3 && argc != 4 )
   {
-    std::cerr << "Please use one argument: the name of the flood file" << std::endl;
+    std::cerr << "Please use three arguments: the name of the flood file, the local ip and the local port" << std::endl;
     return 1;
+  }
+
+  // startup winsock
+  WSADATA wsaData;
+  WSAStartup( MAKEWORD( 2, 2 ), &wsaData );
+
+  XmlRpc::setVerbosity(5);
+
+  FloodFile theflood;
+  ParseFloodFile( argv[1], theflood );
+
+  Client::Setup setup;
+  if ( argc == 3 )
+  {
+    setup.m_localIP = argv[2];
   }
   else
   {
-    // Initialize the XML4C2 system.
-    try
-    {
-      XMLPlatformUtils::Initialize();
-    }
-
-    catch(const XMLException& toCatch)
-    {
-      char *pMsg = XMLString::transcode(toCatch.getMessage());
-      XERCES_STD_QUALIFIER cerr << "Error during Xerces-c Initialization.\n"
-        << "  Exception message:"
-        << pMsg;
-      XMLString::release(&pMsg);
-      return 1;
-    }
-
-    char* data = NULL;
-    FILE* infile = fopen( argv[1], "r" );
-    if ( infile )
-    {
-      fseek(infile,0,SEEK_END);
-
-      U32 size = ftell( infile );
-      data = (char *)malloc( size + 1 );
-      data[ size ] = 0;
-
-      rewind( infile );
-      fread( data, 1, size, infile );
-
-      fclose(infile);
-    }
-
-    std::wstringstream wide;
-    wide << argv[1];
-
-    Flood in;
-    in.FromXML( wide.str() );
-
-
-    XMLPlatformUtils::Terminate();
-    return 0;
+    hostent* localHost = gethostbyname("");
+    setup.m_localIP = inet_ntoa (*(struct in_addr *)*localHost->h_addr_list);
   }
+
+  setup.m_localPort = 10101;
+  if ( argc == 4 )
+  {
+    std::stringstream convert;
+    convert << argv[3];
+    convert >> setup.m_localPort;
+  }
+
+  Client client;
+  client.Initialize( setup );
+  client.AddFloodFile( theflood );
+
+  time_t last_update = 0;
+  while( 1 )
+  {
+    time_t now;
+    time( &now );
+    if ( now - last_update >= UPDATE_INTERVAL )
+    {
+      client.Register();
+      client.UpdatePeerList();
+      time( &last_update );
+    }
+
+    client.GetChunks();
+    client.LoopOnce();
+    Sleep( 0 );
+  }
+}
+
+void ParseFloodFile( const std::string& file, FloodFile& floodfile )
+{
+  // Initialize the XML4C2 system.
+  try
+  {
+    XMLPlatformUtils::Initialize();
+  }
+
+  catch(const XMLException& toCatch)
+  {
+    char *pMsg = XMLString::transcode(toCatch.getMessage());
+    XERCES_STD_QUALIFIER cerr << "Error during Xerces-c Initialization.\n"
+      << "  Exception message:"
+      << pMsg;
+    XMLString::release(&pMsg);
+    return;
+  }
+
+  char* data = NULL;
+  FILE* infile = fopen( file.c_str(), "r" );
+  if ( infile )
+  {
+    fseek(infile,0,SEEK_END);
+
+    U32 size = ftell( infile );
+    data = (char *)malloc( size + 1 );
+    data[ size ] = 0;
+
+    rewind( infile );
+    fread( data, 1, size, infile );
+
+    fclose(infile);
+  }
+
+  floodfile.FromXML( data );
+
+  XMLPlatformUtils::Terminate();
+
 }
 

@@ -20,7 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\extern\xercesc++\2.6.0\src\&quot;;..\src\"
+				AdditionalIncludeDirectories="&quot;..\extern\xercesc++\2.6.0\src\&quot;;&quot;..\extern\xmlrpc++\0.7\src&quot;;..\src\"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -33,7 +33,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libBitFlood.lib"
+				AdditionalDependencies="libBitFlood.lib Ws2_32.lib"
 				OutputFile="$(OutDir)/test_client.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\built\$(ConfigurationName)"
@@ -71,7 +71,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..\extern\xercesc++\2.6.0\src\&quot;;..\src\"
+				AdditionalIncludeDirectories="&quot;..\extern\xercesc++\2.6.0\src\&quot;;&quot;..\extern\xmlrpc++\0.7\src&quot;;..\src\"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="3"
@@ -82,7 +82,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libBitFlood.lib"
+				AdditionalDependencies="libBitFlood.lib Ws2_32.lib"
 				OutputFile="$(OutDir)/test_client.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\built\$(ConfigurationName)"
@@ -122,15 +122,6 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\src\test_client.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						GeneratePreprocessedFile="0"/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\src\stdafx.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -147,6 +138,15 @@
 			</File>
 			<File
 				RelativePath=".\src\stdafx.H">
+			</File>
+			<File
+				RelativePath=".\src\test_client.cpp">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						GeneratePreprocessedFile="0"/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>

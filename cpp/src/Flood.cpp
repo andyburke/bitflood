@@ -1,5 +1,6 @@
 #include "stdafx.H"
 #include "Flood.H"
+#include "Client.H"
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/OutOfMemoryException.hpp>
@@ -8,12 +9,18 @@
 #include <xercesc/dom/StDOMNode.hpp>
 #include <sstream>
 #include <iostream>
+#include <sha.h>
+#include <hex.h>
+#include <channels.h>
+#include <files.h>
+#include <sstream>
+#include <base64.h>
 
 XERCES_CPP_NAMESPACE_USE
 
 namespace libBitFlood
 {
-  namespace FloodKeywords
+  namespace FloodFileKeywords
   {
     const wchar_t* CORE_IMPL    = L"CORE";
     const wchar_t* ROOT         = L"BitFlood";
@@ -29,11 +36,11 @@ namespace libBitFlood
     const wchar_t* TRACKER      = L"Tracker";
   };
 
-  Error::ErrorCode Flood::ToXML( std::wstring& o_xml )
+  Error::ErrorCode FloodFile::ToXML( std::string& o_xml )
   {
     Error::ErrorCode ret = Error::NO_ERROR;
 
-    using namespace FloodKeywords;
+    using namespace FloodFileKeywords;
 
     DOMImplementation* impl =  DOMImplementationRegistry::getDOMImplementation( CORE_IMPL );
     if (impl != NULL)
@@ -105,7 +112,7 @@ namespace libBitFlood
         // write the the output string
         DOMWriter* writer = impl->createDOMWriter();
         writer->setFeature( XMLUni::fgDOMWRTFormatPrettyPrint, 1 );
-        o_xml = writer->writeToString( *rootElem );
+        o_xml = XMLString::transcode( writer->writeToString( *rootElem ) );
       }
       catch (const OutOfMemoryException&)
       {
@@ -127,7 +134,7 @@ namespace libBitFlood
     return ret;
   }
 
-  Error::ErrorCode Flood::FromXML( const std::wstring& i_xml )
+  Error::ErrorCode FloodFile::FromXML( const std::string& i_xml )
   {
     //
     //  Create our parser, then attach an error handler to the parser.
@@ -138,7 +145,24 @@ namespace libBitFlood
     //    DOMTreeErrorReporter *errReporter = new DOMTreeErrorReporter();
     //    parser->setErrorHandler(errReporter);
 
-    //MemBufInputSource src( (const XMLByte *const )(i_xml.c_str()), i_xml.length(), "foo" );
+    MemBufInputSource src( (const XMLByte*)i_xml.data(), i_xml.length(), "input" );
+    src.setEncoding( L"ASCII" );
+
+    // hash the incoming XML
+    {
+      using namespace CryptoPP;
+      SHA sha;
+      HashFilter shaFilter(sha);
+      std::auto_ptr<ChannelSwitch> channelSwitch(new ChannelSwitch);
+      channelSwitch->AddDefaultRoute(shaFilter);
+
+      StringSource( (const byte*)i_xml.data(), i_xml.length(), true, channelSwitch.release() );
+      std::stringstream out;
+      Base64Encoder encoder( new FileSink( out ), false );
+      shaFilter.TransferTo( encoder );
+
+      m_contentHash = out.str();
+    }
 
     //
     //  Parse the XML file, catching any XML exceptions that might propogate
@@ -147,7 +171,7 @@ namespace libBitFlood
     bool errorsOccured = false;
     try
     {
-      parser->parse( i_xml.c_str() );
+      parser->parse( src );
     }
     catch (const OutOfMemoryException&)
     {
@@ -184,7 +208,7 @@ namespace libBitFlood
     // If the parse was successful, output the document data from the DOM tree
     if ( !errorsOccured )//&& !errReporter->getSawErrors())
     {
-      using namespace FloodKeywords;
+      using namespace FloodFileKeywords;
       // get the DOM representation
       DOMDocument *doc = parser->getDocument();
 
@@ -269,5 +293,98 @@ namespace libBitFlood
 
     return Error::NO_ERROR;
   }
+
+  //
+  Error::ErrorCode Flood::Initialize( const FloodFile& i_floodfile )
+  {
+    m_floodfile = i_floodfile;
+
+    V_String::const_iterator trackeriter = m_floodfile.m_trackers.begin();
+    V_String::const_iterator trackerend = m_floodfile.m_trackers.end();
+
+    for( ; trackeriter != trackerend; ++trackeriter )
+    {
+      const std::string& trackerurl = *trackeriter;
+
+      U32 h_start = trackerurl.find( "http://" ) + strlen( "http://" );
+      U32 p_start = trackerurl.find( ':', h_start ) + 1;
+      U32 u_start = trackerurl.find( '/', p_start ) + 1;
+
+      std::string host = trackerurl.substr( h_start, p_start - h_start - 1 );
+      std::string uri  = trackerurl.substr( u_start, std::string::npos );
+      U32 port;
+      
+      std::stringstream port_converter;
+      port_converter << trackerurl.substr( p_start, u_start - p_start - 1 );
+      port_converter >> port;
+     
+      XmlRpcClient* client = new XmlRpcClient( host.c_str(), port, uri.c_str() );
+      m_trackers.push_back( client );
+    }
+
+    return Error::NO_ERROR;
+  }
+
+  Error::ErrorCode Flood::Register( const Client& i_client )
+  {
+    XmlRpcValue args, result;
+    args[0] = i_client.m_id;
+    args[1] = m_floodfile.m_contentHash;
+    args[2] = i_client.m_setup.m_localIP;
+    args[3] = (int)i_client.m_setup.m_localPort;
+
+    V_XmlRpcClientPtr::iterator trackeriter = m_trackers.begin();
+    V_XmlRpcClientPtr::iterator trackerend  = m_trackers.end();
+    
+    for ( ; trackeriter != trackerend; ++trackeriter )
+    {
+      if ( (*trackeriter)->execute("Register", args, result) )
+        std::cout << result << "\n\n";
+      else
+        std::cout << "Error calling 'Register'\n\n";
+    }
+
+    return Error::NO_ERROR;
+  }
+
+  Error::ErrorCode Flood::UpdatePeerList( void )
+  {
+    XmlRpcValue args, result;
+    args[0] = m_floodfile.m_contentHash;
+
+    V_XmlRpcClientPtr::iterator trackeriter = m_trackers.begin();
+    V_XmlRpcClientPtr::iterator trackerend  = m_trackers.end();
+    
+    for ( ; trackeriter != trackerend; ++trackeriter )
+    {
+      if ( (*trackeriter)->execute("RequestPeers", args, result) )
+      {
+        std::cout << result << "\n\n";
+
+        U32 res_index;
+        for ( res_index = 0; res_index < result.size(); res_index++ )
+        {
+          U32 startIndex = 0;
+          const std::string& cur_res = result[ res_index ];
+          std::string peerId   = cur_res.substr( startIndex, 
+                                                 cur_res.find( ':', startIndex ) - startIndex );
+          startIndex += peerId.length() + 1;
+          std::string peerHost = cur_res.substr( startIndex, 
+                                                 cur_res.find( ':', startIndex ) - startIndex );
+          startIndex += peerHost.length() + 1;
+          std::string peerPort = cur_res.substr( startIndex, std::string::npos );
+
+        }
+      }
+      else
+      {
+        std::cout << "Error calling 'RequestPeers'\n\n";
+      }
+    }
+
+    return Error::NO_ERROR;
+  }
+
+
 };
 
