@@ -1,104 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="BitFlood" default="init" basedir=".">
-  <property name="bin" location="bin"/>
   <property name="test" location="test"/>
 
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp/>
-    <!-- Create the build directory structure used by compile -->
-    <mkdir dir="${bin}"/>
   </target>
 
-  <target name="EncoderTest" depends="init" description="build the test encoder " >
-    <javac destdir="${bin}"
-    	   srcdir="."
-           debug="true">
-      <classpath>
-    	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
-      	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
-      </classpath>
-      <include name="EncoderTest.java" />
-      <include name="FloodFile.java" />
-    </javac>
-  </target>
-
-  <target name="ParserTest" depends="init" description="build the test parser " >
-    <javac destdir="${bin}"
-    	   srcdir="."
-           debug="true">
-      <classpath>
-    	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
-      	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
-      </classpath>
-      <include name="ParserTest.java" />
-      <include name="FloodFile.java" />
-    </javac>
-  </target>
-
-  <target name="ClientTest" depends="init" description="build the test client" >
-    <javac destdir="${bin}"
-    	   srcdir="."
-           debug="true">
-      <classpath>
-    	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
-      	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
-      </classpath>
-      <include name="Peer.java"/>
-      <include name="PeerConnection.java"/>
-      <include name="Flood.java"/>
-      <include name="FloodFile.java"/>
-      <include name="ClientTest.java"/>
-    </javac>
-  </target>
-
-  <target name="TrackerTest" depends="init" description="build the test tracker" >
-    <javac destdir="${bin}"
-    	   srcdir="."
-           debug="true">
-      <classpath>
-    	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
-      	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
-      </classpath>
-      <include name="Peer.java"/>
-      <include name="PeerConnection.java"/>
-      <include name="FloodFile.java"/>
-      <include name="Flood.java"/>
-      <include name="TrackerTest.java"/>
-    </javac>
-  </target>
-
-  <target name="test_tracker" depends="init,TrackerTest" description="test a tracker" >
+  <target name="test_tracker" depends="init" description="test a tracker" >
     <mkdir dir="${test}"/>
     <java classname="TrackerTest" dir="${test}" fork="true">
       <arg value="-d"/>
       <arg value="-flood"/>
       <arg value="test.mp3.flood"/>
+      <arg value="-localIp"/>
+      <arg value="vux.fdntech.com"/>
       <arg value="-localPort"/>
-      <arg value="10100"/>
+      <arg value="10101"/>
       <classpath>
-    	<pathelement path="${bin}" />
+    	<pathelement path="${bin}/BitFlood.jar" />
     	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
       	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
       </classpath>
     </java>
   </target>
 
-  <target name="test_client" depends="init,ClientTest" description="test a client" >
+  <target name="test_client" depends="init" description="test a client" >
     <mkdir dir="${test}"/>
     <java classname="ClientTest" dir="${test}" fork="true">
       <arg value="-flood"/>
       <arg value="test.mp3.flood"/>
       <classpath>
-    	<pathelement path="${bin}" />
+    	<pathelement path="${bin}/BitFlood.jar" />
     	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
       	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
       </classpath>
     </java>
   </target>
 
-  <target name="test_encode" depends="init,EncoderTest" description="test encoding .flood files" >
+  <target name="test_encode" depends="init" description="test encoding .flood files" >
     <mkdir dir="${test}"/>
     <java classname="EncoderTest" dir="${test}" fork="true">
       <arg value="-flood"/>
@@ -111,29 +52,24 @@
       <arg value="topheavy"/>
       <arg value="test.mp3"/>
       <classpath>
-    	<pathelement path="${bin}" />
+    	<pathelement path="${bin}/BitFlood.jar" />
     	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
       	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
       </classpath>
     </java>
   </target>
 
-  <target name="test_parse" depends="init,ParserTest" description="test parsing .flood files" >
+  <target name="test_parse" depends="init" description="test parsing .flood files" >
     <mkdir dir="${test}"/>
     <java classname="ParserTest" dir="${test}" fork="true">
       <arg value="-flood"/>
       <arg value="test.mp3.flood"/>
       <classpath>
-    	<pathelement path="${bin}" />
+    	<pathelement path="${bin}/BitFlood.jar" />
     	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
       	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
       </classpath>
     </java>
   </target>
-
-  <target name="clean" depends="init" description="clean the output" >
-    <delete includeemptydirs="true">
-      <fileset dir="${bin}" includes="**/*"/>
-    </delete>
-  </target>
 </project> 
+
