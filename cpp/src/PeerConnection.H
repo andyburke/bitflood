@@ -36,16 +36,32 @@ namespace libBitFlood
 
     struct Reader
     {
+      Reader( void ) 
+        : m_socket( INVALID_SOCKET )
+        , m_lasttail ( 0 )
+        , m_buffersize ( 0 )
+      {
+      }
+
       SOCKET      m_socket;
       std::string m_buffer;
+      U32         m_lasttail;
+      U32         m_buffersize;
 
       Error::ErrorCode Read( I32& o_bytesRead );
     };
 
     struct Writer
     {
+      Writer( void ) 
+        : m_socket( INVALID_SOCKET )
+        , m_buffersize ( 0 )
+      {
+      }
+
       SOCKET      m_socket;
       std::string m_buffer;
+      U32         m_buffersize;
 
       Error::ErrorCode Write( I32& o_bytesWritten );
     };

@@ -349,16 +349,20 @@ namespace libBitFlood
 
   Error::ErrorCode PeerConnection::_ProcessReadBuffer( void )
   {
-    while( !m_reader.m_buffer.empty() )
+    while( m_reader.m_buffersize > m_reader.m_lasttail )
     {
-      U32 tail = m_reader.m_buffer.find( '\n', 0 );
-      if ( tail == std::string::npos )
+      m_reader.m_lasttail = m_reader.m_buffer.find( '\n', m_reader.m_lasttail );
+      if ( m_reader.m_lasttail == std::string::npos )
       {
+        m_reader.m_lasttail = m_reader.m_buffersize;
         break;
       }
 
-      m_fakeServer.SetRequest( m_reader.m_buffer.substr( 0, tail ) );
-      m_reader.m_buffer = m_reader.m_buffer.substr( tail + 1, std::string::npos );
+      m_fakeServer.SetRequest( m_reader.m_buffer.substr( 0, m_reader.m_lasttail ) );
+      m_reader.m_buffer = m_reader.m_buffer.substr( m_reader.m_lasttail + 1, m_reader.m_buffersize );
+
+      m_reader.m_buffersize = m_reader.m_buffersize - ( m_reader.m_lasttail + 1 );
+      m_reader.m_lasttail = 0;
 
       // parse and dispatch the message
       XmlRpcValue args;
@@ -378,7 +382,8 @@ namespace libBitFlood
     std::string& request = m_fakeClient.AccessRequest();
 
     U32 request_index;
-    for ( request_index = 0; request_index < request.size(); ++request_index )
+    U32 request_size = request.size();
+    for ( request_index = 0; request_index < request_size; ++request_index )
     {
       if ( request[ request_index ] == '\n' ||
            request[ request_index ] == '\r' )
@@ -389,6 +394,7 @@ namespace libBitFlood
     
     m_writer.m_buffer.append( request );
     m_writer.m_buffer.append( 1, '\n' );
+    m_writer.m_buffersize += request_size + 1;
 
     return Error::NO_ERROR_LBF;
   }
@@ -409,7 +415,7 @@ namespace libBitFlood
   Error::ErrorCode PeerConnection::Reader::Read( I32& o_bytesRead )
   {
     // Number of bytes to attempt to read at a time
-    const U32 READ_SIZE = 4096;
+    const U32 READ_SIZE = 128 * 1024;
     char readBuf[READ_SIZE];
 
     o_bytesRead = ::recv( m_socket, readBuf, READ_SIZE-1, 0);
@@ -417,6 +423,7 @@ namespace libBitFlood
     {
       readBuf[ o_bytesRead ] = 0;
       m_buffer.append( readBuf, o_bytesRead );
+      m_buffersize += o_bytesRead;
     } 
     else if( WSAGetLastError() == WSAEWOULDBLOCK )
     {
@@ -431,14 +438,13 @@ namespace libBitFlood
 
   Error::ErrorCode PeerConnection::Writer::Write( I32& o_bytesWritten )
   {
-    U32 towrite = (U32)m_buffer.length();
-
-    if ( towrite > 0 )
+    if ( m_buffersize > 0 )
     {
-      o_bytesWritten = ::send( m_socket, m_buffer.data(), towrite, 0 );
+      o_bytesWritten = ::send( m_socket, m_buffer.data(), m_buffersize, 0 );
       if ( o_bytesWritten > 0 ) 
       {
-        m_buffer = m_buffer.substr( o_bytesWritten, std::string::npos );
+        m_buffer = m_buffer.substr( o_bytesWritten, m_buffersize );
+        m_buffersize -= o_bytesWritten;
       } 
       else if( WSAGetLastError() == WSAEWOULDBLOCK )
       {
@@ -478,8 +484,6 @@ namespace libBitFlood
         i_receiver.m_registeredFloods.insert( floodId );
       }
     }
-
-
 
     return Error::NO_ERROR_LBF;
   }
@@ -596,13 +600,18 @@ namespace libBitFlood
           Encoder::Base64Encode( data_ptr, data_size, test );
           if( thechunk.m_hash.compare( test ) == 0 )
           {
-            FILE* fileptr = fopen( filename.c_str(), "wb" );
+            FILE* fileptr = fopen( filename.c_str(), "r+b" );
+            if ( fileptr == NULL )
+            {
+              fileptr = fopen( filename.c_str(), "w+b" );
+            }
+
             if ( fileptr != NULL && fseek( fileptr, chunkoffset, SEEK_SET ) == 0 )
             {
               if ( fwrite( data_ptr, 1, data_size, fileptr ) != data_size )
               {
               }
-              
+
               Flood::P_ChunkKey chunkkey( thefile_index, chunkindex );
               theflood->m_runtimefiles[ thefile_index ].m_chunkmap[ chunkindex ] = '1';
 
