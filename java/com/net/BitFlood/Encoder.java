@@ -1,4 +1,6 @@
-import sdk.Base64.Base64;
+package com.net.BitFlood;
+
+import com.net.BitFlood.sdk.Base64;
 import java.security.MessageDigest;
 
 /**

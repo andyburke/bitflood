@@ -1,4 +1,4 @@
-package sdk.Base64;
+package com.net.BitFlood.sdk;
 
 import java.util.Arrays;
 

@@ -1,9 +1,12 @@
+package com.net.BitFlood.test;
+
 /*
  * Created on Nov 15, 2004
  *
  */
 import java.util.Iterator;
 import java.util.Vector;
+import com.net.BitFlood.FloodFile;
 
 /**
  * @author burke

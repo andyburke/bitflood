@@ -1,7 +1,11 @@
+package com.net.BitFlood.test;
+
 /**
  * Created on Nov 28, 2004
  *
  */
+
+import com.net.BitFlood.FloodFile;
 
 /**
  * @author burke

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jardesc>
+<jar path="C:/code/BitFlood/java/bin/BitFlood.jar"/>
+<options buildIfNeeded="true" compress="true" descriptionLocation="/BitFlood-java/bin/BitFlood.jardesc" exportErrors="true" exportWarnings="true" overwrite="false" saveDescription="true" useSourceFolders="false"/>
+<manifest generateManifest="false" manifestLocation="/BitFlood-java/bin/BitFlood.jar.manifest" manifestVersion="1.0" reuseManifest="true" saveManifest="true" usesManifest="true">
+<sealing sealJar="false">
+<packagesToSeal/>
+<packagesToUnSeal/>
+</sealing>
+</manifest>
+<selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
+<javaElement handleIdentifier="=BitFlood-java/&lt;com.net"/>
+<javaElement handleIdentifier="=BitFlood-java/&lt;com.net.BitFlood.test"/>
+<javaElement handleIdentifier="=BitFlood-java/&lt;com"/>
+<javaElement handleIdentifier="=BitFlood-java/&lt;com.net.BitFlood"/>
+<javaElement handleIdentifier="=BitFlood-java/&lt;com.net.BitFlood.sdk"/>
+</selectedElements>
+</jardesc>

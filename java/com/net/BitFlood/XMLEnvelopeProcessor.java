@@ -1,3 +1,5 @@
+package com.net.BitFlood;
+
 /**
  * Created on Dec 2, 2004
  *
@@ -8,7 +10,7 @@ import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.*;
 
-import sdk.Base64.Base64;
+import com.net.BitFlood.sdk.Base64;
 
 import java.io.StringWriter;
 import java.util.*;

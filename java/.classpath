@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry including="*.java|sdk/Base64/Base64.java|sdk/xerces/xerces-2_6_2/xercesImpl.jar|sdk/xerces/xerces-2_6_2/xml-apis.jar" kind="src" path=""/>
+	<classpathentry including="com/" excluding="**.svn*|com/.svn/|com/net/.svn/|com/net/BitFlood/.svn/|com/net/BitFlood/sdk/.svn/|com/net/BitFlood/test/.svn/" kind="src" path=""/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="sdk/xerces/xerces-2_6_2/xml-apis.jar"/>
 	<classpathentry kind="lib" path="sdk/xerces/xerces-2_6_2/xercesImpl.jar"/>
