@@ -62,6 +62,7 @@ public class TrackerTest
 
     Peer tracker = new Peer( localIP, localPort );
     tracker.JoinFlood( floodFilename );
+    tracker.methodHandlers.add( new RequestPeerListMethodHandler() );
 
     boolean quit = false;
     while ( !quit )

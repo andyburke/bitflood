@@ -10,8 +10,8 @@
 namespace libBitFlood
 {
   // define our method names
-  const char PeerMethodHandler::ReceivePeerList[]  = "ReceivePeerList";
-  const char PeerMethodHandler::RegisterWithPeer[] = "RegisterWithPeer";
+  const char PeerMethodHandler::SendPeerList[]  = "SendPeerList";
+  const char PeerMethodHandler::Register[] = "Register";
   const char PeerMethodHandler::AcknowledgePeer[]  = "AcknowledgePeer";
 
   Error::ErrorCode PeerMethodHandler::HandleMethod( const std::string&  i_method, 
@@ -19,13 +19,13 @@ namespace libBitFlood
                                               XmlRpcValue&        i_args )
   {
     Error::ErrorCode ret = Error::UNKNOWN_ERROR_LBF;
-    if( i_method.compare( ReceivePeerList ) == 0 )
+    if( i_method.compare( SendPeerList ) == 0 )
     {
-      ret = _HandleReceivePeerList( i_receiver, i_args );
+      ret = _HandleSendPeerList( i_receiver, i_args );
     }
-    else if ( i_method.compare( RegisterWithPeer ) == 0 )
+    else if ( i_method.compare( Register ) == 0 )
     {
-      ret = _HandleRegisterWithPeer( i_receiver, i_args );
+      ret = _HandleRegister( i_receiver, i_args );
     }
     else if ( i_method.compare( AcknowledgePeer ) == 0 )
     {
@@ -35,15 +35,13 @@ namespace libBitFlood
     return ret;
   }
 
-  Error::ErrorCode PeerMethodHandler::_HandleReceivePeerList( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
+  Error::ErrorCode PeerMethodHandler::_HandleSendPeerList( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
   {
-    XmlRpcValue& result = i_args[0];
-    
     U32 index;
-    for ( index = 0; index < result.size(); ++index )
+    for ( index = 0; index < i_args.size(); ++index )
     {
       U32 startIndex = 0;
-      const std::string& cur_res = result[ index ];
+      const std::string& cur_res = i_args[ index ];
       std::string peerid   = cur_res.substr( startIndex, 
                                              cur_res.find( ':', startIndex ) - startIndex );
       startIndex += peerid.length() + 1;
@@ -73,7 +71,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode PeerMethodHandler::_HandleRegisterWithPeer( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
+  Error::ErrorCode PeerMethodHandler::_HandleRegister( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
   {
     const std::string& floodhash = i_args[0];
     const std::string& peerid    = i_args[1];

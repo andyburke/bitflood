@@ -10,8 +10,8 @@ namespace libBitFlood
   {
   public:
     // define our method names
-    static const char ReceivePeerList[];
-    static const char RegisterWithPeer[];
+    static const char SendPeerList[];
+    static const char Register[];
     static const char AcknowledgePeer[];
     
     Error::ErrorCode HandleMethod( const std::string&  i_method, 
@@ -19,8 +19,8 @@ namespace libBitFlood
                                    XmlRpcValue&        i_args );
 
   protected:
-    Error::ErrorCode _HandleReceivePeerList( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
-    Error::ErrorCode _HandleRegisterWithPeer( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
+    Error::ErrorCode _HandleSendPeerList( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
+    Error::ErrorCode _HandleRegister( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
     Error::ErrorCode _HandleAcknowledgePeer( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
   };
 };

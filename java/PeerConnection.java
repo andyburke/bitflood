@@ -134,7 +134,7 @@ public class PeerConnection
           }
           catch ( Exception e )
           {
-            System.out.println( "Error connecting? " + e );
+            System.out.println( "Error connecting: " + e );
             disconnected = true;
           }
         }

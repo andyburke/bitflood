@@ -101,7 +101,7 @@ namespace libBitFlood
     U32         m_port;
     U32         m_listenport;
     FakeClient  m_fakeClient;
-    FakeServer  m_fakeServer;
+    FakeServer*  m_fakeServer;
     Reader      m_reader;
     Writer      m_writer;
 

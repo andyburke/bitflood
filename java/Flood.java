@@ -57,7 +57,7 @@ public class Flood
       }
     }
     Date now = new Date();
-    if ( lastTrackerUpdate == null || ( now.getTime() - lastTrackerUpdate.getTime() >= 2000000 ) )
+    if ( lastTrackerUpdate == null || ( now.getTime() - lastTrackerUpdate.getTime() >= 20000 ) )
     {
       UpdateTrackers();
       lastTrackerUpdate = new Date();

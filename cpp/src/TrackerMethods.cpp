@@ -26,8 +26,6 @@ namespace libBitFlood
   Error::ErrorCode TrackerMethodHandler::_HandleRequestPeerList( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
   {
     XmlRpcValue result;
-    result[0];
-
     V_PeerConnectionSPtr::iterator iter = i_receiver->m_flood->m_peers.begin();
     V_PeerConnectionSPtr::iterator end  = i_receiver->m_flood->m_peers.end();
 
@@ -36,11 +34,11 @@ namespace libBitFlood
     {
       std::stringstream out;
       out << (*iter)->m_id << ":" << (*iter)->m_host << ":" << (*iter)->m_listenport;
-      result[0][index++] = out.str();
+      result[index++] = out.str();
     }
 
     // respond with the list of peers
-    i_receiver->SendMethod( PeerMethodHandler::ReceivePeerList, result );
+    i_receiver->SendMethod( PeerMethodHandler::SendPeerList, result );
 
     return Error::NO_ERROR_LBF;
   }

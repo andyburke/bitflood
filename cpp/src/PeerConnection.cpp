@@ -26,6 +26,7 @@ namespace libBitFlood
     m_host      = i_peerhost;
     m_port      = i_peerport;
     m_flood     = NULL;
+    m_fakeServer = new FakeServer();
 
     return Error::NO_ERROR_LBF;
   }
@@ -78,7 +79,7 @@ namespace libBitFlood
       args[0] = m_flood->m_floodfile->m_contentHash;
       args[1] = m_localpeer->m_localid;
       args[2] = (int)m_localpeer->m_localport;
-      SendMethod( PeerMethodHandler::RegisterWithPeer, args );
+      SendMethod( PeerMethodHandler::Register, args );
     }
 
     // request some chunks
@@ -194,7 +195,7 @@ namespace libBitFlood
         break;
       }
 
-      m_fakeServer.SetRequest( m_reader.m_buffer.substr( 0, m_reader.m_lasttail ) );
+      m_fakeServer->SetRequest( m_reader.m_buffer.substr( 0, m_reader.m_lasttail ) );
       m_reader.m_buffer = m_reader.m_buffer.substr( m_reader.m_lasttail + 1, m_reader.m_buffersize );
 
       m_reader.m_buffersize = m_reader.m_buffersize - ( m_reader.m_lasttail + 1 );
@@ -202,7 +203,7 @@ namespace libBitFlood
 
       // parse and dispatch the method
       XmlRpcValue args;
-      std::string methodname = m_fakeServer.ExternalParseRequest( args );
+      std::string methodname = m_fakeServer->ExternalParseRequest( args );
       
       printf( "%s <- %s (%s)\n", m_localpeer->m_localid.c_str(), m_id.c_str(), methodname.c_str() );
 
