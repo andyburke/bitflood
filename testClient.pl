@@ -1,9 +1,23 @@
 use strict;
 
+use Getopt::Long;
 use Time::HiRes qw(time sleep);
 use BitFlood::Client;
 
-my $c = BitFlood::Client->new();
+my $localIp;
+my $help;
+
+if(!GetOptions(
+	       "localip=s" => \$localIp,
+	       "help" => \$help,
+	       )
+   or $help) {
+  print "localip => set ip\n";
+  print "help/h  => this\n";
+  exit;
+}
+
+my $c = BitFlood::Client->new(localIp => $localIp);
 
 $SIG{INT} = sub { $c->Disconnect(); exit(0); };
 

@@ -42,13 +42,14 @@ $SIG{PIPE} = sub { Debug("SIGPIPE: remote end closed suddenly during a read/writ
 
 sub new {
   my $class = shift;
-
-  my $self = $class->SUPER::new(@_);
+  my %args = @_;
+  
+  my $self = $class->SUPER::new(\%args);
 
   $self->floods({});
   $self->peers([]);
   $self->trackers({});
-  $self->localIp($ENV{BITFLOOD_LOCAL_IP} || inet_ntoa(scalar gethostbyname(hostname())));
+  $self->localIp($ENV{BITFLOOD_LOCAL_IP} || inet_ntoa(scalar gethostbyname(hostname()))) if(!$self->localIp);
   $self->desiredPeerLoopDuration(.1);
 
   $self->OpenListenSocket();
