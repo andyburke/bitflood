@@ -44,6 +44,8 @@ sub new {
   my $class = shift;
   my %args = @_;
   
+  Debug("Creating Client object", 30);
+
   my $self = $class->SUPER::new(\%args);
 
   $self->floods({});
@@ -54,22 +56,27 @@ sub new {
 
   $self->OpenListenSocket();
 
+  Debug("Generating id using: " . $self->localIp . ", " . $self->port);
   $self->id(sha1_base64($self->localIp . $self->port));
 
   $self->chunkPrioritizerClass('BitFlood::ChunkPrioritizer::Weighted');
 
+  Debug("Laoding chunk prioritizer...", 20);
   eval "require " . $self->chunkPrioritizerClass;
   if ($@) {
     die "Couldn't load ChunkPrioritizer class " . $self->chunkPrioritizerClass . " : $@";
   }
   $self->chunkPrioritizer($self->chunkPrioritizerClass->new);
   
+  
+  Debug("Finished creating client object...");
   return $self;
 }
 
 sub OpenListenSocket {
   my $self = shift;
 
+  Debug("Creating listen socket for client object", 'net', 50);
   my @portList = $self->port ?
       ($self->port) : (DEFAULT_LISTEN_PORT .. DEFAULT_LISTEN_PORT + 10);
   foreach my $port (@portList) {
@@ -194,10 +201,11 @@ sub UpdatePeerList {
 sub Disconnect {
   my $self = shift;
 
-  print "Disconnecting from tracker...\n";
+#  print "Disconnecting from tracker...\n";
 
   foreach my $flood (values %{$self->floods}) {
     foreach my $tracker (@{$flood->trackers}) {
+      Debug("Sending disconnect request to tracker", 'net');
       $tracker->simple_request
 	(
 	 'Disconnect',
@@ -221,8 +229,6 @@ sub ProcessPeers {
 sub AddConnection {
   my $self = shift;
   my $conn = shift;
-
-  Debug("incoming peer connection: " . $conn->peerhost . ":" . $conn->peerport, 10);
 
   my $peer = BitFlood::Peer->new({
 				  client => $self,

@@ -70,7 +70,7 @@ sub new {
   $self->port(10101) if(!defined($self->port));
 
   if ($self->socket) {
-    Debug("connected from: " . $self->id . "(" . $self->host . ":" . $self->port . ")");
+    Debug("Incoming peer connection: " . $self->host . ":" . $self->port, 'net');
 
     # FIXME: windows assness
     if($^O eq 'MSWin32') {
@@ -99,11 +99,9 @@ sub SendMessage {
   Debug(">>>", 10);
 
   unshift(@methodArgs, $flood->contentHash);
-  Debug("method $methodName (" . scalar(@methodArgs) . " args) -> " . $self->host, 5);
+  Debug("method $methodName (" . scalar(@methodArgs) . " args) -> " . $self->host . ':' . $self->port, 'net', 5);
   my $request = RPC::XML::request->new($methodName, @methodArgs);
-  Debug("  queueing to: " . $self->id . " (" . $self->host . ":" . $self->port . ")", 15);
   $self->writeBuffer($self->writeBuffer . $request->as_string . "\n");
-  Debug("  write buffer: " . $self->writeBuffer, 50);
 
   Debug("<<<", 10);
   return 1;
@@ -121,7 +119,7 @@ sub Connect {
 
   if (!$self->socket) {
 
-    Debug("connecting out: " . $self->id . "(" . $self->host . ":" . $self->port . ")");
+    Debug("connecting out: " . $self->id . "(" . $self->host . ":" . $self->port . ")", 'net');
 
     $self->socket(IO::Socket::INET->new(
 					Proto    => 'tcp',
@@ -142,12 +140,12 @@ sub Connect {
 
   my $select = IO::Select->new($self->socket);
   my $connected = $select->can_write(0);
-  Debug("checking for completed connection (" . $self->host . "): $connected [error: $! (" . ($!+0) . ")]", 25);
+  Debug("checking for completed connection (" . $self->host . "): $connected [error: $! (" . ($!+0) . ")]", 'net', 25);
 
   if ($connected) {
 
     $self->connectCompleted(1);
-    Debug("socket connected");
+    Debug("socket connected", 'net');
 
     $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
     $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
@@ -160,12 +158,12 @@ sub Connect {
     if ($!{EINPROGRESS} or $!{EWOULDBLOCK}) {
       # non-blocking connection is still trying to connect
       if (time > $self->connectStartTime + CONNECTION_TIMEOUT) {
-	Debug("connection timed out: " . $self->id);
+	Debug("connection timed out: " . $self->host . ':' . $self->port, 'net');
 	$self->disconnected(1);
       }
     } elsif($!) {
       # some other error, signaling the connect actually failed
-      Debug("failed to connect: $!");
+      Debug("failed to connect (" . $self->host . ':' . $self->port . "): $!", 'net');
       $self->disconnected(1);
     }
 

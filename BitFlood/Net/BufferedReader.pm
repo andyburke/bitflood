@@ -16,7 +16,10 @@ __PACKAGE__->mk_accessors(qw(buffer socket windowSize));
 
 use constant MAX_SOCKET_WINDOW => 256 * 1024;
 use constant MIN_SOCKET_WINDOW => 512;
-
+use constant DEFAULT_SOCKET_WINDOW => MIN_SOCKET_WINDOW + ((MAX_SOCKET_WINDOW - MIN_SOCKET_WINDOW) / 2);
+#use constant MAX_SOCKET_WINDOW => 4 * 1024;
+#use constant MIN_SOCKET_WINDOW => 4 * 1024;
+#use constant DEFAULT_SOCKET_WINDOW => 4 * 1024;
 
 sub new {
   my $class = shift;
@@ -36,9 +39,8 @@ sub new {
   }
 
   if(!$self->windowSize) {
-    my $defaultWindowSize = MIN_SOCKET_WINDOW + ((MAX_SOCKET_WINDOW - MIN_SOCKET_WINDOW) / 2);
-    Debug("No windowSize specified, setting to: $defaultWindowSize");
-    $self->windowSize($defaultWindowSize);
+    Debug("No windowSize specified, setting to: " . DEFAULT_SOCKET_WINDOW, 'net');
+    $self->windowSize(DEFAULT_SOCKET_WINDOW);
   }
 
   return $self;
@@ -49,7 +51,7 @@ sub Read {
 
   Debug(">>>", 10);
 
-  Debug("read window: " . $self->windowSize, 50);
+  Debug("read window (" . $self->socket->peerhost . ':' . $self->socket->peerport . "): " . $self->windowSize, 'net', 50);
 
   my $data;
   my $readStartTime = time();
@@ -57,26 +59,25 @@ sub Read {
   my $transferTime = time() - $readStartTime;
   if (!defined $bytesRead) {
     if ($! == EWOULDBLOCK) {
-      Debug("would block", 50);
+      Debug("would block", 'net', 50);
       Debug("<<<", 10);
       return -1;
     } else {
-      Debug("unexpected socket error: $! (" . ($!+0) . ")");
+      Debug("unexpected socket error: $! (" . ($!+0) . ")", 'net');
       Debug("<<<", 10);
       return 0;
     }
   }
-
-  Debug("read data: $data", 50);
 
   if (!length($data)) { # remote end disconnected
     Debug("<<<", 10);
     return 0;
   }
 
-  Debug("before: " . ${$self->buffer} . "/" . $self->buffer, 50);
   ${$self->buffer} .= $data;
-  Debug("after: " . ${$self->buffer} . "/" . $self->buffer, 50);
+
+  Debug("read data: $data", 'net', 100);
+  Debug(length(${$self->buffer}) . " bytes in buffer", 'net', 50);
 
   return $bytesRead;
   Debug("<<<", 10);
