@@ -236,14 +236,19 @@ sub floods_ChunksDisplay_Paint {
   $DC->Rectangle(0, 0, $width, $height);
 
   my ($selected) = $mainWindow->floods_FloodsListView->SelectedItems();
-  return if(!defined($selected));
+  if(!defined($selected)) {
+    $mainWindow->floods_ChunksDisplay->Show();
+    $DC->Validate();
+    return;
+  }
 
   my @floods = values(%{$client->floods});
   my $flood = $floods[$selected];
 
   my @fileChunkMaps;
   my $numChunks = 0;
-  foreach my $file (values(%{$flood->Files})) {
+  foreach my $filename (sort(keys(%{$flood->Files}))) {
+    my $file = $flood->Files->{$filename};
     $numChunks += $file->{chunkMap}->Size();
     push(@fileChunkMaps, $file->{chunkMap});
   }
