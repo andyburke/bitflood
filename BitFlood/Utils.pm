@@ -6,7 +6,7 @@ require Exporter;
 @EXPORT = qw(&CleanFilename &LocalFilename &GetLocalPathFromFilename
 	     &Popdir
              &Stringify
-             &ReadableTimeDelta);
+             &ReadableTimeDelta &ReadableSize);
 
 use strict;
 
@@ -90,6 +90,26 @@ sub ReadableTimeDelta {
 
   return "$hours:$minutes:$seconds";
 }
- 
+
+sub ReadableSize {
+  my $size = shift;
+
+  if(int($size / (1024 * 1024 * 1024))) # gigabytes
+  {
+    return sprintf("%.2f GB", $size / (1024 * 1024 * 1024));
+  }
+  elsif(int($size / (1024 * 1024))) # megabytes
+  {
+    return sprintf("%.2f MB", $size / (1024 * 1024));
+  }
+  elsif(int($size / 1024)) # kilobytes
+  {
+    return sprintf("%.2f KB", $size / 1024);
+  }
+  else # bytes
+  {
+    return sprintf("%d B", $size);
+  }
+} 
 
 1;
