@@ -166,11 +166,11 @@ sub UpdatePeerList {
 	    }
 	    push(@{$self->peers}, $peer);
 	  }
-	  $peer->floods->{$flood->contentHash} = $flood;
 	  #Debug("content hash: ".$flood->contentHash);
 	  #Debug($peer->registered);
 	  if (!$peer->registered->{$flood->contentHash}) {
 	    # FIXME refactor into a method in Peer?
+	    $peer->floods->{$flood->contentHash} = $flood;
 	    $peer->SendMessage('Register', $flood, $self->id);
 	    $peer->SendMessage('RequestChunkMaps', $flood);
 	    $peer->registered->{$flood->contentHash} = 1;

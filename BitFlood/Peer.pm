@@ -19,14 +19,27 @@ use BitFlood::Debug;
 use BitFlood::Logger;
 use BitFlood::Logger::Multi;
 use BitFlood::Logger::File;
+use BitFlood::Net::BufferedReader;
+use BitFlood::Net::BufferedWriter;
 
-use constant MAX_SOCKET_WINDOW => 256 * 1024;
-use constant MIN_SOCKET_WINDOW => 512;
 
-__PACKAGE__->mk_accessors(qw(id host port floods chunkMaps registered
-			     socket select disconnected client
-                             readBuffer writeBuffer
-			     socketReadWindow socketWriteWindow));
+__PACKAGE__->mk_accessors(qw(
+                             id
+                             host
+                             port
+                             floods
+                             chunkMaps
+                             registered
+			     socket
+                             disconnected
+                             client
+                             readBuffer
+                             writeBuffer
+                             bufferedReader
+                             bufferedWriter
+                            )
+                         );
+
 
 
 sub new {
@@ -35,6 +48,13 @@ sub new {
   Debug("Creating new Peer...", 5);
   my $self = $class->SUPER::new(@_);
 
+  $self->readBuffer('');
+  $self->writeBuffer('');
+
+  $self->floods({});
+  $self->chunkMaps({});
+  $self->registered({});
+
   $self->client or die("Client object not specified");
 
   $self->port(10101) if(!defined($self->port));
@@ -42,16 +62,11 @@ sub new {
   if ($self->socket) {
     $self->socket->blocking(0)
       or die ("This system does not support O_NONBLOCK!");
+    
+    Debug("giving ref to: " . \$self->{readBuffer}, 50);
+    $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
+    $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
   }
-  #$self->select(IO::Select->new);
-  #$self->UpdateSelect if defined $self->socket;
-
-  $self->socketReadWindow(MAX_SOCKET_WINDOW);
-  $self->socketWriteWindow(MIN_SOCKET_WINDOW);
-  $self->readBuffer('');
-  $self->floods({});
-  $self->chunkMaps({});
-  $self->registered({});
 
   return $self;
 }
@@ -93,6 +108,9 @@ sub Connect {
     $self->disconnected(1);
     return undef;
   }
+
+  $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
+  $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
   
   Debug("connected to peer", 10);
   return 1;
@@ -376,6 +394,8 @@ sub LoopOnce {
   $self->ReadOnce;
   $self->WriteOnce;
 
+  $self->ProcessReadBuffer;
+
   Debug("<<<", 10);
 }
 
@@ -385,180 +405,93 @@ sub ReadOnce {
 
   Debug(">>>", 10);
 
+  if(!defined($self->bufferedReader)) {
+    Debug("No buffered reader object...");
+    return;
+  }
+
   if ($self->disconnected) {
     Debug("previously disconnected");
     Debug("<<<", 10);
     return;
   }
 
-  #Debug($self->select->handles, 60);
+  Debug("readBuffer address before read: " . \$self->readBuffer, 50);
+  my $result = $self->bufferedReader->Read();
+  Debug("readBuffer address after read: " . \$self->readBuffer, 50);
 
-  if (
-#$self->select->can_read(0)
-1) {
-    my ($currentMessage, $remainder);
-    Debug("can indeed read", 50);
-
-    #die "ReadOnce: socket exception: $!" if $self->select->has_exception(0);
-
-    Debug("read window: " . $self->socketReadWindow, 50);
-    my $readStartTime = time();
-    my $remainderLength = $self->socket->sysread($remainder, $self->socketReadWindow);
-    my $transferTime = time() - $readStartTime;
-    if (!defined $remainderLength) {
-      if ($! == EAGAIN) {
-	Debug("would block", 50);
-	return;
-      } else {
-	Debug("unexpected socket error: $!");
-	$self->disconnected(1);
-	return;
-      }
-    }
-    Debug("read data", 50);
-    if ($remainder eq '') {
-      Debug("remote end disconnected: ".$self->host.':'.$self->port, 10);
-      $self->disconnected(1);
-      Debug("<<<", 10);
-      return;
-    }
-
-#    Debug(sprintf("TDBR: %3e %3e %d %3e",
-#		  $transferTime,
-#		  $self->client->desiredPeerLoopDuration/2,
-#		  $remainderLength,
-#		  $remainderLength / $transferTime));
-	  
-#    if($transferTime > $self->client->desiredPeerLoopDuration / 2) {
-#      if($self->socketReadWindow > MIN_SOCKET_WINDOW) { # need time to read AND write, so halve
-#	$self->socketReadWindow($self->socketReadWindow / 2);
-#	Debug("decreased window: " . $self->socketReadWindow(), 10);
-#      }
-#    } elsif($self->socketReadWindow < MAX_SOCKET_WINDOW) { # FIXME: avoid hysterisis
-#      $self->socketReadWindow($self->socketReadWindow * 2);
-#      Debug("increased window: " . $self->socketReadWindow(), 10);
-#    }
-
-#    Debug("read time: $transferTime");
-    do {
-      Debug("remainder: ($remainderLength) $remainder", 50);
-      ($currentMessage, $remainder) = split("\n", $remainder, 2);
-      Debug("  currentMessage: $currentMessage", 50);
-      Debug("  remainder:      $remainder", 50);
-      if (length($currentMessage) < $remainderLength) {
-	Debug("end of message detected", 50);
-	$currentMessage = $self->readBuffer . $currentMessage;
-	Debug("entire message: $currentMessage", 50);
-	$self->DispatchRequests($currentMessage);
-	$self->readBuffer('');
-      } else {
-	Debug("continuing message with: $currentMessage", 50);
-	$self->readBuffer($self->readBuffer . $currentMessage);
-      }
-      $remainderLength = length($remainder);
-    } while ($remainderLength);
-
-  } else {
-    Debug("no data to read, currently", 50);
+  if ($result == EAGAIN) {
+    Debug("Would block...", 50);
+    return;
+  } elsif(!$result) {
+    Debug("read error, disconnecting peer: " . $self->id);
+    $self->disconnected(1);
+    return;
   }
 
-  Debug("<<<", 10);
 }
-
 
 sub WriteOnce {
   my $self = shift;
 
   Debug(">>>", 10);
 
+  if(!length($self->writeBuffer)) {
+    Debug("nothing to write...", 50);
+    Debug("<<<", 10);
+    return;
+  }
+
+  if(!defined($self->bufferedWriter)) {
+    Debug("No buffered writer...");
+    Debug("<<<", 10);
+    return;
+  }
+
   if ($self->disconnected) {
     Debug("previously disconnected");
     Debug("<<<", 10);
     return;
   }
 
-  if (
-#$self->select->can_write(0) and 
-length($self->writeBuffer)) {
-    # FIXME maybe need to hit the hash directly to avoid string copies
+  my $result = $self->bufferedWriter->Write();
 
-    #die "WriteOnce: socket exception: $!" if $self->select->has_exception(0);
-
-    ###my $remainder = $self->writeBuffer;
-    ###Debug(length($remainder) . " bytes to write", 50);
-    ###my $currentMessage = substr($remainder, 0, $self->socketWriteWindow, '');
-    ###Debug("currentMessage: $currentMessage", 50);
-
-    Debug("write window: " . $self->socketWriteWindow, 50);
-    # FIXME look into local ( $SIG{PIPE} ) ?
-    my $transferStartTime = time();
-    my $bytesWritten = $self->socket->syswrite($self->writeBuffer, $self->socketWriteWindow);
-    my $transferTime = time() - $transferStartTime;
-    if (!defined $bytesWritten) {
-      if ($! == EAGAIN) {
-	Debug("would block", 50);
-	return;
-      } else {
-	Debug("unexpected socket error: $!");
-	$self->disconnected(1);
-	return;
-      }
-    }
-
-#    Debug(sprintf("TDBR: %3e %3e %d %3e",
-#		  $transferTime,
-#		  $self->client->desiredPeerLoopDuration/2,
-#		  $bytesWritten,
-#		  $bytesWritten / $transferTime));
-
-    my $remainder = $self->writeBuffer;
-    Debug("$bytesWritten bytes written", 50);
-    substr($remainder, 0, $bytesWritten, '');
-    $self->writeBuffer($remainder);
-    Debug(length($remainder) . " bytes remain", 50);
-
-#    Debug("write time: $transferTime");
-#    Debug("desired transfer duration: ".$self->client->desiredPeerLoopDuration/2);
-    if($transferTime > $self->client->desiredPeerLoopDuration) {
-      if($self->socketWriteWindow > MIN_SOCKET_WINDOW) { # need time to read AND write, so halve
-	$self->socketWriteWindow($self->socketWriteWindow / 2);
-	Debug("decreased window: " . $self->socketWriteWindow(), 10);
-      }
-    } elsif($self->socketWriteWindow < MAX_SOCKET_WINDOW) { # FIXME: avoid hysterisis
-      $self->socketWriteWindow($self->socketWriteWindow * 2);
-      Debug("increased window: " . $self->socketWriteWindow(), 10);
-    }
-
+  if ($result == EAGAIN) {
+    Debug("Would block...", 50);
+    return;
+  } elsif(!$result) {
+    Debug("write error, disconnecting peer: " . $self->id);
+    $self->disconnected(1);
+    return;
   }
 
   Debug("<<<", 10);
 }
 
-
-sub UpdateSelect {
+sub ProcessReadBuffer {
   my $self = shift;
 
-  $self->select->remove($self->select->handles);
-  Debug("Adding to select handles: " . $self->socket, 60);
-  $self->select->add($self->socket);
+  Debug(">>>", 10);
+
+  my $currentMessage;
+  my $remainder;
+
+  Debug("address: " . \$self->readBuffer, 50);
+  Debug("buffer: " . $self->readBuffer, 50);
+
+  do {
+    ($currentMessage, $remainder) = split("\n", $self->readBuffer, 2);
+    Debug("  currentMessage: $currentMessage", 50);
+    Debug("  remainder:      $remainder", 50);
+    if (length($currentMessage) < length($self->readBuffer)) {
+      Debug("end of message detected", 50);
+      $self->DispatchRequests($currentMessage);
+      substr($self->{readBuffer}, 0, length($currentMessage) + 1, ''); #eat off message + \n we just worked on
+    }
+  } while (length($remainder));
+
+  Debug("<<<", 10);
 }
-
-
-=pod
-
-sub socket {
-  my $self = shift;
-
-  my $socket = $self->_socket_accessor(@_);
-  if (@_) {
-    $self->UpdateSelect;
-  }
-
-  return $socket;
-}
-
-=cut
-
 
 sub disconnected {
   my $self = shift;
