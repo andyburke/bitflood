@@ -11,7 +11,7 @@ import org.w3c.dom.*;
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
 import org.apache.xml.serialize.*;
 
-import sun.misc.BASE64Encoder;
+import sdk.Base64.*;
 
 /**
  * @author burke
@@ -44,10 +44,21 @@ public class Encoder
     DocumentBuilderFactory docBuilderFactory = null;
     DocumentBuilder docBuilder = null;
     Document document = null;
-		
+    
     Element root;
     Element fileInfo;
     Element item;
+    
+    // for doing the sha1's of our chunks
+    MessageDigest sha1Encoder = null;
+    try
+		{
+    	sha1Encoder = MessageDigest.getInstance("SHA-1");
+    } 
+    catch (Exception e) 
+		{ 
+    	System.out.println(e.toString());
+		}
 		
     // set up the objects we need to encode the flood data to XML
     try 
@@ -210,7 +221,7 @@ public class Encoder
         }
 	      
         byte[] chunkData = new byte[chunkSize];
-	      
+
         int chunkIndex = 0;
         int offset = 0;
         int bytesRead = 0;
@@ -232,23 +243,19 @@ public class Encoder
             break;
           }
 	      	
-          BASE64Encoder base64Encoder = new BASE64Encoder();
           byte[] digest = null;
-	      	
+
           // sha1 the chunk
           Element chunk = document.createElement("Chunk");
-          try 
-          {
-            MessageDigest messagedigest = MessageDigest.getInstance("SHA-1");
-            messagedigest.update(chunkData);
-            digest = messagedigest.digest();
-          } 
-          catch (Exception e) 
-          { 
-            System.out.println(e.toString());
-          }
 
-          chunk.setAttribute("hash", base64Encoder.encode(digest));
+          sha1Encoder.reset();
+          sha1Encoder.update(chunkData, 0, bytesRead);
+          digest = sha1Encoder.digest();
+
+          // NOTE: base64 encoded sha1s are always 27 chars
+          String chunkHash = Base64.encodeToString(digest, false).substring(0, 27);
+          
+          chunk.setAttribute("hash", chunkHash);
           chunk.setAttribute("index", Integer.toString(chunkIndex++));
           chunk.setAttribute("size", Integer.toString(bytesRead));
           chunk.setAttribute("weight", Integer.toString(weight));
