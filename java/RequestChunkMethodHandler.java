@@ -56,7 +56,7 @@ public class RequestChunkMethodHandler implements MethodHandler
     }
 
     FloodFile.Chunk targetChunk = (FloodFile.Chunk) targetFile.chunks.get( chunkIndex.intValue() );
-    int chunkOffset = runtimeTargetFile.chunkOffsets[chunkIndex.intValue()];
+    long chunkOffset = runtimeTargetFile.chunkOffsets[chunkIndex.intValue()];
 
     InputStream inputFileStream = null;
     try
