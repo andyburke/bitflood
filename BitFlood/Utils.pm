@@ -29,9 +29,9 @@ sub LocalFilename {
 }
 
 sub GetLocalPathFromFilename {
-  my ($volume, $dirs, $filename) = File::Spec->splitpath(shift, 0);
+  my ($volume, $dirs, $filename) = File::Spec->splitpath(File::Spec->canonpath(shift), 0);
   my @directories = File::Spec->splitdir($dirs);
-  return File::Spec->catpath($volume, @directories);
+  return File::Spec->catfile($volume, @directories);
 }
  
 ## pop a directory off of the given path...

@@ -52,6 +52,8 @@ sub new {
         push(@{$self->filehashClientList->{$filehash}}, $peer);
       }
       $peer->{timestamp} = time();
+      $peer->{ip} = $ip;
+      $peer->{port} = $port;
     },
       
   });

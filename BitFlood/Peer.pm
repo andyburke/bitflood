@@ -366,6 +366,7 @@ sub HandleSendChunk {
     $file->{chunkMap}->Bit_On($index);
     $file->{downloadBytes} += $chunk->{size};
     $flood->downloadBytes($flood->downloadBytes + $chunk->{size});
+    $flood->sessionDownloadBytes($flood->sessionDownloadBytes + $chunk->{size});
 
     foreach my $peer (grep { exists($_->floods->{$flood->contentHash}) } @{$self->client->peers}) {
       $peer->SendMessage(

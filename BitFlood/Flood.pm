@@ -18,7 +18,7 @@ use BitFlood::Utils;
 use BitFlood::Debug;
 
 __PACKAGE__->mk_accessors(qw(data filename contentHash localPath 
-                             trackers peers startTime totalBytes downloadBytes
+                             trackers peers sessionStartTime startTime totalBytes sessionDownloadBytes downloadBytes
                              neededChunksByWeight paused));
 
 
@@ -31,6 +31,7 @@ sub new {
   $self->peers([]);
   $self->totalBytes(0);
   $self->downloadBytes(0);
+  $self->sessionDownloadBytes(0);
   $self->neededChunksByWeight([]);
   $self->paused(0);
   
@@ -123,10 +124,13 @@ sub InitializeFiles {
     $self->totalBytes($self->totalBytes + $file->{Size});
     if(!-f $file->{localFilename})   # file doesn't exist, initialize it to 0
     {
-      print "Initializing target file: $file->{name}\n";
       my $path = GetLocalPathFromFilename($file->{localFilename});
       mkpath($path) if length($path);
-      my $outfile = IO::File->new($file->{localFilename}, 'w');
+      my $outfile = IO::File->new("$file->{localFilename}", 'w');
+      if(!$outfile) {
+	Debug("Could not open output file: $file->{localFilename} ($!)");
+	next;
+      }
       if($file->{size} > 0) {
         $outfile->seek($file->{size}-1, 0);
         $outfile->syswrite(0, 1);
@@ -139,6 +143,10 @@ sub InitializeFiles {
     else # file DOES exist, we need to decide what we need to get...
     {
       my $outfile = IO::File->new($file->{localFilename}, 'r');
+      if(!$outfile) {
+	Debug("Could not open output file: $file->{localFilename} ($!)");
+	next;
+      }
       my $buffer;
       my $totalChunks = scalar(@{$file->{Chunk}});
       my $validChunkCount = 0;

@@ -51,23 +51,7 @@ sub new {
   $self->localIp($ENV{BITFLOOD_LOCAL_IP} || inet_ntoa(scalar gethostbyname(hostname())));
   $self->desiredPeerLoopDuration(.1);
 
-  my @portList = $self->port ?
-    ($self->port) : (DEFAULT_LISTEN_PORT .. DEFAULT_LISTEN_PORT + 10);
-  foreach my $port (@portList) {
-    $self->port($port);
-    $self->socket(IO::Socket::INET->new(
-					Listen    => 5,
-					LocalPort => $self->port,
-					Proto     => 'tcp',
-					Reuse     => 1,
-				       ));
-    last if $self->socket;
-  }
-  die("Could not start listening!") if(!$self->socket);
-  if ($self->port != $portList[0]) {
-    Debug("probed port number: " . $self->port);
-  }
-  print "Started listening on " . $self->localIp . ":" . $self->port . "\n";
+  $self->OpenListenSocket();
 
   $self->id(sha1_base64($self->localIp . $self->port));
 
@@ -82,6 +66,29 @@ sub new {
   return $self;
 }
 
+sub OpenListenSocket {
+  my $self = shift;
+
+  my @portList = $self->port ?
+      ($self->port) : (DEFAULT_LISTEN_PORT .. DEFAULT_LISTEN_PORT + 10);
+  foreach my $port (@portList) {
+    $self->port($port);
+    $self->socket(IO::Socket::INET->new(
+					Listen    => 5,
+					LocalPort => $self->port,
+					Proto     => 'tcp',
+					Reuse     => 1,
+					));
+    last if $self->socket;
+  }
+  die("Could not start listening!") if(!$self->socket);
+
+  if ($self->port != $portList[0]) {
+    Debug("probed port number: " . $self->port);
+  }
+  print "Started listening on " . $self->localIp . "(external) :" . $self->port . "\n";
+
+}
 
 # FIXME eventually remove actual RPC calls from here, maybe push
 # outbound events on a queue or something?
@@ -111,6 +118,7 @@ sub GetChunks {
   
   foreach my $flood (values %{$self->floods}) {
     $flood->startTime(time()) if(!defined($flood->startTime));
+    $flood->sessionStartTime(time()) if(!defined($flood->sessionStartTime));
     my ($peer, $file, $chunk) = $self->chunkPrioritizer->FindChunk($self, $flood);
     #Debug([$peer ? $peer->id : "undef", $file ? $file->{name} : "undef" , $chunk ? $chunk->{index} : "undef"]);
 
