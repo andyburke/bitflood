@@ -9,63 +9,66 @@ import java.net.*;
 
 /**
  * @author burke
- *
+ *  
  */
-public class Peer 
+public class Peer
 {
-  private Vector           pendingpeers               = null;
-  private Hashtable        floods                     = null;
+  private Vector              pendingpeers         = null;
 
-  private ServerSocketChannel listenSocketChannel   = null;
-  private Selector            listenSocketSelector  = null;
+  private Hashtable           floods               = null;
 
-  public String             hostname                  = "";
-  public int                port                      = 0;
+  private ServerSocketChannel listenSocketChannel  = null;
+
+  private Selector            listenSocketSelector = null;
+
+  public String               hostname             = "";
+
+  public int                  port                 = 0;
 
   public Peer()
   {
   }
-    
-  public Peer( String localHost, int localPort ) 
+
+  public Peer(String localHost, int localPort)
   {
     hostname = localHost;
     port = localPort;
     SetupListenSocket();
-    
+
     pendingpeers = new Vector();
     floods = new Hashtable();
   }
-  
-  public boolean JoinFlood(String floodFilename) 
+
+  public boolean JoinFlood( String floodFilename )
   {
-    Flood floodToJoin = new Flood(floodFilename);
-    if(floodToJoin.Id() != null)
+    Flood floodToJoin = new Flood( floodFilename );
+    if ( floodToJoin.Id() != null )
     {
-      floods.put(floodToJoin.Id(), floodToJoin);
+      floods.put( floodToJoin.Id(), floodToJoin );
       return true;
     }
     return false;
   }
-  
+
   public void LoopOnce()
   {
     if ( floods != null )
     {
       Collection floodsToProcess = floods.values();
       Iterator floodIter = floodsToProcess.iterator();
-      while(floodIter.hasNext())
+      while ( floodIter.hasNext() )
       {
-        Flood flood = (Flood)floodIter.next();
+        Flood flood = (Flood) floodIter.next();
         flood.LoopOnce();
       }
     }
 
-    if( pendingpeers != null )
+    if ( pendingpeers != null )
     {
       Enumeration peeriter = pendingpeers.elements();
-      for ( ; peeriter.hasMoreElements() ; )
+      for ( ; peeriter.hasMoreElements(); )
       {
-        PeerConnection peer = (PeerConnection)peeriter.nextElement();
+        PeerConnection peer = (PeerConnection) peeriter.nextElement();
         peer.LoopOnce();
       }
     }
@@ -78,22 +81,22 @@ public class Peer
       }
       catch ( Exception e )
       {
-        System.out.println("Error selecing from listenSocketSelector: " + e );
+        System.out.println( "Error selecing from listenSocketSelector: " + e );
       }
 
       // if the socket can accept, test for an incoming connection
       // Get list of selection keys with pending events
       Iterator it = listenSocketSelector.selectedKeys().iterator();
-      while( it.hasNext() )
+      while ( it.hasNext() )
       {
         // Get the selection key
-        SelectionKey selKey = (SelectionKey)it.next();
-    
+        SelectionKey selKey = (SelectionKey) it.next();
+
         // Remove it from the list to indicate that it is being processed
         it.remove();
-    
+
         // Check if it's a connection request
-        if (selKey.isAcceptable()) 
+        if ( selKey.isAcceptable() )
         {
           int tmp = listenSocketChannel.socket().getLocalPort();
           SocketChannel incomingSocket = null;
@@ -103,10 +106,12 @@ public class Peer
           }
           catch ( Exception e )
           {
-            System.out.println("Error accepting connection from listenSocketChannel: " + e );
+            System.out
+                .println( "Error accepting connection from listenSocketChannel: "
+                    + e );
           }
-          
-          if( incomingSocket != null )
+
+          if ( incomingSocket != null )
           {
             PeerConnection incomingPeer = new PeerConnection( incomingSocket );
             pendingpeers.add( incomingPeer );
@@ -124,16 +129,16 @@ public class Peer
     }
     catch ( Exception e )
     {
-      System.out.println("Error making listen socket: " + e );
+      System.out.println( "Error making listen socket: " + e );
     }
-    
+
     try
     {
-      listenSocketChannel.configureBlocking(false);
+      listenSocketChannel.configureBlocking( false );
     }
     catch ( Exception e )
     {
-      System.out.println("Error setting listen socket non-blocking: " + e );
+      System.out.println( "Error setting listen socket non-blocking: " + e );
     }
 
     try
@@ -142,7 +147,7 @@ public class Peer
     }
     catch ( Exception e )
     {
-      System.out.println("Error binding to address: " + e );
+      System.out.println( "Error binding to address: " + e );
     }
 
     try
@@ -151,7 +156,7 @@ public class Peer
     }
     catch ( Exception e )
     {
-      System.out.println("Error setting resuse address: " + e );
+      System.out.println( "Error setting resuse address: " + e );
     }
 
     try
@@ -160,16 +165,17 @@ public class Peer
     }
     catch ( Exception e )
     {
-      System.out.println("Error making the listen selector: " + e );
+      System.out.println( "Error making the listen selector: " + e );
     }
-    
+
     try
     {
-      listenSocketChannel.register(listenSocketSelector, SelectionKey.OP_ACCEPT);
+      listenSocketChannel.register( listenSocketSelector,
+          SelectionKey.OP_ACCEPT );
     }
     catch ( Exception e )
     {
-      System.out.println("Error registering listen socket selector: " + e );
+      System.out.println( "Error registering listen socket selector: " + e );
     }
   }
 }

@@ -5,35 +5,35 @@
 
 /**
  * @author burke
- *
+ *  
  */
-public class ClientTest 
+public class ClientTest
 {
-  public static void main(String argv[]) 
+  public static void main( String argv[] )
   {
     String floodFilename = "";
     String localIP = "localhost";
     int localPort = 10101;
 
-    for(int i = 0; i < argv.length; i++) 
+    for ( int i = 0; i < argv.length; i++ )
     {
-      if(argv[i].compareToIgnoreCase("-flood") == 0)
+      if ( argv[i].compareToIgnoreCase( "-flood" ) == 0 )
       {
-        if(floodFilename.length() == 0)
+        if ( floodFilename.length() == 0 )
         {
           floodFilename = argv[++i];
         }
         else
         {
-          System.out.println("Attempted to specify multiple flood files!");
+          System.out.println( "Attempted to specify multiple flood files!" );
           Usage();
         }
       }
-      else if(argv[i].compareToIgnoreCase("-localIP") == 0)
+      else if ( argv[i].compareToIgnoreCase( "-localIP" ) == 0 )
       {
         localIP = argv[++i];
       }
-      else if(argv[i].compareToIgnoreCase("-localPort") == 0)
+      else if ( argv[i].compareToIgnoreCase( "-localPort" ) == 0 )
       {
         localPort = Integer.parseInt( argv[++i] );
       }
@@ -41,23 +41,23 @@ public class ClientTest
 
     try
     {
-      java.net.InetAddress localMachine = java.net.InetAddress.getByName( localIP );	
+      java.net.InetAddress localMachine = java.net.InetAddress
+          .getByName( localIP );
       localIP = localMachine.getHostAddress();
     }
-    catch(java.net.UnknownHostException uhe)
+    catch ( java.net.UnknownHostException uhe )
     {
       //handle exception
-    } 
-    
+    }
 
     if ( floodFilename.length() == 0 )
     {
       Usage();
     }
-		
-    System.out.println("flood filename: " + floodFilename);
-    System.out.println("local ip      : " + localIP);
-    System.out.println("flood port    : " + localPort);
+
+    System.out.println( "flood filename: " + floodFilename );
+    System.out.println( "local ip      : " + localIP );
+    System.out.println( "flood port    : " + localPort );
 
     Peer client = new Peer( localIP, localPort );
     client.JoinFlood( floodFilename );
@@ -76,11 +76,12 @@ public class ClientTest
       }
     }
   }
-  
-  public static void Usage() 
+
+  public static void Usage()
   {
-    System.out.println("Usage:");
-    System.out.println("ClientTest -flood <flood filename> [-localIP <localIP>] [-localPort <localPort>]");
-    System.exit(0);
+    System.out.println( "Usage:" );
+    System.out
+        .println( "ClientTest -flood <flood filename> [-localIP <localIP>] [-localPort <localPort>]" );
+    System.exit( 0 );
   }
 }

@@ -7,43 +7,46 @@ import java.util.*;
 
 /**
  * @author burke
- *
+ *  
  */
-public class Flood 
+public class Flood
 {
   private Vector    peers             = null;
+
   private FloodFile floodFile         = null;
+
   private Date      lastTrackerUpdate = null;
-  
+
   public Flood()
   {
     peers = new Vector();
   }
-  
+
   public Flood(String floodFilename)
   {
-    floodFile = new FloodFile(floodFilename);	
+    floodFile = new FloodFile( floodFilename );
   }
-  
+
   public String Id()
   {
     return floodFile.contentHash;
   }
-  
+
   public void LoopOnce()
   {
-    if( peers != null )
+    if ( peers != null )
     {
       Enumeration peeriter = peers.elements();
-      for ( ; peeriter.hasMoreElements() ; )
+      for ( ; peeriter.hasMoreElements(); )
       {
-        PeerConnection peer = (PeerConnection)peeriter.nextElement();
+        PeerConnection peer = (PeerConnection) peeriter.nextElement();
         peer.LoopOnce();
       }
     }
-    
+
     Date now = new Date();
-    if ( lastTrackerUpdate == null || ( now.getTime() - lastTrackerUpdate.getTime() >= 20 ) )
+    if ( lastTrackerUpdate == null
+        || ( now.getTime() - lastTrackerUpdate.getTime() >= 20 ) )
     {
       UpdateTrackers();
       lastTrackerUpdate = new Date();
@@ -52,5 +55,8 @@ public class Flood
 
   protected void UpdateTrackers()
   {
+    if ( floodFile != null )
+    {
+    }
   }
 }
