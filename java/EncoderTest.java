@@ -2,6 +2,8 @@
  * Created on Nov 15, 2004
  *
  */
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * @author burke
@@ -13,12 +15,9 @@ public class EncoderTest
   {
     String floodFilename = "";
     String weightingFunction = "";
-    String[] trackers = new String[10];
-    String[] filesToAdd = new String[10];
+    Vector trackers = new Vector();
+    Vector filesToAdd = new Vector();
     int chunkSize = 256 * 1024;
-
-    int numTrackers = 0;
-    int numFilesToAdd = 0;
 
     for ( int i = 0; i < argv.length; i++ )
     {
@@ -37,14 +36,7 @@ public class EncoderTest
       }
       else if ( argv[i].compareToIgnoreCase( "-tracker" ) == 0 )
       {
-        if ( numTrackers > trackers.length )
-        {
-          int newSize = 2 * trackers.length;
-          String[] tempTrackers = new String[newSize];
-          System.arraycopy( trackers, 0, tempTrackers, 0, trackers.length );
-          trackers = tempTrackers;
-        }
-        trackers[numTrackers++] = argv[++i];
+        trackers.add( argv[++i] );
       }
       else if ( argv[i].compareToIgnoreCase( "-chunksize" ) == 0 )
       {
@@ -56,61 +48,50 @@ public class EncoderTest
       }
       else
       {
-        if ( numFilesToAdd > filesToAdd.length )
-        {
-          int newSize = 2 * filesToAdd.length;
-          String[] tempFilesToAdd = new String[newSize];
-          System.arraycopy( filesToAdd, 0, tempFilesToAdd, 0, filesToAdd.length );
-          filesToAdd = tempFilesToAdd;
-        }
-        filesToAdd[numFilesToAdd++] = argv[i];
+        filesToAdd.add( argv[i] );
       }
     }
 
-    if ( numTrackers == 0 )
+    if ( trackers.size() == 0 )
     {
       System.out.println( "No trackers specified!" );
       Usage();
       System.exit( 0 );
     }
 
-    if ( numFilesToAdd == 0 )
+    if ( filesToAdd.size() == 0 )
     {
       System.out.println( "No files specified for flood!" );
       Usage();
       System.exit( 0 );
     }
 
-    FloodFile floodFile = new FloodFile( floodFilename, chunkSize, trackers );
+    FloodFile floodFile = new FloodFile( floodFilename, chunkSize );
 
     System.out.println( "flood filename: " + floodFilename );
     System.out.println( "weighting function: " + weightingFunction );
-    for ( int i = 0; i < trackers.length; i++ )
+   
+    Enumeration trackeriter = trackers.elements();
+    for ( ; trackeriter.hasMoreElements(); )
     {
-      if ( trackers[i] == null )
+      String tracker = (String)trackeriter.nextElement();
+      System.out.println( "adding tracker: " + tracker );
+      if ( !floodFile.AddTracker( tracker ) )
       {
-        break;
-      }
-      if ( trackers[i].length() > 0 )
-      {
-        System.out.println( "tracker: " + trackers[i] );
+        System.out.println( "error adding tracker: " + tracker );
+        System.exit( 0 );
       }
     }
-
-    for ( int i = 0; i < filesToAdd.length; i++ )
+    
+    Enumeration fileiter = filesToAdd.elements();
+    for ( ; fileiter.hasMoreElements(); )
     {
-      if ( filesToAdd[i] == null )
+      String file = (String)fileiter.nextElement();
+      System.out.println( "adding file: " + file );
+      if ( !floodFile.Add( file ) )
       {
-        break;
-      }
-      if ( filesToAdd[i].length() > 0 )
-      {
-        System.out.println( "adding file: " + filesToAdd[i] );
-        if ( !floodFile.Add( filesToAdd[i] ) )
-        {
-          System.out.println( "error adding file: " + filesToAdd[i] );
-          System.exit( 0 );
-        }
+        System.out.println( "error adding file: " + file );
+        System.exit( 0 );
       }
     }
 
