@@ -131,20 +131,15 @@ sub Connect {
   my $connected = $select->can_write(0);
   Debug("checking for completed connection (" . $self->host . "): $connected [error: $! (" . ($!+0) . ")]", 25);
 
-  if ($!{ENOTCONN}) {
-    $connected = 0;
-    # force "error slippage" to get the real error (credit DJB)
-    $self->socket->sysread(undef, 1);
-  }
-
   if ($connected) {
 
     $self->connectCompleted(1);
-
     Debug("socket connected");
 
     $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
     $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
+
+    return 1;
     
   } else {
 
@@ -160,15 +155,9 @@ sub Connect {
       $self->disconnected(1);
     }
 
+    return 0;
+
   }
-
-  # note: if connected is true here, just return 0 anyway.  we'll do
-  # the finalization stuff the next time around.  this is required to
-  # support some systems (linux?) with weird configure()/connected()
-  # dynamics.
-
-  return 0;
-
 
 }
 
