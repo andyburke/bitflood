@@ -8,6 +8,9 @@ __PACKAGE__->mk_accessors(qw(filename filehandle append));
 use IO::File;
 use File::Spec;
 use File::Path;
+use POSIX qw(strftime);
+use Time::HiRes qw(time);
+
 
 sub new {
   my $class = shift;
@@ -16,7 +19,7 @@ sub new {
 
   my $self = $class->SUPER::new(\%args);
 
-  $self->filename($filename);
+  $self->filename(File::Spec->rel2abs($filename));
   $self->filehandle(new IO::File);
   $self->append(exists($args{append}) ? $args{append} : 1);
 
@@ -30,7 +33,13 @@ sub commit {
   my $string = shift;
 
   $self->open();
-  $self->filehandle->print(localtime() . ": $string\n");
+  my $time = time();
+  my $timeString = sprintf(
+			   '%s.%03d',
+			   strftime('%Y%m%d%H%M%S', localtime($time)),
+			   ($time - int($time)) * 1000
+			   );
+  $self->filehandle->print("$timeString: $string\n");
 }
 
 sub open {
@@ -40,7 +49,7 @@ sub open {
     my($volume, $directories, $file) = File::Spec->splitpath($self->filename);
     mkpath($volume . $directories);
     my $prefix = $self->append ? '>>' : '>';
-    $self->filehandle->open("${prefix}" . $self->filename) or die($!);
+    $self->filehandle->open($prefix . $self->filename) or die($!);
   }
 }
 
@@ -50,9 +59,5 @@ sub close {
   $self->filehandle->close() if $self->filehandle->opened();
 }
 
-sub DESTROY {
-  my $self = shift;
-  $self->close();
-}
 
 1;
