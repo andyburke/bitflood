@@ -59,7 +59,7 @@ public class ClientTest
     System.out.println("local ip      : " + localIP);
     System.out.println("flood port    : " + localPort);
 
-    Peer client = new Peer();
+    Peer client = new Peer( localIP, localPort );
     client.JoinFlood( floodFilename );
 
     boolean quit = false;

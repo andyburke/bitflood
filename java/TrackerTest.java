@@ -59,7 +59,7 @@ public class TrackerTest
     System.out.println("local ip      : " + localIP);
     System.out.println("flood port    : " + localPort);
 
-    Peer tracker = new Peer();
+    Peer tracker = new Peer( localIP, localPort );
     tracker.JoinFlood( floodFilename );
 
     boolean quit = false;
