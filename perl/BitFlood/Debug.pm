@@ -25,7 +25,7 @@ our $debugPid         = $ENV{BITFLOOD_DEBUG_PID};
 
 # '' is the default channel
 my $defaultDebugLevel = $ENV{BITFLOOD_DEBUG};
-foreach my $channel ('', split(',', $ENV{BITFLOOD_DEBUG_CHANNELS})) {
+foreach my $channel ('', split(',', $ENV{BITFLOOD_DEBUG_CHANNELS} || '')) {
   OpenChannel($channel);
   SetChannelLevel($channel, $defaultDebugLevel) if defined $defaultDebugLevel;
 }
@@ -69,7 +69,7 @@ sub OpenChannel {
     }
   } else {
     $loggerObject = BitFlood::Logger::Multi->new();
-  }    
+  }
 
   $loggers{$channel} = $loggerObject;
   return 1;

@@ -13,7 +13,7 @@ use strict;
 use File::Spec;
 use File::Spec::Unix;
 
-sub CleanFilename {
+sub CleanPath {
   # FIXME: windows compatible, asshole?
   my ($volume, $dirs, $filename) = File::Spec->splitpath(shift, 1);
   my @directories = File::Spec->splitdir($dirs);

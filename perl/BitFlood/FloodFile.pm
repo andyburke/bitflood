@@ -1,4 +1,4 @@
-package BitFlood::Encoder;
+package BitFlood::FloodFile;
 
 use strict;
 
@@ -9,44 +9,76 @@ use XML::Simple;
 use File::Find;
 
 use BitFlood::Utils;
+use BitFlood::Debug;
 
-sub new {
-  my $class = shift;
-  my %args = @_;
+__PACKAGE__->mk_accessors(qw(trackers files));
 
-  my $self = bless {}, $class;
-  $self->mk_accessors(qw(data filename chunkSize weightingFunction));
 
-  die "No filename specified!" if(!defined($args{filename}));
-  
-  $self->data({});
-  $self->data->{Tracker} = $args{tracker};
-  $self->filename($args{filename});
-  $self->chunkSize($args{chunkSize} || 2**18); # default to 256k
-  $self->weightingFunction($args{weightingFunction});
+sub initialize {
+  my $self = shift;
+  my $args = shift;
+
+  $self->SUPER::initialize;
+  # probably not useful to pass trackers/files to new() but we'll allow it
+  $self->trackers  or $self->trackers([]);
+  $self->files     or $self->files([]);
+  $self->chunkSize or $self->chunkSize(2**18); # default to 256k
 
   return $self;
 }
 
+
+sub AddFile {
+  my $self = shift;
+  my $localFilePath = shift;
+  my $targetFilePath = shift;
+
+  my $virtualTargetFile = BitFlood::VirtualTargetFile->new({floodFile => $self,
+                                                            localPath => $localFilePath,
+                                                            path      => CleanPath($targetFilePath)});
+  push(@{$self->files}, $virtualTargetFile);
+}
+
+
+sub AddDir {
+  my $self = shift;
+  my $localDirPath = shift;
+
+  my @path = File::Spec->splitdir($localDirPath);
+  my $baseDir = pop(@path);
+
+  my @localFilePaths;
+  find({ wanted  => sub { push(@localFilePaths, $File::Find::name) unless -d _ } }, $localDirPath);
+  foreach my $localFilePath (@localFilePaths) {
+    (my $targetFilePath = $localFilePath) =~ s/\Q$localDirPath\E/$baseDir/;
+    $self->AddFile($localFilePath, $targetFilePath);
+  }
+}
+
+
+sub ComputeContentHash {
+  my $self = shift;
+}
+
+
 sub encode {
   my $self = shift;
 
-  $self->filename([$self->filename]) if(!ref($self->filename)); # just a string, make it into an array
-  
   my @fileInfo;
-  foreach my $filename (@{$self->filename}) {
+  foreach my $filename (@{$self->filenames}) {
     $filename = LocalFilename($filename);
-    if(-f $filename)  # regular file
+    if (-f $filename)  # regular file
     {
       my (undef, $dirPart) = File::Spec->splitpath($filename, 1);
       my (@dirs) = File::Spec->splitdir($dirPart);
       my $cleanFilename = pop(@dirs);
       push(@fileInfo, { cleanFilename => CleanFilename($cleanFilename),
-                        fullFilename => $filename } );
+                        fullFilename  => $filename } );
     }
-    elsif(-d $filename) 
+    elsif (-d $filename)
     {
-      find({ wanted => sub {
+      find({ wanted =>
+             sub {
                return if(-d $_);
                my $fullFilename = $_;
                my $cleanFilename = $_;
@@ -63,14 +95,14 @@ sub encode {
   }
 
   my $startTime = time();
-  print "Encoding " . scalar(@fileInfo) . " files:\n";
+  ### print "Encoding " . scalar(@fileInfo) . " files:\n"; # FIXME move to caller
   foreach my $fileStruct (sort { $a->{cleanFilename} cmp $b->{cleanFilename} } @fileInfo) {
     $self->_EncodeFile($fileStruct);
   }
-  
+
   if($self->weightingFunction eq 'topheavyperfile')
   {
-    foreach my $file (values(%{$self->data->{Files}})) {
+    foreach my $file (values(%{$self->fileData})) {
       $file->{Chunk} or next;
       my $numChunks = scalar(@{$file->{Chunk}});
       for(my $i = 0; $i < $numChunks; $i++) {
@@ -80,7 +112,7 @@ sub encode {
   }
   elsif($self->weightingFunction eq 'bottomheavyperfile')
   {
-    foreach my $file (values(%{$self->data->{Files}})) {
+    foreach my $file (values(%{$self->fileData})) {
       $file->{Chunk} or next;
       my $numChunks = scalar(@{$file->{Chunk}});
       for(my $i = 0; $i < $numChunks; $i++) {
@@ -91,12 +123,12 @@ sub encode {
   elsif($self->weightingFunction eq 'topheavy')
   {
     my $totalChunks = 0; 
-    foreach my $file (values(%{$self->data->{Files}})) {
+    foreach my $file (values(%{$self->fileData})) {
       $file->{Chunk} or next;
       $totalChunks += scalar(@{$file->{Chunk}});
     }
-    foreach my $filename (sort(keys(%{$self->data->{Files}}))) {
-      my $file = $self->data->{Files}->{$filename};
+    foreach my $filename (sort(keys(%{$self->fileData}))) {
+      my $file = $self->fileData->{$filename};
       $file->{Chunk} or next;      
       my $numChunks = scalar(@{$file->{Chunk}});
       for(my $i = 0; $i < $numChunks; $i++) {
@@ -107,8 +139,8 @@ sub encode {
   elsif($self->weightingFunction eq 'bottomheavy')
   {
     my $weight = 0;
-    foreach my $filename (sort(keys(%{$self->data->{Files}}))) {
-      my $file = $self->data->{Files}->{$filename};
+    foreach my $filename (sort(keys(%{$self->fileData}))) {
+      my $file = $self->fileData->{$filename};
       $file->{Chunk} or next;
       my $numChunks = scalar(@{$file->{Chunk}});
       for(my $i = 0; $i < $numChunks; $i++) {
@@ -119,27 +151,26 @@ sub encode {
   else
   {
     # random weighting
-    foreach my $file (values(%{$self->data->{Files}})) {
+    foreach my $file (values(%{$self->fileData})) {
       $file->{Chunk} or next;
       my $numChunks = scalar(@{$file->{Chunk}});
       for(my $i = 0; $i < $numChunks; $i++) {
-	$file->{Chunk}->[$i]->{weight} = int(rand() * $numChunks);
+	$file->{Chunk}->[$i]->{weight} = int(rand() * $numChunks); # FIXME make weights unique?
       }
     }
   }
-  
 
-  print "Total Time: " . (time() - $startTime) . "s\n";
+
+  ###print "Total Time: " . (time() - $startTime) . "s\n"; # FIXME move to caller
 
   return XMLout(
                 {
-                  FileInfo => { File => [$self->data->{Files}]},
-                  Tracker => $self->data->{Tracker},
+                 FileInfo => { File => $self->fileData},
+                 Tracker => $self->trackerData,
                 },
                 RootName => 'BitFlood',
-
                 );
-  
+
 }
 
 ## FIXME: this can't end up being done in memory...
@@ -154,29 +185,33 @@ sub _EncodeFile {
   return if(-d $localFilename);
 
   open(INFILE, $localFilename);
-  
+
   $| = 1;
-  printf("%6.2f%% %11.3f MB | %s\r", 0, 0, $cleanFilename);
+  ### printf("%6.2f%% %11.3f MB | %s\r", 0, 0, $cleanFilename); # FIXME move to caller
 
   my $totalSize = -s INFILE;
   my $buffer;
   my $index = 0;
   my $bytesRead = 0;
   while(my $readLength = read(INFILE, $buffer, $self->chunkSize)) {
-    push(@{$self->data->{Files}->{$cleanFilename}->{Chunk}}, { index => $index++,
-                                                               hash => sha1_base64($buffer),
-                                                               size => $readLength,
-							       weight => 0,
-                                                             });
+    push(
+         @{$self->fileData->{$cleanFilename}->{Chunk}},
+         {
+          index  => $index++,
+          hash   => sha1_base64($buffer),
+          size   => $readLength,
+          weight => 0,
+         }
+        );
     $bytesRead += length($buffer);
-    printf("%6.2f%% %11.3f\r", 100*$bytesRead/$totalSize, $bytesRead/1048576);
+    ###printf("%6.2f%% %11.3f\r", 100*$bytesRead/$totalSize, $bytesRead/1048576); # FIXME move to caller
   }
-  $self->data->{Files}->{$cleanFilename}->{size} = $bytesRead;
-  print "100.00%\n";
+  $self->fileData->{$cleanFilename}->{size} = $bytesRead;
+  ###print "100.00%\n"; # FIXME move to caller
 
   close(INFILE);
 }
 
- 
+
 
 1;

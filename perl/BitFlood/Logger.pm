@@ -3,35 +3,20 @@ package BitFlood::Logger;
 use strict;
 
 use base qw(BitFlood::Accessor);
+
 __PACKAGE__->mk_accessors(qw(filters muted));
 
 
 use BitFlood::Utils;
-use BitFlood::Debug;
 
-sub new {
-  my $class = shift;
+
+sub initialize {
+  my $self = shift;
   my $args = shift;
 
-  my $self = $class->SUPER::new($args);
-
-  $self->filters([]);
+  $self->SUPER::initialize;
+  $self->filters([]) if !$self->filters;
   $self->muted(0);
-
-  my %loadedFilterModuleNames;
-  if(exists($args->{filters}))
-  {
-    foreach my $filterName (@{$args->{filters}}) {
-      if(!exists($loadedFilterModuleNames{$filterName}))
-      {
-	eval "local \$SIG{__DIE__}='DEFAULT'; require ${filterName}";
-	die("Failed to load filter: $filterName: $@") if ($@);
-	$loadedFilterModuleNames{$filterName}++;
-      }
-
-      $self->AddFilter($filterName->new());
-    }
-  }
 
   return $self;
 }
@@ -39,6 +24,7 @@ sub new {
 sub AddFilter {
   my $self = shift;
   my $filter = shift;
+
   push(@{$self->filters}, $filter);
 }
 
@@ -70,5 +56,7 @@ sub close {
 sub DESTROY {
   # dummy
 }
+
+
 
 1;

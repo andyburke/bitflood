@@ -3,19 +3,15 @@ package BitFlood::Logger::Multi;
 use strict;
 
 use base qw(BitFlood::Logger);
+
 __PACKAGE__->mk_accessors(qw(loggers));
 
-sub new {
-  my $class = shift;
 
-  my $self = $class->SUPER::new();
+sub initialize {
+  my $self = shift;
 
+  $self->SUPER::initialize;
   $self->loggers([]);
-
-  while(my $logger = shift) {
-    Debug("Adding logger to " . ref($class) . ": " . ref($logger), 12);
-    push(@{$self->loggers}, $logger);
-  }
 
   return $self;
 }
@@ -47,5 +43,7 @@ sub close {
 sub DESTROY {
   # dummy
 }
+
+
 
 1;
