@@ -8,9 +8,13 @@ use File::Spec;
 use File::Spec::Unix;
 
 sub CleanFilename {
+  # FIXME: check splitpath (no_file) etc. on windows
   my ($volume, $dirs, $filename) = File::Spec->splitpath(shift, 1);
   my @directories = File::Spec->splitdir($dirs);
-  return File::Spec::Unix->catpath($volume, @directories, $filename);
+  shift @directories if $directories[0] eq '.';
+  return File::Spec::Unix->canonpath(join('/', @directories, $filename));
+
+  #return File::Spec::Unix->catfile($volume, @directories, $filename);
 }
 
 sub LocalFilename {
