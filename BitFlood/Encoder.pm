@@ -53,7 +53,7 @@ sub encode {
                my $cleanFilename = $_;
                my @dirs = File::Spec->splitdir($filename);
                my $lastDir = pop(@dirs);
-               $cleanFilename =~ s/\Q$filename\E/\Q$lastDir\E/;
+               $cleanFilename =~ s/\Q$filename\E/$lastDir/;
                push(@fileInfo, { cleanFilename => CleanFilename($cleanFilename),
                                  fullFilename => LocalFilename($fullFilename) });
              },
