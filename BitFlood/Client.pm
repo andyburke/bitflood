@@ -9,8 +9,7 @@ use RPC::XML;
 use RPC::XML::Server;
 use RPC::XML::Client;
 
-use base qw(Class::Accessor);
-use base qw(RPC::XML::Server);
+use base qw(Class::Accessor RPC::XML::Server);
 
 use Digest::SHA1  qw(sha1 sha1_hex sha1_base64);
 use XML::Simple;
@@ -29,6 +28,7 @@ use BitFlood::Flood;
 
 __PACKAGE__->mk_accessors(qw(floods trackers peers chunksToGet));
 
+$| = 1; # FIXME buh?
 
 sub new {
   my $class = shift;
@@ -50,8 +50,6 @@ sub new {
     code => sub {
       my $self = shift;
 
-      printf("RequestChunk: sending: %s %s %d\n", @_);
-
       my $fileHash = shift;
       my $filename = shift;
       my $index = shift;
@@ -60,17 +58,19 @@ sub new {
       my $file = $flood->Files->{$filename};
       # FIXME: return error here...
       return unless($file->{chunkMap}->bit_test($index));
-      print " -> have chunk\n";
 
       my $chunkSourceFilename = $file->{localFilename};
       # FIXME: error
       return unless(defined $chunkSourceFilename);
-      print " -> have source filename\n";
 
       my $chunk = $file->{Chunk}[$index];
       # FIXME: return error
       return unless($chunk);
-      print " -> got chunk object\n";
+
+      printf("%-30.30s#%d => %-21.21s\r",
+             $file->{name}, $chunk->{index}+1,
+	     $self->{__conn}->peerhost . ':' . $self->{__conn}->peerport,
+	    );
 
       my $chunkData;
       my $chunkSourceFile = IO::File->new($chunkSourceFilename, 'r');
@@ -82,6 +82,8 @@ sub new {
     },
 
   });
+
+  $self->started('set'); # FIXME ???
 
   return $self;
 }
@@ -106,18 +108,8 @@ sub AddFloodFile {
   # add our trackers for this flood file...
   foreach my $trackerURL (@{$flood->TrackerURLs}) {
     my $tracker = RPC::XML::Client->new($trackerURL);
+    $tracker->compress_requests(0);
     push(@{$flood->trackers}, $tracker);
-    $tracker->simple_request(
-                             'Register',
-                             $flood->contentHash,
-                             inet_ntoa(scalar gethostbyname(hostname())), # FIXME good enough?
-                             $self->port,
-                            );
-
-    foreach my $peerAddress (@{$tracker->simple_request('RequestPeers', $flood->contentHash)}) {
-      push(@{$flood->peers}, RPC::XML::Client->new($peerAddress));
-    }
-
   }
 
 }
@@ -126,8 +118,6 @@ sub AddFloodFile {
 sub GetChunk {
   my $self = shift;
 
-  printf("GetChunk: getting: %s %s %d\n", @_);
-
   my $floodFileHash = shift;
   my $targetFilename = shift;
   my $index = shift;
@@ -135,6 +125,11 @@ sub GetChunk {
   my $flood = $self->floods->{$floodFileHash};
   my $file = $flood->Files->{$targetFilename};
   my $chunk = $file->{Chunk}[$index];
+
+  if (! @{$flood->peers}) {
+    print "No peers to talk to!\r";
+    return;
+  }
 
 #  share($file->{chunkMap});
 #  share($file->{totalDownloading});
@@ -146,30 +141,49 @@ sub GetChunk {
     $file->{totalDownloading}++;
   }
 
+  $file->{downloadBeginTime} ||= time();
+  $file->{downloadBytes} ||= 0;
+
+  my $peerIndex = int(rand(@{$flood->peers}));
+  my $peer = $flood->peers->[$peerIndex];
+  my ($peerHost) = $peer->{__request}->uri =~ m|http://(.*?)/|;
+
+  printf("%-30.30s#%d <= %-21.21s\r",
+	 $file->{name}, $chunk->{index}+1,
+	 $peerHost,
+	);
+
 #  my $thread = threads->create(sub {
-    my $targetFile = IO::File->new($file->{localFilename}, 'r+');
-    $targetFile->seek($chunk->{offset}, 0);
-    print "  -> making RPC call\n";
-    my $chunkData = $flood->peers->[0]->simple_request('RequestChunk', $floodFileHash, $targetFilename, $index); # FIXME choose which peer
-  print "    -> Chunk data length: " . length($chunkData) . "\n";
-    print "  -> finished RPC call\n";
+  my $targetFile = IO::File->new($file->{localFilename}, 'r+');
+  $targetFile->seek($chunk->{offset}, 0);
+  my $chunkData = $peer->simple_request('RequestChunk', $floodFileHash, $targetFilename, $index); # FIXME choose which peer
+  if (!$chunkData) {
+    if ($RPC::XML::ERROR =~ /connection refused/i) {
+      splice(@{$flood->peers}, $peerIndex, 1);
+      return;
+    }
+  }
 
     if(sha1_base64($chunkData) eq $chunk->{hash}) {
-      print "  -> hashes match\n";
       $targetFile->print($chunkData);
-      print "  -> updating chunkmap\n";
 #      lock($file->{chunkMap});
       $file->{chunkMap}->Bit_On($index);
-      print "  -> updated chunkmap OK\n";
+      $file->{downloadBytes} += $chunk->{size};
     } else {
-      print "  -> FAIL!!!!!!!!!!!!!!!!!\n";
+      print "  -> Bad chunk data!\n";
     }
 
     $targetFile->close();
     delete $chunk->{downloading};
 #    lock($file->{totalDownloading});
     $file->{totalDownloading}--;
-    print "  -> done getting chunk\n";
+
+  if ($file->{chunkMap}->is_full) {
+    print ' ' x 70 . "\r";
+    printf("Completed: %s [%.2f KB/s]\n",
+	   $file->{name},
+	   $file->{downloadBytes} / 1024 / (time() - $file->{downloadBeginTime} + 1));
+  }
 #  });
 
 #  $thread->detach();
@@ -189,7 +203,7 @@ sub GetChunks {
 
     while (my ($floodFileHash, $files) = each %incompleteFiles) {
       foreach my $file (@$files) {
-        next if $self->floods->{$floodFileHash}->{totalDownloading}; # FIXME only getting one chunk at a time
+        #next if $self->floods->{$floodFileHash}->{totalDownloading}; # FIXME only getting one chunk at a time
         my $chunkMap = $file->{chunkMap};
         for (my $index = 0; $index < $chunkMap->Size; $index++) {
           next if $chunkMap->bit_test($index);
@@ -203,31 +217,63 @@ sub GetChunks {
 
 }
 
-sub do_one_loop {
+
+sub Register {
   my $self = shift;
-  
-  if ($self->{__daemon})
-  {
-    my ($conn);
 
-    $self->started('set');
-
-    $self->{__daemon}->timeout(1);
-
-    $conn = $self->{__daemon}->accept;
-        
-    return unless $conn;
-    $conn->timeout($self->timeout);
-    print Dumper $conn;
-    $self->process_request($conn); 
-    print "\n\n";
-    print Dumper $conn;
-    $conn->close;
-  }
-  else
-  {
-    die("Do one loop not supported by Net::Server implementation!");
+  foreach my $flood (values %{$self->floods}) {
+    foreach my $tracker (@{$flood->trackers}) {
+      $tracker->simple_request
+	(
+	 'Register',
+	 $flood->contentHash,
+	 inet_ntoa(scalar gethostbyname(hostname())), # FIXME good enough?
+	 $self->port,
+	);
+    }
   }
 }
+
+
+sub UpdatePeerList {
+  my $self = shift;
+
+  foreach my $flood (values %{$self->floods}) {
+    my $tracker = $flood->trackers->[int(rand(@{$flood->trackers}))]; #FIXME random ok?
+    $flood->peers([]);
+
+    foreach my $peerAddress (@{$tracker->simple_request('RequestPeers', $flood->contentHash)}) {
+      if ($peerAddress ne 'http://'.inet_ntoa(scalar gethostbyname(hostname())).':'.$self->port.'/RPCSERV') { # FIXME skip self (not robusto)
+	push(@{$flood->peers}, RPC::XML::Client->new($peerAddress));
+      }
+    }
+
+  }
+}
+
+
+sub Disconnect {
+  my $self = shift;
+
+  foreach my $flood (values %{$self->floods}) {
+    foreach my $tracker (@{$flood->trackers}) {
+      $tracker->simple_request
+	(
+	 'Disconnect',
+	 $flood->contentHash,
+	 inet_ntoa(scalar gethostbyname(hostname())), # FIXME good enough?
+	 $self->port,
+	);
+    }
+  }
+}
+
+
+sub DESTROY {
+  my $self = shift;
+
+  $self->Disconnect;
+}
+
 
 1;
