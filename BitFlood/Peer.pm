@@ -105,7 +105,12 @@ sub SendMessage {
 sub Connect {
   my $self = shift;
 
-  return 1 if $self->connectCompleted;
+  Debug(">>>", 10);
+
+  if ($self->connectCompleted) {
+    Debug("<<<", 10);
+    return 1;
+  }
 
   if (!$self->socket) {
 
@@ -120,6 +125,7 @@ sub Connect {
     if (!$self->socket) {
       Debug("socket creation failed");
       $self->disconnected(1);
+      Debug("<<<", 10);
       return 0;
     }
 
@@ -139,6 +145,7 @@ sub Connect {
     $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
     $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
 
+    Debug("<<<", 10);
     return 1;
     
   } else {
@@ -155,6 +162,7 @@ sub Connect {
       $self->disconnected(1);
     }
 
+    Debug("<<<", 10);
     return 0;
 
   }
