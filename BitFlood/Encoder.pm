@@ -33,11 +33,17 @@ sub encode {
 
   $self->filename([$self->filename]) if(!ref($self->filename)); # just a string, make it into an array
   
+  my @filenames;
   foreach my $filename (@{$self->filename}) {
-    $self->_EncodeFile($filename) if(-f LocalFilename($filename)); # regular file
-    find({ wanted => sub { $self->_EncodeFile($File::Find::name); },
+    push(@filenames, $filename) if(-f LocalFilename($filename)); # regular file
+    find({ wanted => sub { push(@filenames, $File::Find::name); },
            no_chdir => 1 },
          LocalFilename($filename)) if(-d LocalFilename($filename));
+  }
+
+  print "Encoding " . scalar(@filenames) . " files:\n";
+  foreach my $filename (sort @filenames) {
+    $self->_EncodeFile($filename);
   }
 
   return XMLout(
@@ -63,15 +69,23 @@ sub _EncodeFile {
 
   open(INFILE, $localFilename);
   
+  $| = 1;
+  printf("%6.2f%% %s\r", 0, $cleanFilename);
+
+  my $totalSize = -s INFILE;
   my $buffer;
   my $index = 0;
-  while(my $read_length = read(INFILE, $buffer, $self->chunkSize)) {
+  my $bytesRead = 0;
+  while(my $readLength = read(INFILE, $buffer, $self->chunkSize)) {
     push(@{$self->data->{Files}->{$cleanFilename}->{Chunk}}, { index => $index++,
                                                                hash => sha1_base64($buffer),
-                                                               size => $read_length,
+                                                               size => $readLength,
                                                              });
-    $self->data->{Files}->{$cleanFilename}->{Size} += length($buffer);
+    $bytesRead += length($buffer);
+    printf("%6.2f%\r", 100*$bytesRead/$totalSize);
   }
+  $self->data->{Files}->{$cleanFilename}->{Size} = $bytesRead;
+  print "\n";
 
   close(INFILE);
 
