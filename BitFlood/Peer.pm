@@ -104,7 +104,7 @@ sub Connect {
 				      Blocking => 0,
 				     ));
   if(!$self->socket) {
-    Debug("failure: " . $self->id . " (" . $self->host . ":" . $self->port . ")");
+    Debug("failure: ($!) " . $self->id . " (" . $self->host . ":" . $self->port . ")");
     $self->disconnected(1);
     return undef;
   }
