@@ -18,6 +18,7 @@ use File::Spec::Unix;
 use File::Find;
 
 my $TIMEOUT = 300; # 5 minute timeout for clients
+my $PEER_LIST_LENGTH = 20; # return 20 peers
 
 sub new {
   my $class = shift;
@@ -39,9 +40,9 @@ sub new {
       my $filehash = shift;
       my $ip = shift;
       my $port = shift;
-
+      
       print "registering: ip: $ip port: $port fh: $filehash\n";
-      push(@{$self->filehashClientList->{$filehash}}, {ip => $ip, port => $port, timestamp => time()});
+      push(@{$self->filehashClientList->{$filehash}}, { peer => "http://$ip:$port/RPCSERV", timestamp => time()});
     },
       
   });
@@ -56,12 +57,20 @@ sub new {
       my $self = shift;
       my $filehash = shift;
 
-      print "requested peers for: $filehash\n";
-
       $self->CleanFilehashClientList($filehash);
       my @peers;
-      foreach my $peer (@{$self->filehashClientList->{$filehash}}) {
-        push(@peers, "http://$peer->{ip}:$peer->{port}/RPCSERV");
+
+      if(scalar(@{$self->filehashClientList->{$filehash}}) < $PEER_LIST_LENGTH)
+      {
+        @peers = map { $_->{peer} } @{$self->filehashClientList->{$filehash}};
+      }
+      else
+      {
+        # FIXME: this can have duplicates
+        for(1..$PEER_LIST_LENGTH) {
+          my $totalPeers = scalar(@{$self->filehashClientList->{$filehash}});
+          push(@peers, $self->filehashClientList->{$filehash}[int(rand($totalPeers))]);
+        }
       }
       return \@peers;
     },

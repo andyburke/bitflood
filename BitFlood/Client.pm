@@ -2,6 +2,9 @@ package BitFlood::Client;
 
 use strict;
 
+use threads;
+use threads::shared;
+
 use RPC::XML;
 use RPC::XML::Server;
 use RPC::XML::Client;
@@ -22,7 +25,7 @@ use Data::Dumper; # XXX
 use BitFlood::Utils;
 
 
-__PACKAGE__->mk_accessors(qw(floods trackers peers));
+__PACKAGE__->mk_accessors(qw(floods trackers peers gettingChunks));
 
 
 sub new {
@@ -35,6 +38,7 @@ sub new {
   $self->floods({});
   $self->trackers({});
   $self->peers({});
+  $self->gettingChunks(0);
 
   $self->add_method({
     name => 'RequestChunk', # the name of the method
@@ -229,20 +233,71 @@ sub GetChunk {
   my $index = shift;
 
   my $flood = $self->floods->{$floodFileHash};
+  $flood->{$floodFileHash}->{gettingChunk} = 1;
+  share($flood->{$floodFileHash}->{gettingChunk});
 
-  my $targetFile = IO::File->new($flood->{localTargetFilenames}{$targetFilename}, 'r+');
-  $targetFile->seek($flood->{chunkOffsets}{$targetFilename}[$index], 0);
+  my $thread = threads::create->(sub {
+    my $targetFile = IO::File->new($flood->{localTargetFilenames}{$targetFilename}, 'r+');
+    $targetFile->seek($flood->{chunkOffsets}{$targetFilename}[$index], 0);
 
-  my $chunkData = $self->peers->{$floodFileHash}[0]->simple_request('RequestChunk', $floodFileHash, $targetFilename, $index);
-  my $chunk = $flood->{floodData}{FileInfo}{File}{$targetFilename}{Chunk}[$index];
+    my $chunkData = $self->peers->{$floodFileHash}[0]->simple_request('RequestChunk', $floodFileHash, $targetFilename, $index);
 
-  if(sha1_base64($chunkData) eq $chunk->{hash}) {
-    $targetFile->print($chunkData);
-    $flood->{chunkMaps}{$targetFilename}->Bit_On($index);
-  } else {
-    print "FAIL!!!!!!!!!!!!!!!!!\n";
+    my $chunk = $flood->{floodData}{FileInfo}{File}{$targetFilename}{Chunk}[$index];
+    
+    if(sha1_base64($chunkData) eq $chunk->{hash}) {
+      $targetFile->print($chunkData);
+      $flood->{chunkMaps}{$targetFilename}->Bit_On($index);
+    } else {
+      print "FAIL!!!!!!!!!!!!!!!!!\n";
+    }
+    $targetFile->close();
+    
+    $flood->{gettingChunk} = 0;
+  });
+
+  $thread->detach();
+
+}
+
+sub GetChunks {
+  my $self = shift;
+
+  foreach my $floodFileHash (keys(%{$self->floods})) {
+    my $flood = $self->floods->{$floodFileHash};
+    next if($flood->{$floodFileHash}->{gettingChunk}); # this one is getting a chunk right now
+    $self->GetChunk($floodFileHash,); # FIXME: busticated
+    
   }
-  $targetFile->close();
+}
+
+sub do_one_loop
+{
+  my $self = shift;
+  
+  if ($self->{__daemon})
+  {
+    my ($conn, $req, $resp, $reqxml, $return, $respxml, $timeout);
+
+    my %args = @_;
+
+    $timeout = $self->{__daemon}->timeout(1);
+
+    $conn = $self->{__daemon}->accept;
+        
+    return unless $conn;
+    $conn->timeout($self->timeout);
+    $self->process_request($conn);
+    $conn->close;
+    undef $conn; # Free up any lingering resources
+
+    $self->{__daemon}->timeout($timeout) if defined $timeout;
+  }
+  else
+  {
+    die("Do one loop not supported by Net::Server implementation!");
+  }
+  
+  return;
 }
 
 1;
