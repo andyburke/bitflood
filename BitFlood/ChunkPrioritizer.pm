@@ -1,7 +1,7 @@
 package BitFlood::ChunkPrioritizer;
 
 use strict;
-use base qw(Class::Accessor);
+use base qw(BitFlood::Accessor);
 
 
 sub new {

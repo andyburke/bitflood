@@ -2,7 +2,7 @@ package BitFlood::Net::BufferedReader;
 
 use strict;
 
-use base qw(Class::Accessor);
+use base qw(BitFlood::Accessor);
 
 use Errno qw(:POSIX);
 use Time::HiRes qw(time);
@@ -69,13 +69,13 @@ sub Read {
 
   Debug("read data: $data", 50);
 
-  if ($data eq '') { # remote end disconnected
+  if (!length($data)) { # remote end disconnected
     Debug("<<<", 10);
     return 0;
   }
 
   Debug("before: " . ${$self->buffer} . "/" . $self->buffer, 50);
-  ${$self->buffer} = ${$self->buffer} . $data;
+  ${$self->buffer} .= $data;
   Debug("after: " . ${$self->buffer} . "/" . $self->buffer, 50);
 
   return $bytesRead;

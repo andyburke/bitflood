@@ -9,7 +9,7 @@ use RPC::XML;
 use RPC::XML::Server;
 use RPC::XML::Client;
 
-use base qw(Class::Accessor);
+use base qw(BitFlood::Accessor);
 
 use Digest::SHA1  qw(sha1 sha1_hex sha1_base64);
 use XML::Simple;

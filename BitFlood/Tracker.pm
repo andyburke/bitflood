@@ -5,7 +5,7 @@ use strict;
 use RPC::XML;
 use RPC::XML::Server;
 
-use base qw(Class::Accessor);
+use base qw(BitFlood::Accessor);
 use base qw(RPC::XML::Server);
 __PACKAGE__->mk_accessors(qw(filehashClientList lastCleanupTime));
 

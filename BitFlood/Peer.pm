@@ -2,7 +2,7 @@ package BitFlood::Peer;
 
 use strict;
 
-use base qw(Class::Accessor);
+use base qw(BitFlood::Accessor);
 
 use RPC::XML;
 use RPC::XML::Parser;
@@ -42,6 +42,7 @@ __PACKAGE__->mk_accessors(qw(
                              client
                              readBuffer
                              writeBuffer
+                             currentReadBufferPosition
                              bufferedReader
                              bufferedWriter
 			     targetFilehandles
@@ -79,6 +80,7 @@ sub new {
       defined($self->socket->blocking(0)) or die("non-blocking not supported!");
     }
 
+    $self->currentReadBufferPosition(0);
     $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
     $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
 
@@ -551,21 +553,26 @@ sub ProcessReadBuffer {
   Debug(">>>", 10);
 
   my $currentMessage;
+  my $currentMessageTail;
   my $remainder;
 
-  Debug("address: " . \$self->readBuffer, 50);
-  Debug("buffer: " . $self->readBuffer, 50);
-
+  my $tailLength;
   do {
-    ($currentMessage, $remainder) = split("\n", $self->readBuffer, 2);
-    Debug("  currentMessage: $currentMessage", 50);
-    Debug("  remainder:      $remainder", 50);
-    if (length($currentMessage) < length($self->readBuffer)) {
-      Debug("end of message detected", 50);
+    ($currentMessageTail) = (substr($self->readBuffer, $self->currentReadBufferPosition) =~ /(.*?\n)/);
+    if($tailLength = length($currentMessageTail))
+    {
+      Debug("end of message detected", 30);
+      Debug("  tailLength: $tailLength", 30);
+      $currentMessage = substr($self->{readBuffer}, 0, $self->currentReadBufferPosition + $tailLength, '');
       $self->DispatchRequests($currentMessage);
-      substr($self->{readBuffer}, 0, length($currentMessage) + 1, ''); #eat off message + \n we just worked on
+      $self->currentReadBufferPosition(0);
     }
-  } while (length($remainder));
+    else
+    {
+      $self->currentReadBufferPosition(length($self->readBuffer));
+    }
+    Debug("  remainder: " . $self->readBuffer, 50);
+  } while ($tailLength);
 
   Debug("<<<", 10);
 }

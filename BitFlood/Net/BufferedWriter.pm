@@ -2,7 +2,7 @@ package BitFlood::Net::BufferedWriter;
 
 use strict;
 
-use base qw(Class::Accessor);
+use base qw(BitFlood::Accessor);
 
 use Errno qw(:POSIX);
 use Time::HiRes qw(time);
