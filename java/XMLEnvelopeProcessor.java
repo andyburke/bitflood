@@ -45,38 +45,36 @@ public class XMLEnvelopeProcessor
 
   public static String encode( String methodName, Vector arguments )
   {
-    Document doc = docBuilder.newDocument();
-
-    Element methodCallElement = doc.createElement( "methodCall" );
-
-    Element methodNameElement = doc.createElement( "methodName" );
-    methodNameElement.appendChild( doc.createTextNode( methodName ) );
-    methodCallElement.appendChild( methodNameElement );
-
-    Element params = doc.createElement( "params" );
-
-    Iterator argIter = arguments.iterator();
-    while ( argIter.hasNext() )
-    {
-      Element param = doc.createElement( "param" );
-      Element value = doc.createElement( "value" );
-
-      encodeArg( doc, value, argIter.next() );
-      param.appendChild( value );
-      params.appendChild( param );
-    }
-
-    methodCallElement.appendChild( params );
-    doc.appendChild( methodCallElement );
-
-    XMLSerializer xmlSerializer = null;
-    StringWriter strWriter = null;
-    OutputFormat outFormat = null;
+    String retVal = null;
     try
     {
-      xmlSerializer = new XMLSerializer();
-      strWriter = new StringWriter();
-      outFormat = new OutputFormat();
+      Document doc = docBuilder.newDocument();
+
+      Element methodCallElement = doc.createElement( "methodCall" );
+
+      Element methodNameElement = doc.createElement( "methodName" );
+      methodNameElement.appendChild( doc.createTextNode( methodName ) );
+      methodCallElement.appendChild( methodNameElement );
+
+      Element params = doc.createElement( "params" );
+
+      Iterator argIter = arguments.iterator();
+      while ( argIter.hasNext() )
+      {
+        Element param = doc.createElement( "param" );
+        Element value = doc.createElement( "value" );
+
+        encodeArg( doc, value, argIter.next() );
+        param.appendChild( value );
+        params.appendChild( param );
+      }
+
+      methodCallElement.appendChild( params );
+      doc.appendChild( methodCallElement );
+
+      XMLSerializer xmlSerializer = new XMLSerializer();
+      StringWriter strWriter = new StringWriter();
+      OutputFormat outFormat = new OutputFormat();
 
       //outFormat.setEncoding( "UTF-8" );
       outFormat.setVersion( "1.0" );
@@ -86,25 +84,19 @@ public class XMLEnvelopeProcessor
 
       xmlSerializer.setOutputCharStream( strWriter );
       xmlSerializer.setOutputFormat( outFormat );
-    }
-    catch ( Exception e )
-    {
-      e.printStackTrace();
-    }
-
-    try
-    {
       xmlSerializer.serialize( doc );
+      
+      retVal = strWriter.toString();
     }
     catch ( Exception e )
     {
-      e.printStackTrace();
+      Logger.LogError( "Error encoding method: '" + methodName + "': " + e );
     }
 
-    return strWriter.toString();
+    return retVal;
   }
 
-  private static void encodeArg( Document doc, Node node, Object arg )
+  private static void encodeArg( Document doc, Node node, Object arg ) throws Exception
   {
     if ( arg instanceof String )
     {
@@ -151,8 +143,7 @@ public class XMLEnvelopeProcessor
     }
     else
     {
-      System.out.println( arg.toString() );
-      System.out.println( "Unknown type encountered!" );
+      throw new Exception( "Unsupported XML-RPC type: " + arg.toString() );
     }
   }
 
@@ -198,7 +189,7 @@ public class XMLEnvelopeProcessor
     }
     catch ( Exception e )
     {
-      System.out.println( "Error: " + e );
+      Logger.LogError( "Error decoding xml: '" + xmlToDecode + "': " + e );
     }
   }
 

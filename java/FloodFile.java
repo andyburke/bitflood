@@ -88,13 +88,6 @@ public class FloodFile
     this.chunkSize = chunkSize;
   }
 
-  public FloodFile(String filePath, int chunkSize, String[] trackers)
-  {
-    this.filePath = filePath;
-    this.chunkSize = chunkSize;
-
-  }
-
   public boolean Read()
   {
     InputStream inputFileStream = null;
@@ -155,37 +148,27 @@ public class FloodFile
 
   public void Dump()
   {
-    if ( trackers == null )
-    {
-      System.out.println( "No trackers defined..." );
-      return;
-    }
+    Logger.LogNormal( "ContentHash: " + contentHash );
+    Logger.LogNormal( "# Files    : " + targetFiles.size() );
+    Logger.LogNormal( "# Trackers : " + trackers.size() );
 
-    System.out.println( "ContentHash: " + contentHash );
-    System.out.println( "# Files    : " + targetFiles.size() );
-    System.out.println( "# Trackers : " + trackers.size() );
-
-    System.out.println( "Files:" );
+    Logger.LogNormal( "Files:" );
     Object[] sortedTargetFiles = targetFiles.values().toArray();
     Arrays.sort( sortedTargetFiles );
     for ( int targetFileIndex = 0; targetFileIndex < sortedTargetFiles.length; targetFileIndex++ )
     {
       TargetFile file = (TargetFile)sortedTargetFiles[targetFileIndex];
-      if ( file == null )
-      {
-        System.out.println( "Error: null targetfile?" );
-        continue;
-      }
-      System.out.println( "  name: " + file.name );
-      System.out.println( "    size: " + file.size + " chunks:" + file.chunks.size() );
+      Logger.LogNormal( "    name: " + file.name );
+      Logger.LogNormal( "    size: " + file.size );
+      Logger.LogNormal( "  chunks: " + file.chunks.size() );
     }
 
-    System.out.println( "Trackers:" );
+    Logger.LogNormal( "Trackers:" );
     Iterator trackeriter = trackers.iterator();
     for ( ; trackeriter.hasNext(); )
     {
       TrackerInfo tracker = (TrackerInfo) trackeriter.next();
-      System.out.println( "  address: " + tracker.host + ":" + tracker.port );
+      Logger.LogNormal( "  address: " + tracker.host + ":" + tracker.port );
     }
   }
 
@@ -583,8 +566,9 @@ public class FloodFile
         }
       }
 
-      System.out.println( "Hashing on: " + content );
+      Logger.LogNormal( "Hashing on: " + content );
       contentHash = Encoder.SHA1Base64Encode( content );
+      Logger.LogNormal( "Produced hash: " + contentHash );
     }
   }
 

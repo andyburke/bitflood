@@ -56,11 +56,11 @@ public class PeerConnection
       socketChannel.configureBlocking( false );
       socketChannel.register( socketSelector, socketChannel.validOps() );
       socketChannel.connect( new InetSocketAddress( InetAddress.getByName( hostname ), port ) );
-      System.out.println( "Connecting to: " + this );
+      Logger.LogNormal( "Connecting to: " + this );
     }
     catch ( Exception e )
     {
-      System.out.println( "Error connecting to (" + this + "): " + e );
+      Logger.LogError( "Error connecting to (" + this + "): " + e );
       disconnected = true;
       return;
     }
@@ -85,7 +85,7 @@ public class PeerConnection
 
     if ( incomingSocketConnection == null )
     {
-      System.out.println( "Tried to create a PeerConnection with a null socket?" );
+      Logger.LogError( "Tried to create a PeerConnection with a null socket?" );
       disconnected = true;
       return;
     }
@@ -101,12 +101,12 @@ public class PeerConnection
       socketChannel.configureBlocking( false );
       socketChannel.register( socketSelector, socketChannel.validOps() );
       connected = true;
-      System.out.println( "Connection from: " + this );
+      Logger.LogNormal( "Connection from: " + this );
     }
     catch ( Exception e )
     {
       disconnected = true;
-      System.out.println( "Error setting incoming connection to be non-blocking: " + e );
+      Logger.LogError( "Error setting up incoming connection: " + e );
     }
   }
 
@@ -120,7 +120,7 @@ public class PeerConnection
       }
       catch ( Exception e )
       {
-        System.out.println( "Error selecing from socketSelector: " + e );
+        Logger.LogError( "Error selecing from socketSelector: " + e );
         disconnected = true;
       }
 
@@ -146,7 +146,7 @@ public class PeerConnection
           }
           catch ( Exception e )
           {
-            System.out.println( "Error connecting: " + e );
+            Logger.LogError( "Error connecting: " + e );
             disconnected = true;
           }
         }
@@ -179,7 +179,7 @@ public class PeerConnection
     }
     catch ( Exception e )
     {
-      System.out.println( "Error reading from socketChannel: " + e );
+      Logger.LogError( "Error reading from socketChannel: " + e );
       disconnected = true;
       return false;
     }
@@ -200,7 +200,7 @@ public class PeerConnection
     }
     catch ( Exception e )
     {
-      System.out.println( "Error writing to socketChannel: " + e );
+      Logger.LogError( "Error writing to socketChannel: " + e );
       disconnected = true;
       return false;
     }
@@ -226,7 +226,7 @@ public class PeerConnection
         Vector args = new Vector();
         StringBuffer methodName = new StringBuffer();
         XMLEnvelopeProcessor.decode( new String( message ), methodName, args );
-        //System.out.println( localPeer.id + " <- " + id + " (" + methodName + ")" );
+        Logger.LogNormal( this + " sent (" + methodName + ")" );
         localPeer.HandleMethod( this, methodName.toString(), args );
       }
     }
@@ -237,8 +237,9 @@ public class PeerConnection
   public void SendMethod( final String methodName, final Vector parameters )
   {
     String out = XMLEnvelopeProcessor.encode( methodName, parameters );
-    //System.out.println( localPeer.id + " -> " + id + " (" + methodName + ")" );
+    Logger.LogNormal( this + " sending (" + methodName + ")" );
 
-    writeBuffer.put( ( out.replaceAll( "\n", "" ) + "\n" ).getBytes() );
+    // fix up the string, remove newlines and then add one at the end to signify the end of a method call
+    writeBuffer.put( ( out.replace( '\n', ' ' ) + '\n' ).getBytes() );
   }
 }

@@ -118,7 +118,7 @@ public class Flood
       PeerConnection peer = (PeerConnection) peeriter.next();
       if ( peer.disconnected )
       {
-        System.out.println( "Reaping " + peer.id + ":" + peer.hostname + ":" + peer.port );
+        Logger.LogNormal( "Reaping " + peer );
         peeriter.remove();
       }
     }

@@ -34,32 +34,32 @@ public class SendChunkMethodHandler implements MethodHandler
     
     if( targetFilename == null )
     {
-      throw new Exception( "No target filename specified in SendChunk");
+      throw new Exception( "No target filename specified in " + methodName + " from " + receiver );
     }
     if( chunkIndex == null )
     {
-      throw new Exception( "No chunk index specified in SendChunk");
+      throw new Exception( "No chunk index specified in " + methodName + " from " + receiver );
     }
     if( chunkData == null )
     {
-      throw new Exception( "No chunk data specified in SendChunk");
+      throw new Exception( "No chunk data specified in " + methodName + " from " + receiver );
     }
 
     Flood.RuntimeTargetFile runtimeTargetFile = (Flood.RuntimeTargetFile) receiver.flood.runtimeTargetFiles.get(targetFilename);
     if(runtimeTargetFile == null)
     {
-      throw new Exception( "Unknown target file specified in SendChunk");
+      throw new Exception( "Unknown target file specified in " + methodName + " from " + receiver );
     }
 
     if(chunkIndex.intValue() < 0 || chunkIndex.intValue() >= runtimeTargetFile.chunks.size())
     {
-      throw new Exception( "Chunk index out of bounds in SendChunk" );
+      throw new Exception( "Chunk index out of bounds in " + methodName + " from " + receiver );
     }
     
     FloodFile.Chunk chunkInfo = (FloodFile.Chunk) runtimeTargetFile.targetFile.chunks.elementAt(chunkIndex.intValue());
     if( chunkInfo == null )
     {
-      throw new Exception( "Error retrieving chunk info in SendChunk");
+      throw new Exception( "Error retrieving chunk info in " + methodName + " from " + receiver );
     }
     
     // if the incoming data hashes right
@@ -89,7 +89,7 @@ public class SendChunkMethodHandler implements MethodHandler
       receiver.flood.bytesMissing -= downloadedChunk.size;
       
       Date now = new Date();
-      System.out.println( receiver + " sent chunk: " + targetFilename + "#" + chunkIndex + " " + chunkInfo.size / (now.getTime() - downloadedChunk.downloadStartDate.getTime()) + "K/s" );
+      Logger.LogNormal( receiver + " sent chunk: " + targetFilename + "#" + chunkIndex + " " + chunkInfo.size / (now.getTime() - downloadedChunk.downloadStartDate.getTime()) + "K/s" );
       
       
       Vector nhcParams = new Vector( 2 );
@@ -105,7 +105,7 @@ public class SendChunkMethodHandler implements MethodHandler
     }
     else
     {
-      throw new Exception( "Bad chunk data received in SendChunk");
+      throw new Exception( "Bad chunk data received in " + methodName + " from " + receiver );
     }
   }
 }

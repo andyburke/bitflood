@@ -25,23 +25,32 @@ public class RegisterMethodHandler implements MethodHandler
 
     if ( receiver.flood != null )
     {
-      throw new Exception( "Receiver is already Registered!" );
+      if ( receiver.flood.Id().compareTo( floodId ) != 0 )
+      {
+        throw new Exception( receiver + " already registered, attempting to register with a different flood?" );
+      }
+      
+      Logger.LogNormal( receiver + "is already registered with this flood.. string but ok.." );
+      return;
     }
 
     Flood flood = receiver.localPeer.FindFlood( floodId );
     if ( flood == null )
     {
-      throw new Exception( "Received a register for an unknown flood!" );
+      receiver.disconnected = true;
+      throw new Exception( receiver + " attempting to join unknown flood: " + floodId  );
     }
 
     PeerConnection existingPeer = flood.FindPeer( peerId );
-    if ( existingPeer != null && existingPeer.connected )
+    if ( existingPeer != null )
     {
-      throw new Exception( "Peer has already registered with this flood!" );
+      receiver.disconnected = true;
+      throw new Exception( receiver + " has already registered with the flood: " +  floodId );
     }
 
     if ( !flood.localPeer.pendingPeers.remove( receiver ) )
     {
+      receiver.disconnected = true;
       throw new Exception( "Receiver could not be removed from pending queue" );
     }
 
@@ -53,6 +62,6 @@ public class RegisterMethodHandler implements MethodHandler
     receiver.SendMethod( RequestChunkMapsMethodHandler.methodName, new Vector() );
     
     flood.peerConnections.add( receiver );
-    System.out.println( "Registered peer: " + receiver );
+    Logger.LogNormal( "Registered peer: " + receiver + " with the flood: " + floodId );
   }
 }

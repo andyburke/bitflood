@@ -16,7 +16,7 @@ public class Encoder
   {
     return SHA1Base64Encode( input.getBytes(), input.length() );	
   }
-
+ 
   public static String SHA1Base64Encode( final byte[] bytes, final int length )
   {
     MessageDigest sha1Encoder = null;
@@ -27,7 +27,7 @@ public class Encoder
     }
     catch ( Exception e )
     {
-      System.out.println( e.toString() );
+      Logger.LogError( "Failed to encode (" + new String( bytes, length ) + ") : " + e );
     }
  
     sha1Encoder.reset();

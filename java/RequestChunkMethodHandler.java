@@ -30,34 +30,38 @@ public class RequestChunkMethodHandler implements MethodHandler
 
     String fileName = (String) parameters.elementAt( 0 );
     Integer chunkIndex = (Integer) parameters.elementAt( 1 );
-    
-    // read in the appropriate chunk data and send it across the wire
-    Vector scParams = new Vector( 3 );
-    scParams.add( fileName );
-    scParams.add( chunkIndex );
-
-    FloodFile.TargetFile targetFile = (FloodFile.TargetFile) receiver.flood.floodFile.targetFiles.get( fileName );
-    // 
-    if ( targetFile == null )
+    if ( fileName == null )
     {
-      throw new Exception( "peer requested invalid data!" );
+      throw new Exception( "No target filename specified in " + methodName + " from " + receiver );
+    }
+    if ( chunkIndex == null )
+    {
+      throw new Exception( "No chunk index specified in " + methodName + " from " + receiver );
     }
 
-    Flood.RuntimeTargetFile runtimeTargetFile = (Flood.RuntimeTargetFile) receiver.flood.runtimeTargetFiles.get( targetFile.name );
-
+    // logging
+    Logger.LogNormal( receiver + " is requesting chunk: " + fileName + "#" + chunkIndex );
+    
+    Flood.RuntimeTargetFile runtimeTargetFile = (Flood.RuntimeTargetFile) receiver.flood.runtimeTargetFiles.get( fileName );
     if ( runtimeTargetFile == null )
     {
-      throw new Exception( "peer requested an invalid file!" );
+      throw new Exception( "Unknown target file (" + fileName + ") specified in " + methodName + " from " + receiver );
     }
-
+    
+    if(chunkIndex.intValue() < 0 || chunkIndex.intValue() >= runtimeTargetFile.chunks.size())
+    {
+      throw new Exception( "Chunk index out of bounds in " + methodName + " from " + receiver );
+    }
+    
     if ( runtimeTargetFile.chunkMap[chunkIndex.intValue()] == '0' )
     {
-      throw new Exception( "peer requested invalid data!" );
+      throw new Exception( "We don't have the chunk that was requested in " + methodName + " from " + receiver );
     }
 
-    FloodFile.Chunk targetChunk = (FloodFile.Chunk) targetFile.chunks.get( chunkIndex.intValue() );
+    FloodFile.Chunk targetChunk = (FloodFile.Chunk) runtimeTargetFile.targetFile.chunks.get( chunkIndex.intValue() );
     long chunkOffset = runtimeTargetFile.chunkOffsets[chunkIndex.intValue()];
 
+    // read in the appropriate chunk data and send it across the wire
     InputStream inputFileStream = null;
     try
     {
@@ -92,6 +96,10 @@ public class RequestChunkMethodHandler implements MethodHandler
       throw new Exception( "file data is not correct!" );
     }
 
+    // respond with the appropriate method
+    Vector scParams = new Vector( 3 );
+    scParams.add( fileName );
+    scParams.add( chunkIndex );
     scParams.add( chunkData );
     receiver.SendMethod( SendChunkMethodHandler.methodName, scParams );
   }

@@ -30,17 +30,25 @@ public class SendChunkMapsMethodHandler implements MethodHandler
     {
       String targetFilename = (String) paramIter.next();
       String chunkMapstring = (String) paramIter.next();
+      if( targetFilename == null )
+      {
+        throw new Exception( "No target filename specified in " + methodName + " from " + receiver );
+      }
+      if( chunkMapstring == null )
+      {
+        throw new Exception( "No chunk map specified in " + methodName + " from " + receiver );
+      }
       
       Flood.RuntimeTargetFile runtimeTargetFile = (Flood.RuntimeTargetFile) receiver.flood.runtimeTargetFiles.get(targetFilename); 
       if( runtimeTargetFile == null )
       {
-        throw new Exception( "Unknown target filename specified in " + methodName);
+        throw new Exception( "Unknown target filename specified in " + methodName + " from " + receiver );
       }
             
       char[] peerChunkMap = new char[runtimeTargetFile.chunkMap.length];
       if( chunkMapstring.length() > peerChunkMap.length )
       {
-         throw new Exception( "ChunkMap out of bounds in " + methodName);
+         throw new Exception( "ChunkMap out of bounds in " + methodName + " from " + receiver );
       }
       
       for( int chunkMapIndex = 0; chunkMapIndex < runtimeTargetFile.chunkMap.length; chunkMapIndex++ )

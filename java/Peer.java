@@ -22,6 +22,11 @@ public class Peer
   public String               id                   = "";
   private Hashtable           methodHandlers       = new Hashtable();
 
+  public String toString()
+  {
+    return new String( id + ":" + hostname + ":" + port );
+  }
+  
   public Peer()
   {
   }
@@ -93,7 +98,7 @@ public class Peer
         PeerConnection peer = (PeerConnection) peeriter.next();
         if ( peer.disconnected )
         {
-          System.out.println( "Reaping " + peer + " (pending)");
+          Logger.LogNormal( "Reaping " + peer + " (pending)");
           peeriter.remove();
         }
       }
@@ -107,7 +112,7 @@ public class Peer
       }
       catch ( Exception e )
       {
-        System.out.println( "Error selecing from listenSocketSelector: " + e );
+        Logger.LogError( "Error selecing from listenSocketSelector: " + e );
       }
 
       // if the socket can accept, test for an incoming connection
@@ -132,7 +137,7 @@ public class Peer
           }
           catch ( Exception e )
           {
-            System.out.println( "Error accepting connection from listenSocketChannel: " + e );
+            Logger.LogError( "Error accepting connection from listenSocketChannel: " + e );
           }
 
           if ( incomingSocket != null )
@@ -158,7 +163,7 @@ public class Peer
     }
     catch ( Exception e )
     {
-      System.out.println( "Error making listen socket: " + e );
+      Logger.LogError( "Error making listen socket: " + e );
     }
   }
 
@@ -178,7 +183,7 @@ public class Peer
       }
       catch ( Exception e )
       {
-        System.out.println( "Failed to execute method: " + methodName + ": " + e );
+        Logger.LogError( "Failed to execute method: " + methodName + " from peer: " + receiver + ": " + e );
       }
     }
   }
