@@ -24,7 +24,7 @@ sub new {
 
   my $self = RPC::XML::Server->new(port => $args{port} || 10101);
   bless $self, $class;
-  $self->mk_accessors(qw(port filehashClientList));
+  $self->mk_accessors(qw(port filehashClientList lastCleanupTime));
 
   $self->port($args{port} || 10101);
   $self->filehashClientList({});
@@ -42,7 +42,6 @@ sub new {
       my $port = shift;
 
       push(@{$self->filehashClientList->{$filehash}}, {ip => $ip, port => $port, timestamp => time()});
-      $self->CleanFilehashClientList($filehash);
     },
       
   });
@@ -89,6 +88,13 @@ sub start {
 sub CleanFilehashClientList {
   my $self = shift;
   my $filehash = shift;
+
+  # we only clean up if we've waited at least TIMEOUT/2 
+  # to try to minimize the performance hit of cleaning up on all
+  # requests...
+  return if(time() - $self->lastCleanupTime < ($TIMEOUT / 2));
+
+  $self->lastCleanupTime = time();
 
   my $index = 0;
   foreach my $client (@{$self->{filehashClientList}->{$filehash}}) {
