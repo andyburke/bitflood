@@ -349,7 +349,6 @@ namespace libBitFlood
 
   Error::ErrorCode PeerConnection::_ProcessReadBuffer( void )
   {
-
     while( !m_reader.m_buffer.empty() )
     {
       U32 tail = m_reader.m_buffer.find( '\n', 0 );
@@ -376,15 +375,18 @@ namespace libBitFlood
   {
     m_fakeClient.ExternalGenerateRequest( i_methodName.c_str(), i_args );
 
-    // kill the newlines
-    std::string request = m_fakeClient.GetRequest();
-    U32 index = request.find_first_of( "\r\n" );
-    while( index != std::string::npos )
-    {
-      request.erase( index, 1 );
-      index = request.find_first_of( "\r\n" );
-    }
+    std::string& request = m_fakeClient.AccessRequest();
 
+    U32 request_index;
+    for ( request_index = 0; request_index < request.size(); ++request_index )
+    {
+      if ( request[ request_index ] == '\n' ||
+           request[ request_index ] == '\r' )
+      {
+        request[ request_index ] = ' ';
+      }
+    }
+    
     m_writer.m_buffer.append( request );
     m_writer.m_buffer.append( 1, '\n' );
 

@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
   signal( SIGTERM,  HandleSignal );
   signal( SIGABRT,  HandleSignal );
 
-  XmlRpc::setVerbosity(5);
+  //XmlRpc::setVerbosity(5);
 
   U32 localPort = 10101;
   if ( argc == 2 )
@@ -43,8 +43,8 @@ int main(int argc, char* argv[])
 
   while( !quit )
   {
-    t.Run( 1.0f );
-    Sleep(0);
+    t.Run( 0 );
+    Sleep( 100 );
   }
 }
 

@@ -19,7 +19,7 @@ namespace libBitFlood
     {
     public:
       FakeClient() : XmlRpcClient( "", 0 ) {}
-      const std::string& GetRequest( void ) const { return _request; }
+      std::string& AccessRequest( void ) { return _request; }
       bool ExternalGenerateRequest(const char* i_method, const XmlRpcValue& i_args) { return generateRequest( i_method, i_args ); }
 
     protected:
