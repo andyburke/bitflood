@@ -40,11 +40,11 @@ __PACKAGE__->mk_accessors(qw(
                              disconnected
                              connectCompleted
                              client
-                             readBuffer
-                             writeBuffer
+                             readBuffer writeBuffer
                              currentReadBufferPosition
-                             bufferedReader
-                             bufferedWriter
+                             bufferedReader bufferedWriter
+			     lastReadTime lastWriteTime
+                             readSpeed writeSpeed
 			     targetFilehandles
                             )
                          );
@@ -323,7 +323,9 @@ sub HandleSendChunk {
     Debug("out-of-range chunk index: $filename#$index", 'net');
     return;
   }
-  
+
+  Debug("transfer speed snapshot: ". $self->host . ":" . $self->port ." read=" . ReadableSize($self->readSpeed) . "/s write=" . ReadableSize($self->writeSpeed) . "/s", 'net', 20);
+
   printf("%-30.30s#%d <= %-21.21s [%7.2f K/s]  \r",
 	 substr($file->{name}, -30),
 	 $chunk->{index}+1,
@@ -490,19 +492,22 @@ sub ReadOnce {
   }
 
   Debug("readBuffer address before read: " . \$self->readBuffer, 50);
-  my $result = $self->bufferedReader->Read();
+  my $bytesRead = $self->bufferedReader->Read();
   Debug("readBuffer address after read: " . \$self->readBuffer, 50);
 
-  if ($result == -1) {
+  if ($bytesRead == -1) {
     Debug("would block", 'net', 30);
     Debug("<<<", 10);
     return;
-  } elsif($result == 0) {
+  } elsif($bytesRead == 0) {
     Debug("read error, disconnecting peer: " . $self->id, 'net');
     $self->disconnected(1);
     Debug("<<<", 10);
     return;
   }
+
+  $self->CalculateReadSpeed($bytesRead);
+  $self->lastReadTime(time());
 
   Debug("<<<", 10);
 }
@@ -530,18 +535,21 @@ sub WriteOnce {
     return;
   }
 
-  my $result = $self->bufferedWriter->Write();
+  my $bytesWritten = $self->bufferedWriter->Write();
 
-  if ($result == -1) {
+  if ($bytesWritten == -1) {
     Debug("would block", 'net', 30);
     Debug("<<<", 10);
     return;
-  } elsif($result == 0) {
+  } elsif($bytesWritten == 0) {
     Debug("write error, disconnecting peer: " . $self->id, 'net');
     $self->disconnected(1);
     Debug("<<<", 10);
     return;
   }
+
+  $self->CalculateWriteSpeed($bytesWritten);
+  $self->lastWriteTime(time());
 
   Debug("<<<", 10);
 }
@@ -574,6 +582,37 @@ sub ProcessReadBuffer {
   } while ($tailLength);
 
   Debug("<<<", 10);
+}
+
+
+sub CalculateReadSpeed {
+  my $self = shift;
+  my $bytesRead = shift;
+
+  return if !defined $self->lastReadTime;
+
+  my $timeDelta = time() - $self->lastReadTime;
+  if ($timeDelta) {
+    $self->readSpeed($bytesRead / $timeDelta);
+  } else {
+    $self->readSpeed(undef);
+  }
+  Debug("read speed: " . ReadableSize($self->readSpeed) . "/s", 'net', 40);
+}
+
+sub CalculateWriteSpeed {
+  my $self = shift;
+  my $bytesWritten = shift;
+
+  return if !defined $self->lastWriteTime;
+
+  my $timeDelta = time() - $self->lastWriteTime;
+  if ($timeDelta) {
+    $self->writeSpeed($bytesWritten / $timeDelta);
+  } else {
+    $self->writeSpeed(undef);
+  }
+  Debug("write speed: " . ReadableSize($self->writeSpeed) . "/s", 'net', 40);
 }
 
 sub disconnected {
