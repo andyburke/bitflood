@@ -128,25 +128,28 @@ sub Connect {
 
   return 1 if ($self->socket->connected);
 
-  $self->socket->configure({
-                            PeerAddr => $self->host,
-                            PeerPort => $self->port,
-                            Proto    => 'tcp',
-                            Blocking => 0,
-                           });
+  my $socket_args = {
+                     PeerAddr => $self->host,
+                     PeerPort => $self->port,
+                     Proto    => 'tcp',
+                    };
+  $socket_args->{Blocking} = 0 if ($^O ne 'MSWin32');
+  $self->socket->configure($socket_args);
 
-  if ($!{EINPROGRESS}) {
-    # non-blocking connection is still trying to connect
-    if (time > $self->connectStartTime + CONNECTION_TIMEOUT) {
-      Debug("connection timed out");
+  if (!$self->socket->connected) {
+    if ($!{EINPROGRESS}) {
+      # non-blocking connection is still trying to connect
+      if (time > $self->connectStartTime + CONNECTION_TIMEOUT) {
+        Debug("connection timed out");
+        $self->disconnected(1);
+      }
+      return 0;
+    } else {
+      # some other error, signaling the connect actually failed
+      Debug("failed to connect: $!");
       $self->disconnected(1);
+      return 0;
     }
-    return 0;
-  } elsif ($!) {
-    # some other error, signaling the connect actually failed
-    Debug("failed to connect: $!");
-    $self->disconnected(1);
-    return 0;
   } else {
     # connection succeeded
 
