@@ -35,7 +35,7 @@ public class RegisterMethodHandler implements MethodHandler
     }
 
     PeerConnection existingPeer = flood.FindPeer( peerId );
-    if ( existingPeer != null )
+    if ( existingPeer != null && existingPeer.connected )
     {
       throw new Exception( "Peer has already registered with this flood!" );
     }
