@@ -4,6 +4,8 @@ use Getopt::Long;
 use File::Path;
 use File::Basename;
 
+chdir dirname $0;
+
 my $iClient = 1;
 GetOptions( "client=i" => \$iClient );
 
