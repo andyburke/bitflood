@@ -55,17 +55,13 @@ sub InitializeTargetFiles {
      else # file DOES exist, we need to decide what we need to get...
      {
        open(OUTFILE, "<$localFilename");
-#       my $curPos = 0;
        foreach my $chunk (sort { $a->{index} <=> $b->{index} } @{$file->{data}->{FileInfo}->{File}->{$targetFile}->{Chunk}}) {
          my $buffer;
-#         seek(OUTFILE, $curPos, 0);
          read(OUTFILE, $buffer, $chunk->{size});
          my $hash = sha1_base64($buffer);
          if($hash ne $chunk->{hash}) {
-           print "chunk $chunk->{index} mismatch\n";
+           
          }
-         # FIXME: add the chunk to a list of chunks we need...
- #        $curPos += $chunk->{size};
        }
        close(OUTFILE);
      }
