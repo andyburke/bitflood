@@ -159,7 +159,7 @@ sub InitializeFiles {
   Debug('>>>', 'trace');
 
   foreach my $file (values %{$self->Files}) {
-    $self->totalBytes($self->totalBytes + $file->{Size});
+    $self->totalBytes($self->totalBytes + $file->{size});
     if(!-f $file->{localFilename})   # file doesn't exist, initialize it to 0
     {
       my $path = GetLocalPathFromFilename($file->{localFilename});

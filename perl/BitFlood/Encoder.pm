@@ -171,7 +171,7 @@ sub _EncodeFile {
     $bytesRead += length($buffer);
     printf("%6.2f%% %11.3f\r", 100*$bytesRead/$totalSize, $bytesRead/1048576);
   }
-  $self->data->{Files}->{$cleanFilename}->{Size} = $bytesRead;
+  $self->data->{Files}->{$cleanFilename}->{size} = $bytesRead;
   print "100.00%\n";
 
   close(INFILE);
