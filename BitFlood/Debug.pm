@@ -38,9 +38,8 @@ AddLogger('', 'Stderr')
 AddLogger('', 'File', $ENV{BITFLOOD_DEBUG_FILENAME} || 'debug.log', append => 0)
   if $ENV{BITFLOOD_DEBUG_FILE};  
 
-AddLogger('trace', 'Stdout');
-
-AddLogger('perf', 'File', 'perf.log');
+#AddLogger('trace', 'Stdout');
+#AddLogger('perf', 'File', 'perf.log');
 
 if ($ENV{BITFLOOD_DEBUG_NET_FILE}) {
   AddLogger('net', 'File', 'net.log', append => 0);
@@ -53,7 +52,7 @@ if ($ENV{BITFLOOD_DEBUG_NET_FILE}) {
             password   => 'bftest',
             resource   => hostname() . '_' . inet_ntoa(scalar gethostbyname(hostname())));
 } else {
-  AddLogger('net', 'Stdout');
+#  AddLogger('net', 'Stdout');
 }
 
 

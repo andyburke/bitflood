@@ -7,7 +7,10 @@ __PACKAGE__->mk_accessors(qw(
   recipient serverHost serverPort username password resource
 ));
 
-use Net::Jabber qw(Client);
+#use Net::Jabber qw(Client);
+use Net::Jabber;
+use Net::Jabber::Client;
+use Net::Jabber::Message;
 use Time::HiRes qw(time);
 use POSIX qw(strftime);
 

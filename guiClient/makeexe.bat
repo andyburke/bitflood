@@ -1,0 +1,1 @@
+pp -I .. -M Net::Jabber -M POSIX -M Net::XMPP -M XML::Stream -M Authen::SASL -M BitFlood -gui -a ..\BitFlood;..\inc\lib\BitFlood -a guiClient.gld -o BitFloodGUI.exe guiClient.pl
