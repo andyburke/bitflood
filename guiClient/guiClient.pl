@@ -9,6 +9,8 @@ use File::Path;
 use Getopt::Long;
 use XML::Simple;
 use Time::HiRes qw(usleep);
+use Sys::Hostname;
+use Socket;
 
 use constant UPDATE_INTERVAL => 20;
 
@@ -16,18 +18,17 @@ my $mainWindowDef;
 
 # this locates the BitFlood/ directory and adds it to our include path
 BEGIN {
-#  my ($volume, $directories) = File::Spec->splitpath($0);
-#  my @dirs = File::Spec->splitdir($directories);
-#  pop(@dirs) while(@dirs && !-e File::Spec->catfile($volume, @dirs, 'BitFlood'));
-#  push(@INC, File::Spec->catfile($volume, @dirs));
-#  $mainWindowDef = File::Spec->catfile($volume, @dirs, 'guiClient', 'guiClient.gld');
+  my ($volume, $directories) = File::Spec->splitpath($0);
+  my @dirs = File::Spec->splitdir($directories);
+  pop(@dirs) while(@dirs && !-e File::Spec->catfile($volume, @dirs, 'BitFlood'));
+  unshift(@INC, File::Spec->catfile($volume, @dirs));
+  $mainWindowDef = File::Spec->catfile($volume, @dirs, 'guiClient', 'guiClient.gld');
 
-
-  foreach my $incDir (@INC) {
-    if(-e File::Spec->catfile($incDir, 'guiClient.gld')) {
-      $mainWindowDef = File::Spec->catfile($incDir, 'guiClient.gld');
-    }
-  }
+#  foreach my $incDir (@INC) {
+#    if(-e File::Spec->catfile($incDir, 'guiClient.gld')) {
+#      $mainWindowDef = File::Spec->catfile($incDir, 'guiClient.gld');
+#    }
+#  }
 }
 
 use BitFlood::Client;
@@ -36,6 +37,55 @@ use BitFlood::Debug;
 ###########################
 ## floods_ --> Floods tab
 ## config_ --> Config tab
+
+# debugging channels...
+my %channelNames;
+$channelNames{'Default'} = '';
+$channelNames{'Network'} = 'net';
+$channelNames{'Performance'} = 'perf';
+
+my $configFile = File::Spec->catfile($ENV{HOMEDRIVE}, $ENV{HOMEPATH}, '.bitflood', 'gui.cfg');
+my $config;
+if(!-e $configFile) {
+  print "creating config file: $configFile\n";
+  mkpath(File::Spec->catfile($ENV{HOMEDRIVE}, $ENV{HOMEPATH}, '.bitflood'));
+  $config = {
+	     localIp => inet_ntoa(scalar gethostbyname(hostname())),
+	     port    => 10101,
+	     debugging => {
+			   Default => {
+				       enabled => 0,
+				       level => 1,
+				       logtofile => 0,
+				       filename => 'debug.log',
+				       remote => 0,
+				      },
+			   Network => {
+				       enabled => 0,
+				       level => 1,
+				       logtofile => 0,
+				       filename => 'network.log',
+				       remote => 0,
+				      },
+			   Performance => {
+					   enabled => 0,
+					   level => 1,
+					   logtofile => 0,
+					   filename => 'network.log',
+					   remote => 0,
+					  },
+			  },
+	    };
+  my $configXML = XMLout($config);
+  open(CONFIG, ">$configFile")
+    or die("Could not open config file...");
+  print CONFIG $configXML;
+  close(CONFIG);
+} else {
+  print "loading config from: $configFile\n";
+  $config = XMLin($configFile, ForceArray => 1);
+  $config or die("Could not load config file!");
+}
 
 my $objDesign = Win32::GUI::Loft::Design->newLoad($mainWindowDef) or
   die("Could not open window file ($mainWindowDef)");
@@ -51,8 +101,12 @@ my $pen = new Win32::GUI::Pen(
 			      -style => 5,
 			      );
 
-my $client = BitFlood::Client->new();
+my $client = BitFlood::Client->new(
+				   localIp => $config->{localIp},
+				   port    => $config->{port},
+				  );
 
+config_Populate();
 $mainWindow->Show();
 #Win32::GUI::SetCursor($oldCursor);  #show previous arrow cursor again
 
@@ -80,9 +134,7 @@ while(1) {
   $client->GetChunks();
   $client->LoopOnce();
   
-#  print "sleeping ... ";
   usleep(1000);
-#  print "done\n";
 }
 
 sub mainWindow_Terminate {
@@ -157,7 +209,71 @@ sub floods_RemoveButton_Click {
 sub config_ApplyButton_Click {
   my $externalIP = $mainWindow->config_ExternalIPEntry->Text();
   my $port = $mainWindow->config_PortEntry->Text();
+  
+  foreach my $debugChannel (keys(%channelNames)) {
+    my $enabledCheckbox = "config_${debugChannel}LoggingChannelEnabledCheckbox";
+    my $levelEntry = "config_${debugChannel}LoggingChannelLevelEntry";
+    my $logToFileCheckbox = "config_${debugChannel}LoggingChannelToFileCheckbox";
+    my $logFilenameEntry = "config_${debugChannel}LoggingChannelFilenameEntry";
+    my $remoteLoggingCheckbox = "config_${debugChannel}LoggingChannelRemoteCheckbox";
+      
+    my $enabled = $mainWindow->$enabledCheckbox->GetCheck();
+    my $level = $mainWindow->$levelEntry->Text();
+    my $logToFile = $mainWindow->$logToFileCheckbox->GetCheck();
+    my $logFilename = $mainWindow->$logFilenameEntry->Text();
+    my $remoteLogging = $mainWindow->$remoteLoggingCheckbox->GetCheck();
 
+    if($enabled) {
+      $config->{debugging}->{$debugChannel}->{enabled} = 1;
+
+      BitFlood::Debug::OpenChannel($channelNames{$debugChannel});
+      
+      $config->{debugging}->{$debugChannel}->{level} = $level;
+      BitFlood::Debug::SetChannelLevel($channelNames{$debugChannel}, $level);
+
+      if($logToFile) {
+	if($config->{debugging}->{$debugChannel}->{logtofile} == 0) {
+	  $config->{debugging}->{$debugChannel}->{logtofile} = 1;
+	  $config->{debugging}->{$debugChannel}->{filename} = $logFilename;
+	  
+	  BitFlood::Debug::AddLogger($channelNames{$debugChannel}, 'File', $logFilename);
+	  $mainWindow->$logToFileCheckbox->Checked(2);
+	}
+      }
+	
+      if($remoteLogging) {
+	if($config->{debugging}->{$debugChannel}->{remote} == 0) {
+	  $config->{debugging}->{$debugChannel}->{remote} = 1;
+	  
+	  BitFlood::Debug::AddLogger($channelNames{$debugChannel}, 'Jabber',
+				     recipient  => 'bftest@jabber.org/listener',
+				     serverHost => 'jabber.org',
+				     serverPort => 5222,
+				     username   => 'bftest',
+				     password   => 'bftest',
+				     resource   => hostname() . '_' . inet_ntoa(scalar gethostbyname(hostname())));
+	  $mainWindow->$remoteLoggingCheckbox->Checked(2);
+	}
+      }
+
+    } else {
+      BitFlood::Debug::CloseChannel($channelNames{$debugChannel});
+      $mainWindow->$logToFileCheckbox->Checked(0);
+      $mainWindow->$remoteLoggingCheckbox->Checked(0);
+
+      $config->{debugging}->{$debugChannel}->{enabled} = 0;
+      $config->{debugging}->{$debugChannel}->{logtofile} = 0;
+      $config->{debugging}->{$debugChannel}->{remote} = 0;      
+    }
+  }
+  
+  $config->{localIp} = $externalIP;
+  $config->{port} = $port;
+  
+  open(CONFIG, ">$configFile");
+  print CONFIG XMLout($config);
+  close(CONFIG);
+  
   $client->localIp($externalIP);
   $client->port($port);
 
@@ -379,6 +495,54 @@ sub floods_ChunksDisplay_Paint {
   $DC->Validate();
 #      $mainWindow->floods_ChunksDisplay->Update();
   return 1;
+}
+
+sub config_Populate {
+  $mainWindow->config_ExternalIPEntry->SelectAll();
+  $mainWindow->config_ExternalIPEntry->ReplaceSel($config->{localIp});
+
+  $mainWindow->config_PortEntry->SelectAll();
+  $mainWindow->config_PortEntry->ReplaceSel($config->{port});
+
+  foreach my $debugChannel (keys(%channelNames)) {
+    my $enabledCheckbox = "config_${debugChannel}LoggingChannelEnabledCheckbox";
+    my $levelEntry = "config_${debugChannel}LoggingChannelLevelEntry";
+    my $logToFileCheckbox = "config_${debugChannel}LoggingChannelToFileCheckbox";
+    my $logFilenameEntry = "config_${debugChannel}LoggingChannelFilenameEntry";
+    my $remoteLoggingCheckbox = "config_${debugChannel}LoggingChannelRemoteCheckbox";
+      
+    if($config->{debugging}->{$debugChannel}->{enabled}) {
+      $mainWindow->$enabledCheckbox->Checked(1);
+
+      if(BitFlood::Debug::OpenChannel($channelNames{$debugChannel}) or $debugChannel eq 'Default') {
+	$mainWindow->$levelEntry->SelectAll();
+	$mainWindow->$levelEntry->ReplaceSel($config->{debugging}->{$debugChannel}->{level});
+	BitFlood::Debug::SetChannelLevel($channelNames{$debugChannel}, $config->{debugging}->{$debugChannel}->{level});
+
+	if($config->{debugging}->{$debugChannel}->{logtofile}) {
+	  $mainWindow->$logFilenameEntry->SelectAll();
+	  $mainWindow->$logFilenameEntry->ReplaceSel($config->{debugging}->{$debugChannel}->{filename});
+	  
+	  BitFlood::Debug::AddLogger($channelNames{$debugChannel}, 'File', $config->{debugging}->{$debugChannel}->{filename});
+	  $mainWindow->$logToFileCheckbox->Checked(1);
+	}
+	
+	if($config->{debugging}->{$debugChannel}->{remote}) {
+	  $mainWindow->$remoteLoggingCheckbox->Checked(1);
+	  
+	  BitFlood::Debug::AddLogger($channelNames{$debugChannel}, 'Jabber',
+				     recipient  => 'bftest@jabber.org/listener',
+				     serverHost => 'jabber.org',
+				     serverPort => 5222,
+				     username   => 'bftest',
+				     password   => 'bftest',
+				     resource   => hostname() . '_' . inet_ntoa(scalar gethostbyname(hostname())));
+	  $mainWindow->$remoteLoggingCheckbox->Checked(1);
+	}
+      }
+    }
+  }
+
 }
 
 sub ReadableTimeDelta {
