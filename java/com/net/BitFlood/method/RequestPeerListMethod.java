@@ -6,6 +6,8 @@ package com.net.BitFlood.method;
  */
 
 import com.net.BitFlood.*;
+import com.net.BitFlood.peerconnection.SocketConnection;
+
 import java.util.Vector;
 import java.util.Iterator;
 
@@ -34,7 +36,10 @@ public class RequestPeerListMethod implements MethodHandler
     while( peeriter.hasNext() )
     {
       final PeerConnection peer = (PeerConnection)peeriter.next();
-      responseParams.add( new String( peer.id + ":" + peer.hostname + ":" + peer.listenPort ) );
+      if (peer instanceof SocketConnection) { // TODO: handle this more elegantly
+        SocketConnection socketPeer = (SocketConnection) peer;
+        responseParams.add( new String( socketPeer.id + ":" + socketPeer.hostname + ":" + socketPeer.listenPort ) );
+      }
     }
     
     receiver.SendMethod( "SendPeerList", responseParams );

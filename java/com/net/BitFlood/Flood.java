@@ -6,6 +6,8 @@ package com.net.BitFlood;
  */
 
 import com.net.BitFlood.method.*;
+import com.net.BitFlood.peerconnection.SocketConnection;
+
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -67,6 +69,7 @@ public class Flood
   public Flood(Peer peer, String floodFilename, ChunkPrioritizer chunkPrioritizer)
   {
     localPeer = peer;
+    // TODO: use FileConnection stuff instead of FloodFile
     floodFile = new FloodFile( floodFilename );
     floodFile.Read();
     PrioritizeChunks(chunkPrioritizer);
@@ -148,7 +151,7 @@ public class Flood
           PeerConnection peer = FindPeer( tracker.id );
           if ( peer == null )
           {
-            peer = new PeerConnection( this, tracker.host, tracker.port, tracker.id );
+            peer = new SocketConnection( this, tracker.host, tracker.port, tracker.id );
             peerConnections.add( peer );
           }
 

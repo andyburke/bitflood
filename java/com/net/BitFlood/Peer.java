@@ -6,6 +6,8 @@ package com.net.BitFlood;
  */
 
 import com.net.BitFlood.method.*;
+import com.net.BitFlood.peerconnection.SocketConnection;
+
 import java.util.*;
 import java.nio.channels.*;
 import java.net.*;
@@ -145,7 +147,7 @@ public class Peer
 
           if ( incomingSocket != null )
           {
-            PeerConnection incomingPeer = new PeerConnection( this, incomingSocket );
+            PeerConnection incomingPeer = new SocketConnection( this, incomingSocket );
             pendingPeers.add( incomingPeer );
           }
         }

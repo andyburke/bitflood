@@ -6,6 +6,8 @@ package com.net.BitFlood.method;
  */
 
 import com.net.BitFlood.*;
+import com.net.BitFlood.peerconnection.SocketConnection;
+
 import java.util.Vector;
 
 /**
@@ -14,6 +16,7 @@ import java.util.Vector;
  */
 public class RegisterMethod implements MethodHandler
 {
+  // TODO: refactor this static string / getmethodname() stuff
   final static public String methodName = "Register";
   public String getMethodName()
   {
@@ -58,8 +61,11 @@ public class RegisterMethod implements MethodHandler
     }
 
     receiver.id = peerId;
-    receiver.listenPort = peerListen.intValue();
     receiver.flood = flood;
+    if ( receiver instanceof SocketConnection )    // TODO: handle this more elegantly
+    {
+      ((SocketConnection) receiver).listenPort = peerListen.intValue();
+    }
     
     // ask for chunks
     receiver.SendMethod( RequestChunkMapsMethod.methodName, new Vector() );

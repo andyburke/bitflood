@@ -6,6 +6,8 @@ package com.net.BitFlood.method;
  */
 
 import com.net.BitFlood.*;
+import com.net.BitFlood.peerconnection.SocketConnection;
+
 import java.util.Vector;
 import java.util.Iterator;
 
@@ -44,7 +46,7 @@ public class SendPeerListMethod implements MethodHandler
 
         if ( peer == null )
         {
-          peer = new PeerConnection( receiver.flood, peerHost, peerPort, peerId );
+          peer = new SocketConnection( receiver.flood, peerHost, peerPort, peerId );
           receiver.flood.peerConnections.add( peer );
         }
       }
