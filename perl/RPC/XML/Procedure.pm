@@ -8,7 +8,7 @@
 #
 ###############################################################################
 #
-#   $Id: Procedure.pm,v 1.1 2004/09/13 05:41:11 burke Exp $
+#   $Id$
 #
 #   Description:    This class abstracts out all the procedure-related
 #                   operations from the RPC::XML::Server class

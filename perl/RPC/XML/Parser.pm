@@ -8,7 +8,7 @@
 #
 ###############################################################################
 #
-#   $Id: Parser.pm,v 1.1 2004/09/13 05:41:11 burke Exp $
+#   $Id$
 #
 #   Description:    This is the RPC::XML::Parser class, a container for the
 #                   XML::Parser class. It was moved here from RPC::XML in

@@ -8,7 +8,7 @@
 #
 ###############################################################################
 #
-#   $Id: Method.pm,v 1.1 2004/09/13 05:41:11 burke Exp $
+#   $Id$
 #
 #   Description:    This is now an empty sub-class of RPC::XML::Procedure.
 #                   It is given its own file to allow for a minimal manual

@@ -9,7 +9,7 @@
 #
 ###############################################################################
 #
-#   $Id: XML.pm,v 1.1 2004/09/13 05:41:07 burke Exp $
+#   $Id$
 #
 #   Description:    This module provides the core XML <-> RPC conversion and
 #                   structural management.

@@ -9,7 +9,7 @@
 #
 ###############################################################################
 #
-#   $Id: Client.pm,v 1.1 2004/09/13 05:41:11 burke Exp $
+#   $Id$
 #
 #   Description:    This class implements an RPC::XML client, using LWP to
 #                   manage the underlying communication protocols. It relies

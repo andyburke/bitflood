@@ -9,7 +9,7 @@
 #
 ###############################################################################
 #
-#   $Id: Server.pm,v 1.1 2004/09/13 05:41:11 burke Exp $
+#   $Id$
 #
 #   Description:    This class implements an RPC::XML server, using the core
 #                   XML::RPC transaction code. The server may be created with

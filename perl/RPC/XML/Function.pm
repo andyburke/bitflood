@@ -8,7 +8,7 @@
 #
 ###############################################################################
 #
-#   $Id: Function.pm,v 1.1 2004/09/13 05:41:11 burke Exp $
+#   $Id$
 #
 #   Description:    This is a type of Procedure that does no signature tests
 #                   at either creation or invocation.
