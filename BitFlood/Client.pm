@@ -17,13 +17,16 @@ use File::Path;
 
 use BitFlood::Utils;
 
+
+__PACKAGE__->mk_accessors(qw(floodFiles neededChunks));
+
+
 sub new {
   my $class = shift;
   my %args = @_;
 
   my $self = RPC::XML::Server->new(port => $args{port} || 10101);
   bless $self, $class;
-  $self->mk_accessors(qw(floodFiles));
 
   $self->floodFiles({});
   $self->neededChunks({});
@@ -40,7 +43,7 @@ sub new {
       my $filename = shift;
       my $index = shift;
 
-      open();
+      #open();
     },
       
   });
@@ -55,56 +58,77 @@ sub AddFloodFile {
   return if(!-f $filename);
 
   open(FLOODFILE, $filename);
-  my $data = XMLin(FLOODFILE, ForceArray => ['File']);
+  my $floodData = XMLin(\*FLOODFILE, ForceArray => ['File']);
   seek(FLOODFILE, 0, 0);
   my $contents = join('', <FLOODFILE>);
   my $fileHash = sha1_base64($contents);
   close(FLOODFILE);
 
-  $self->floodFiles->{$fileHash} = $data;
+  $self->floodFiles->{$fileHash} = { floodData  => $floodData,
+                                     chunkIndex => $self->BuildChunkIndex($floodData)  };
+}
+
+sub BuildChunkIndex {
+  my $self = shift;
+  my $floodData = shift;
+
+  my @index;
+  while (my ($fileName, $file) = each %{$floodData->{FileInfo}{File}}) {
+    foreach my $chunk (@{$file->{Chunk}}) {
+      push(@index, [$fileName, $chunk->{index}]);
+    }
+  }
+
+  return \@index;
 }
 
 sub InitializeTargetFiles {
   my $self = shift;
-  
- foreach my $floodFileHash (keys(%{$self->floodFiles})) {
-   my $floodFile = $self->floodFiles->{$floodFileHash};
-   foreach my $targetFile (keys(%{$floodFile->{FileInfo}->{File}})) {
-     $localFilename = LocalFilename($targetFile);
 
-     if(!-f $localFilename)   # file doesn't exist, initialize it to 0
-     {
-       mkpath(GetLocalPathFromFilename($localFilename));
-       open(OUTFILE, ">$localFilename");
-       my $fileSize = $floodFile->{FileInfo}->{File}->{$targetFile}->{Size};
-       if($fileSize > 0) {
-         seek(OUTFILE, $fileSize-1, 0);
-         syswrite(OUTFILE, 0, 1);
-       }
-       close(OUTFILE);
-       foreach my $chunk (@{$floodFile->{FileInfo}->{File}->{$targetFile}->{Chunk}}) {
-         #FIXME: this is really inefficient, memory-wise
-         if(ref($self->{neededChunks}->{$floodFileHash}->{$targetFile}) ne 'ARRAY') $self->{neededChunks}->{$floodFileHash}->{$targetFile} = []; 
-         push(@{$self->neededChunks->{$floodFileHash}->{$targetFile}}, $chunk);
-       }
-     }
-     else # file DOES exist, we need to decide what we need to get...
-     {
-       open(OUTFILE, "<$localFilename");
-       foreach my $chunk (sort { $a->{index} <=> $b->{index} } @{$floodFile->{FileInfo}->{File}->{$targetFile}->{Chunk}}) {
-         my $buffer;
-         read(OUTFILE, $buffer, $chunk->{size});
-         my $hash = sha1_base64($buffer);
-         if($hash ne $chunk->{hash}) {
-           if(ref($self->{neededChunks}->{$floodFileHash}->{$targetFile}) ne 'ARRAY') $self->{neededChunks}->{$floodFileHash}->{$targetFile} = []; 
-           # FIXME: very ineffecient...
-           push(@{$self->{neededChunks}->{$floodFileHash}->{$targetFile}}, $chunk);
-         }
-       }
-       close(OUTFILE);
-     }
-   }
- }
+  foreach my $floodFileHash (keys(%{$self->floodFiles})) {
+    my $floodFile = $self->floodFiles->{$floodFileHash}{floodData};
+    foreach my $targetFile (keys(%{$floodFile->{FileInfo}->{File}})) {
+      my $localFilename = LocalFilename($targetFile);
+
+      if(!-f $localFilename)   # file doesn't exist, initialize it to 0
+      {
+        mkpath(GetLocalPathFromFilename($localFilename));
+        open(OUTFILE, ">$localFilename");
+        my $fileSize = $floodFile->{FileInfo}->{File}->{$targetFile}->{Size};
+        if($fileSize > 0) {
+          seek(OUTFILE, $fileSize-1, 0);
+          syswrite(OUTFILE, 0, 1);
+        }
+        close(OUTFILE);
+
+=pod
+
+        foreach my $chunk (@{$floodFile->{FileInfo}->{File}->{$targetFile}->{Chunk}}) {
+          #FIXME: this is really inefficient, memory-wise
+          if(ref($self->{neededChunks}->{$floodFileHash}->{$targetFile}) ne 'ARRAY') $self->{neededChunks}->{$floodFileHash}->{$targetFile} = []; 
+          push(@{$self->neededChunks->{$floodFileHash}->{$targetFile}}, $chunk);
+        }
+
+=cut
+
+      }
+      else # file DOES exist, we need to decide what we need to get...
+      {
+        open(OUTFILE, "<$localFilename");
+        my $buffer;
+        foreach my $chunk (sort { $a->{index} <=> $b->{index} } @{$floodFile->{FileInfo}->{File}->{$targetFile}->{Chunk}}) {
+          read(OUTFILE, $buffer, $chunk->{size});
+          my $hash = sha1_base64($buffer);
+          if($hash ne $chunk->{hash}) {
+            #if(ref($self->{neededChunks}->{$floodFileHash}->{$targetFile}) ne 'ARRAY') $self->{neededChunks}->{$floodFileHash}->{$targetFile} = []; 
+            # FIXME: very ineffecient...
+            #push(@{$self->{neededChunks}->{$floodFileHash}->{$targetFile}}, $chunk);
+          }
+        }
+        close(OUTFILE);
+      }
+    }
+  }
 }
 
 1;
