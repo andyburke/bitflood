@@ -55,6 +55,7 @@ public class Flood
   public Hashtable           runtimeTargetFiles = new Hashtable();
   public Vector              chunksToDownload   = new Vector();
   public Vector              chunksDownloading  = new Vector();
+  public ChunkPrioritizer    chunkPrioritizer   = new ChunkPrioritizer();
 
   public Flood()
   {
@@ -195,9 +196,8 @@ public class Flood
           if( !runtimeTargetFile.fileObject.exists() )
           {
             // make any necessary dirs
-            String targetFileDirectoryPath = runtimeTargetFile.fileObject.getAbsolutePath();
-            File runtimeTargetFileDirectory = new File(targetFileDirectoryPath.substring( 0, targetFileDirectoryPath.lastIndexOf( '/' )));
-            runtimeTargetFileDirectory.mkdirs();
+            File targetFileDirectoryPath = runtimeTargetFile.fileObject.getParentFile();
+            targetFileDirectoryPath.mkdirs();
           }
           
           runtimeTargetFile.fileHandle = new RandomAccessFile(runtimeTargetFile.fileObject, "rw");
@@ -285,10 +285,14 @@ public class Flood
 
     // how many bytes are we currently missing
     bytesMissing = totalBytes - bytesAtStartup;
+    
+    // sort the chunks
+    PrioritizeChunks( chunkPrioritizer );
   }
 
-  public void PrioritizeChunks( ChunkPrioritizer chunkPrioritizer)
+  public void PrioritizeChunks( ChunkPrioritizer newChunkPrioritizer)
   {
+    chunkPrioritizer = newChunkPrioritizer;
     Collections.sort(chunksToDownload, chunkPrioritizer);
   }
   

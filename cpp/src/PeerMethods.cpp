@@ -122,6 +122,7 @@ namespace libBitFlood
         i_receiver->m_id         = peerid;
         i_receiver->m_listenport = peerlisten;
         i_receiver->m_flood      = flood.Get();
+        i_receiver->SendMethod( ChunkMethodHandler::RequestChunkMaps, XmlRpcValue() );
         flood->m_peers.push_back( i_receiver );
       }
     }

@@ -48,7 +48,8 @@ namespace libBitFlood
     _ProcessPeers();
 
     // if socket can read
-    if ( m_listensocket->CanRead( 0 ) )
+    bool canread, canwrite;
+    if ( m_listensocket->Select( 0, canread, canwrite ) && canread )
     {
       // if socked accept, add incoming connection
       std::string host;

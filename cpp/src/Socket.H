@@ -21,8 +21,7 @@ namespace libBitFlood
     virtual bool Listen( U32 i_backlog ) = 0;
     virtual bool Accept( SocketSPtr& o_socket, std::string& o_host, U32& o_port ) = 0;
 
-    virtual bool CanRead( U32 i_timeout ) = 0;
-    virtual bool CanWrite( U32 i_timeout ) = 0;
+    virtual bool Select( U32 i_timeout, bool& o_canread, bool& o_canwrite ) = 0;
     
   public:
     static bool CreateSocket( SocketSPtr& o_socket );
@@ -53,8 +52,7 @@ namespace libBitFlood
     bool Listen( U32 i_backlog );
     bool Accept( SocketSPtr& o_socket, std::string& o_host, U32& o_port );
 
-    bool CanRead( U32 i_timeout );
-    bool CanWrite( U32 i_timeout );
+    bool Select( U32 i_timeout, bool& o_canread, bool& o_canwrite );
 
     U32 m_handle;
   };

@@ -154,26 +154,33 @@ namespace libBitFlood
     return success;
   }
 
-  bool Win32Socket::CanRead( U32 i_timeout )
+  bool Win32Socket::Select( U32 i_timeout, bool& o_canread, bool& o_canwrite )
   {
-    fd_set set;
-    FD_ZERO( &set );
-    FD_SET( (SOCKET)m_handle, &set );
-    timeval timeout;
-    timeout.tv_sec = timeout.tv_usec = i_timeout;
-    U32 num = ::select( 0, &set, NULL, NULL, &timeout ); 
-    return num == 1;
-  }
+    fd_set read, write;
+    FD_ZERO( &read );
+    FD_ZERO( &write );
 
-  bool Win32Socket::CanWrite( U32 i_timeout )
-  {
-    fd_set set;
-    FD_ZERO( &set );
-    FD_SET( (SOCKET)m_handle, &set );
+    FD_SET( (SOCKET)m_handle, &read );
+    FD_SET( (SOCKET)m_handle, &write );
+
     timeval timeout;
     timeout.tv_sec = timeout.tv_usec = i_timeout;
-    U32 num = ::select( 0, NULL, &set, NULL, &timeout ); 
-    return num == 1;
+
+    bool ret = true;
+
+    o_canread = false;
+    o_canwrite = false;
+    if ( ::select( 0, &read, &write, NULL, &timeout ) == SOCKET_ERROR && IsFatalError() )
+    {
+      ret = false;
+    }
+    else
+    {
+      o_canread = FD_ISSET( (SOCKET)m_handle, &read ) != 0;
+      o_canwrite = FD_ISSET( (SOCKET)m_handle, &write ) != 0;
+    }
+
+    return ret;
   }
 };
 

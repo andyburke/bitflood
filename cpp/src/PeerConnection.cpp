@@ -95,11 +95,35 @@ namespace libBitFlood
   Error::ErrorCode PeerConnection::LoopOnce( void )
   {
     //
-    if ( !m_disconnected && _Connect() == Error::NO_ERROR_LBF )
+    if ( !m_disconnected )
     {
-      _ReadOnce();
-      _WriteOnce();
-      _ProcessReadBuffer();
+      if ( !m_connected )
+      {
+        _Connect();
+      }
+
+      if ( m_connected )
+      {
+        bool canread, canwrite;
+        if ( !m_socket->Select( 0, canread, canwrite ) )
+        {
+          m_disconnected = true;
+        }
+        else
+        {
+          if ( canread )
+          {
+            _ReadOnce();
+          }
+
+          if ( canwrite )
+          {
+            _WriteOnce();
+          }
+      
+          _ProcessReadBuffer();
+        }
+      }
     }
 
     return Error::NO_ERROR_LBF;
@@ -148,7 +172,8 @@ namespace libBitFlood
         m_socket->Connect( m_host, m_port );
       }
 
-      if ( m_socket->CanWrite( 0 ) )
+      bool canread, canwrite;
+      if ( m_socket->Select( 0, canread, canwrite ) && canwrite )
       {
         // mark as connected
         m_connected = true;
