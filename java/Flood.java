@@ -14,6 +14,9 @@ import java.util.*;
  */
 public class Flood
 {
+  private static final long DOWNLOADING_CHUNK_TIMEOUT = 600000; // 5 minutes
+  private static final long TRACKER_REFRESH_TIMEOUT   =  20000; // 20 seconds
+  
   public Peer      localPeer         = null;
   public Vector    peerConnections   = new Vector();
   public FloodFile floodFile         = null;
@@ -22,6 +25,7 @@ public class Flood
   // runtime flood data
   public class RuntimeTargetFile
   {
+    String               name          = null;
     String               nameOnDisk    = null;
     File                 fileObject    = null;
     RandomAccessFile     fileHandle    = null;
@@ -29,58 +33,18 @@ public class Flood
     FloodFile.TargetFile targetFile    = null;
     long[]               chunkOffsets  = null;
     char[]               chunkMap      = null;
-  }
-
-  public class ChunkKey 
-  {
-    public RuntimeTargetFile runtimeTargetFile = null;
-    public int chunkIndex = 0;
-    
-    public ChunkKey( RuntimeTargetFile file, int index )
-    {
-      runtimeTargetFile = file;
-      chunkIndex = index;
-    }
-    
-    public int hashCode()
-    {
-      if ( runtimeTargetFile == null )
-      {
-        return chunkIndex;
-      }
-      return chunkIndex + runtimeTargetFile.hashCode();
-    }
-    
-    public boolean equals( Object rhs )
-    {
-      if ( !( rhs instanceof ChunkKey ) )
-      {
-        return false;
-      }
-      
-      ChunkKey realRhs = (ChunkKey)rhs;
-      if ( runtimeTargetFile != realRhs.runtimeTargetFile )
-      {
-        return false;
-      }
-      
-      if ( chunkIndex != realRhs.chunkIndex )
-      {
-        return false;
-      }
-      
-      return true;
-    }
-  }
-  public ChunkKey MakeChunkKey( RuntimeTargetFile file, int index )
-  {
-    return new ChunkKey( file, index );
+    Vector               chunks        = null;
   }
   
-  public class ChunkDownload
+  public class RuntimeChunk
   {
-    public PeerConnection downloadFrom = null;
-    public Date startTime = null;
+    int               index                  = -1;
+    int               weight                 = 0;
+    int               size                   = 0;
+    RuntimeTargetFile ownerRuntimeTargetFile = null;
+    boolean           downloading            = false;
+    Date              downloadStartDate      = null;
+    PeerConnection    downloadFrom           = null;
   }
   
   public int                 totalBytes        = 0;
@@ -89,18 +53,24 @@ public class Flood
   public int                 bytesDownloading  = 0;
 
   public Hashtable           runtimeTargetFiles = new Hashtable();
-  public Vector              chunksToDownload  = new Vector();
-  public Hashtable           chunksDownloading = new Hashtable();
+  public Vector              chunksToDownload   = new Vector();
+  public Vector              chunksDownloading  = new Vector();
 
   public Flood()
   {
   }
 
-  public Flood(Peer peer, String floodFilename)
+  public Flood(Peer peer, String floodFilename, ChunkPrioritizer chunkPrioritizer)
   {
     localPeer = peer;
     floodFile = new FloodFile( floodFilename );
     floodFile.Read();
+    PrioritizeChunks(chunkPrioritizer);
+  }
+
+  public Flood(Peer peer, String floodFilename)
+  {
+    this(peer, floodFilename, new ChunkPrioritizer());
   }
 
   public String Id()
@@ -110,6 +80,22 @@ public class Flood
 
   public void LoopOnce()
   {
+    
+    Date now = new Date();
+    
+    // reap timed-out chunks
+    Iterator chunksDownloadingIter = chunksDownloading.iterator();
+    while(chunksDownloadingIter.hasNext())
+    {
+      RuntimeChunk chunk = (RuntimeChunk) chunksDownloadingIter.next();
+      if(now.getTime() - chunk.downloadStartDate.getTime() >= DOWNLOADING_CHUNK_TIMEOUT)
+      {
+        chunk.downloading = false;
+        chunk.downloadStartDate = null;
+        chunksDownloading.remove(chunk);
+      }
+    }
+    
     // get chunks
     GetChunk();
     
@@ -135,8 +121,9 @@ public class Flood
         peeriter.remove();
       }
     }
-    Date now = new Date();
-    if ( lastTrackerUpdate == null || ( now.getTime() - lastTrackerUpdate.getTime() >= 20000 ) )
+    
+    // update trackers
+    if ( lastTrackerUpdate == null || ( now.getTime() - lastTrackerUpdate.getTime() >= TRACKER_REFRESH_TIMEOUT ) )
     {
       UpdateTrackers();
       lastTrackerUpdate = new Date();
@@ -195,8 +182,11 @@ public class Flood
         FloodFile.TargetFile targetFile = (FloodFile.TargetFile) targetFileIter.next();
 
         RuntimeTargetFile runtimeTargetFile = new RuntimeTargetFile();
-        runtimeTargetFile.nameOnDisk = targetFile.name;  // having the rtf have a name lets us rename the target 
+        runtimeTargetFile.name       = targetFile.name;
+        runtimeTargetFile.nameOnDisk = targetFile.name;  // TODO let people override this somehow 
         runtimeTargetFile.targetFile = targetFile;
+        runtimeTargetFile.chunks     = new Vector(targetFile.chunks.size());
+        
         try
         {
           // Get a file handle and channel for the file on disk
@@ -232,6 +222,13 @@ public class Flood
         {
           FloodFile.Chunk chunk = (FloodFile.Chunk) chunkiter.next();
 
+          RuntimeChunk runtimeChunk           = new RuntimeChunk();
+          runtimeChunk.index                  = chunk.index;
+          runtimeChunk.weight                 = chunk.weight;
+          runtimeChunk.size                   = chunk.size;
+          runtimeChunk.ownerRuntimeTargetFile = runtimeTargetFile;
+          runtimeTargetFile.chunks.add(runtimeChunk.index, runtimeChunk);
+          
           // track the offsets
           runtimeTargetFile.chunkOffsets[chunk.index] = nextOffset;
 
@@ -278,7 +275,7 @@ public class Flood
 
           if ( runtimeTargetFile.chunkMap[chunk.index] == '0' )
           {
-            chunksToDownload.add( new ChunkKey( runtimeTargetFile, chunk.index ) );
+            chunksToDownload.add( runtimeChunk );
           }
           
           nextOffset += chunk.size;
@@ -290,35 +287,40 @@ public class Flood
     bytesMissing = totalBytes - bytesAtStartup;
   }
 
+  public void PrioritizeChunks( ChunkPrioritizer chunkPrioritizer)
+  {
+    Collections.sort(chunksToDownload, chunkPrioritizer);
+  }
+  
   protected void GetChunk(  )
   {
     boolean foundchunk = false;
-    PeerConnection todownload_from = null;
-    ChunkKey todownload_key = null;
-
+    PeerConnection peerConnectionToUse = null;
+    Flood.RuntimeChunk chunkToDownload = null;
+    
     // figure out what chunk to get from which peer and ask for it
     Iterator chunkiter = chunksToDownload.iterator();
     while ( chunkiter.hasNext() && !foundchunk )
     {
-      ChunkKey chunkKey = (ChunkKey)chunkiter.next();
+      Flood.RuntimeChunk chunk = (Flood.RuntimeChunk) chunkiter.next();
       
-      if ( !chunksDownloading.contains( chunkKey ) )
+      if ( !chunk.downloading )
       {
-        RuntimeTargetFile runtimeTargetFile = chunkKey.runtimeTargetFile;
+        RuntimeTargetFile runtimeTargetFile = chunk.ownerRuntimeTargetFile;
         Iterator peeriter = peerConnections.iterator();
         while( peeriter.hasNext() && !foundchunk )
         {
-          PeerConnection peerConnection = (PeerConnection)peeriter.next();
+          PeerConnection peerConnection = (PeerConnection) peeriter.next();
           if ( peerConnection.chunksDownloading < 1 )
           {
             char[] peerChunkMap = (char[])peerConnection.chunkMaps.get( runtimeTargetFile.targetFile.name );
             if ( peerChunkMap != null )
             {
-              if ( peerChunkMap[ chunkKey.chunkIndex ] == '1' )
+              if ( peerChunkMap[ chunk.index ] == '1' )
               {
-                foundchunk = true;
-                todownload_from  = peerConnection;
-                todownload_key   = chunkKey;
+                foundchunk           = true;
+                peerConnectionToUse  = peerConnection;
+                chunkToDownload      = chunk;
               }
             }
           }
@@ -329,20 +331,16 @@ public class Flood
     if ( foundchunk )
     {
       Vector parameters = new Vector( 2 );
-      parameters.add( todownload_key.runtimeTargetFile.targetFile.name );
-      parameters.add( new Integer( todownload_key.chunkIndex ) );
+      parameters.add( chunkToDownload.ownerRuntimeTargetFile.name );
+      parameters.add( new Integer( chunkToDownload.index ) );
       
-      todownload_from.chunksDownloading++;
-      todownload_from.SendMethod( RequestChunkMethodHandler.methodName, parameters );
+      peerConnectionToUse.chunksDownloading++;
+      peerConnectionToUse.SendMethod( RequestChunkMethodHandler.methodName, parameters );
 
-      ChunkDownload download = new ChunkDownload();
-      download.downloadFrom = todownload_from;
-      download.startTime = new Date();
-      
-      chunksDownloading.put( todownload_key, download );
-
-      FloodFile.Chunk chunk = (FloodFile.Chunk)todownload_key.runtimeTargetFile.targetFile.chunks.elementAt( todownload_key.chunkIndex );
-      bytesDownloading += chunk.size;
+      chunkToDownload.downloading       = true; // FIXME this needs to be checked for timeout in LoopOnce
+      chunkToDownload.downloadFrom      = peerConnectionToUse;
+      chunkToDownload.downloadStartDate = new Date();
+      bytesDownloading += chunkToDownload.size;
     }
   }
 

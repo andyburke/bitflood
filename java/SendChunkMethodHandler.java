@@ -51,12 +51,11 @@ public class SendChunkMethodHandler implements MethodHandler
       throw new Exception( "Unknown target file specified in SendChunk");
     }
 
-    Flood.ChunkKey chunkKey = receiver.flood.MakeChunkKey( runtimeTargetFile, chunkIndex.intValue() );
-    if ( !receiver.flood.chunksDownloading.containsKey( chunkKey ) )
+    if(chunkIndex.intValue() < 0 || chunkIndex.intValue() >= runtimeTargetFile.chunks.size())
     {
-      throw new Exception( "We've already received this chunk");
+      throw new Exception( "Chunk index out of bounds in SendChunk" );
     }
-
+    
     FloodFile.Chunk chunkInfo = (FloodFile.Chunk) runtimeTargetFile.targetFile.chunks.elementAt(chunkIndex.intValue());
     if( chunkInfo == null )
     {
@@ -82,14 +81,15 @@ public class SendChunkMethodHandler implements MethodHandler
       runtimeTargetFile.fileHandle.write(chunkData);
       writeLock.release();
       
-      Flood.ChunkDownload download = (Flood.ChunkDownload)receiver.flood.chunksDownloading.remove( chunkKey );
-      receiver.flood.chunksToDownload.remove( chunkKey );
+      Flood.RuntimeChunk downloadedChunk = (Flood.RuntimeChunk) runtimeTargetFile.chunks.elementAt(chunkIndex.intValue());
+      receiver.flood.chunksDownloading.remove( downloadedChunk );
+      receiver.flood.chunksToDownload.remove( downloadedChunk );
       receiver.chunksDownloading--;
-      receiver.flood.bytesDownloading -= chunkInfo.size;
-      receiver.flood.bytesMissing -= chunkInfo.size;
+      receiver.flood.bytesDownloading -= downloadedChunk.size;
+      receiver.flood.bytesMissing -= downloadedChunk.size;
       
       Date now = new Date();
-      System.out.println( receiver.id + " sent chunk: " + targetFilename + "#" + chunkIndex + " " + chunkInfo.size / (now.getTime() - download.startTime.getTime()) + "K/s" );
+      System.out.println( receiver.id + " sent chunk: " + targetFilename + "#" + chunkIndex + " " + chunkInfo.size / (now.getTime() - downloadedChunk.downloadStartDate.getTime()) + "K/s" );
       
       
       Vector nhcParams = new Vector( 2 );
