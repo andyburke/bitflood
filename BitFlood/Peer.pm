@@ -235,7 +235,7 @@ sub HandleRequestChunkMaps {
   Debug(">>>", 10);
   my $chunkMaps = [
 		   map
-		     { $_->{name} => $_->{chunkMap}->to_Hex() }
+		     { $_->{name} => $_->{chunkMap}->to_Bin() }
 		     values %{$flood->Files}
 		  ];
 
@@ -251,7 +251,7 @@ sub HandleSendChunkMaps {
   
   Debug(">>>", 10);
   foreach my $chunkMap (values %chunkMaps) {
-    $chunkMap = Bit::Vector->new_Hex(length($chunkMap) * 4, $chunkMap);
+    $chunkMap = Bit::Vector->new_Bin(length($chunkMap), $chunkMap);
   }
   $self->chunkMaps->{$flood->contentHash} = \%chunkMaps;
 
@@ -336,7 +336,7 @@ sub HandleSendChunk {
 
     my $targetFile = IO::File->new($file->{localFilename}, 'r+');
     $targetFile->seek($chunk->{offset}, 0);
-    $targetFile->print($chunkData);
+    $targetFile->syswrite($chunkData);
     $targetFile->close();
 
     $file->{chunkMap}->Bit_On($index);
