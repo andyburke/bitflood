@@ -8,6 +8,7 @@ use RPC::XML;
 use RPC::XML::Parser;
 use IO::Socket;
 use Errno qw(:POSIX);
+use Fcntl qw(:flock);
 use Bit::Vector;
 use Digest::SHA1 qw(sha1_base64);
 use Time::HiRes qw(time);
@@ -42,6 +43,7 @@ __PACKAGE__->mk_accessors(qw(
                              writeBuffer
                              bufferedReader
                              bufferedWriter
+			     targetFilehandles
                             )
                          );
 
@@ -72,6 +74,8 @@ sub new {
     $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
     $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
   }
+
+  $self->targetFilehandles({});
 
   return $self;
 }
@@ -334,10 +338,19 @@ sub HandleSendChunk {
 
   if(sha1_base64($chunkData) eq $chunk->{hash}) {
 
-    my $targetFile = IO::File->new($file->{localFilename}, 'r+');
+    if(!defined($self->targetFilehandles->{$file->{localFilename}})) {
+      $self->targetFilehandles->{$file->{localFilename}} = IO::File->new($file->{localFilename}, 'r+');
+#      $self->targetFilehandles->{$file->{localFilename}}->flock(LOCK_SH);
+#      flock($self->targetFilehandles->{$file->{localFilename}}, LOCK_SH);
+      $self->targetFilehandles->{$file->{localFilename}}->autoflush(1);
+    }
+    my $targetFile = $self->targetFilehandles->{$file->{localFilename}};
+    defined($targetFile) or die("Could not open file for write: $file->{localFilename}");
+    flock($targetFile, LOCK_EX);
     $targetFile->seek($chunk->{offset}, 0);
     $targetFile->syswrite($chunkData);
-    $targetFile->close();
+    flock($targetFile, LOCK_UN);
+#    $targetFile->close();
 
     $file->{chunkMap}->Bit_On($index);
     $file->{downloadBytes} += $chunk->{size};
@@ -370,6 +383,8 @@ sub HandleSendChunk {
   $flood->{totalDownloading}--;
   
   if ($file->{chunkMap}->is_full) {
+    $self->targetFilehandles->{$file->{localFilename}}->close();
+    delete $self->targetFilehandles->{$file->{localFilename}};
     print ' ' x 76 . "\r";
     printf("Completed: %s [%.2f KB/s]\n",
 	   $file->{name},
@@ -569,6 +584,14 @@ sub disconnected {
     }
   }
   $self->_disconnected_accessor(@_);
+}
+
+sub DESTROY {
+  my $self = shift;
+
+  foreach my $filehandle (values(%{$self->targetFilehandles})) {
+    $filehandle->close();
+  }
 }
 
 
