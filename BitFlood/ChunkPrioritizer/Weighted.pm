@@ -12,6 +12,7 @@ sub FindChunk {
   my $client = shift;
   my $flood = shift;
   
+  return undef if($flood->{paused});
   return undef if($flood->{totalDownloading} >= MAX_CHUNKS_TO_DOWNLOAD);
 
   foreach my $neededChunk (@{$flood->neededChunksByWeight}) {
