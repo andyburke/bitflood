@@ -10,15 +10,16 @@ use File::Find;
 
 use BitFlood::Utils;
 use BitFlood::Debug;
+use BitFlood::VirtualTargetFile;
 
-__PACKAGE__->mk_accessors(qw(trackers files));
+__PACKAGE__->mk_accessors(qw(trackers files chunkSize));
 
 
 sub initialize {
   my $self = shift;
-  my $args = shift;
+  my ($args) = @_;
 
-  $self->SUPER::initialize;
+  $self->SUPER::initialize(@_);
   # probably not useful to pass trackers/files to new() but we'll allow it
   $self->trackers  or $self->trackers([]);
   $self->files     or $self->files([]);

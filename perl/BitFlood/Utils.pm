@@ -3,7 +3,7 @@ package BitFlood::Utils;
 
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT = qw(&CleanFilename &LocalFilename &GetLocalPathFromFilename
+@EXPORT = qw(&CleanPath &LocalFilename &GetLocalPathFromFilename
 	     &Popdir
              &Stringify
              &ReadableTimeDelta &ReadableSize);
