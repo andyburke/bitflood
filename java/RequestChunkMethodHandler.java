@@ -6,8 +6,7 @@
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * @author burke
@@ -37,34 +36,27 @@ public class RequestChunkMethodHandler implements MethodHandler
     scParams.add( fileName );
     scParams.add( chunkIndex );
 
-    FloodFile.TargetFile targetFile = null;
-    int fileIndex = 0;
-    Iterator fileiter = receiver.flood.floodFile.files.iterator();
-    for ( fileIndex = 0; fileiter.hasNext(); ++fileIndex )
-    {
-      FloodFile.TargetFile file = (FloodFile.TargetFile) fileiter.next();
-      if ( file.name.compareTo( fileName ) == 0 )
-      {
-        targetFile = file;
-        break;
-      }
-    }
-
+    FloodFile.TargetFile targetFile = (FloodFile.TargetFile) receiver.flood.floodFile.targetFiles.get( fileName );
     // 
     if ( targetFile == null )
     {
       throw new Exception( "peer requested invalid data!" );
     }
 
-    Flood.RuntimeTargetFile rtf = receiver.flood.runtimeFileData[fileIndex];
+    Flood.RuntimeTargetFile runtimeTargetFile = (Flood.RuntimeTargetFile) receiver.flood.runtimeTargetFiles.get( targetFile.name );
 
-    if ( rtf.chunkMap[chunkIndex.intValue()] == '0' )
+    if ( runtimeTargetFile == null )
+    {
+      throw new Exception( "peer requested an invalid file!" );
+    }
+
+    if ( runtimeTargetFile.chunkMap[chunkIndex.intValue()] == '0' )
     {
       throw new Exception( "peer requested invalid data!" );
     }
 
     FloodFile.Chunk targetChunk = (FloodFile.Chunk) targetFile.chunks.get( chunkIndex.intValue() );
-    int chunkOffset = receiver.flood.runtimeFileData[fileIndex].chunkOffsets[chunkIndex.intValue()];
+    int chunkOffset = runtimeTargetFile.chunkOffsets[chunkIndex.intValue()];
 
     InputStream inputFileStream = null;
     try

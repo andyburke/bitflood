@@ -3,8 +3,7 @@
  *
  */
 
-import java.util.Iterator;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * @author burke
@@ -27,15 +26,15 @@ public class RequestChunkMapsMethodHandler implements MethodHandler
     }
     
     // build params and call SendChunkMap
-    Vector scmParams = new Vector( receiver.flood.floodFile.files.size() * 2 );
-    Iterator fileiter = receiver.flood.floodFile.files.iterator();
+    Vector scmParams = new Vector( receiver.flood.floodFile.targetFiles.size() * 2 );
+    Iterator fileiter = Arrays.asList(receiver.flood.floodFile.targetFiles.values().toArray()).iterator();
     for ( int fileIndex = 0; fileiter.hasNext(); ++fileIndex )
     {
-      FloodFile.TargetFile file = (FloodFile.TargetFile) fileiter.next();
-      Flood.RuntimeTargetFile rtf = receiver.flood.runtimeFileData[ fileIndex ];
+      FloodFile.TargetFile targetFile = (FloodFile.TargetFile) fileiter.next();
+      Flood.RuntimeTargetFile runtimeTargetFile = (Flood.RuntimeTargetFile) receiver.flood.runtimeTargetFiles.get(targetFile.name);
       
-      scmParams.add( file.name );
-      scmParams.add( new String( rtf.chunkMap ) );
+      scmParams.add( targetFile.name );
+      scmParams.add( new String( runtimeTargetFile.chunkMap ) );
     }
     
     receiver.SendMethod( SendChunkMapsMethodHandler.methodName, scmParams );
