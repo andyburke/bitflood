@@ -1,5 +1,6 @@
 package BitFlood::Utils;
 
+
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(&CleanFilename &LocalFilename &GetLocalPathFromFilename
@@ -22,7 +23,7 @@ sub CleanFilename {
 }
 
 sub LocalFilename {
-  return File::Spec->canonpath(shift);
+  return File::Spec->rel2abs(shift);
 #  my ($volume, $dirs, $filename) = File::Spec->splitpath(shift, 1);
 #  my @directories = File::Spec->splitdir($dirs);
 #  return File::Spec->catpath($volume, @directories, $filename);
