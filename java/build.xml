@@ -45,10 +45,37 @@
     	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
       	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
       </classpath>
-      <include name="PeerConnection.java" />
-      <include name="ClientTest.java" />
-      <include name="FloodFile.java" />
+      <include name="Peer.java"/>
+      <include name="ClientTest.java"/>
     </javac>
+  </target>
+
+  <target name="TrackerTest" depends="init" description="build the test tracker" >
+    <javac destdir="${bin}"
+    	   srcdir="."
+           debug="true">
+      <classpath>
+    	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
+      	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
+      </classpath>
+      <include name="Peer.java"/>
+      <include name="TrackerTest.java"/>
+    </javac>
+  </target>
+
+  <target name="test_tracker" depends="init,TrackerTest" description="test a tracker" >
+    <mkdir dir="${test}"/>
+    <java classname="TrackerTest" dir="${test}" fork="true">
+      <arg value="-flood"/>
+      <arg value="test.mp3.flood"/>
+      <arg value="-localPort"/>
+      <arg value="10100"/>
+      <classpath>
+    	<pathelement path="${bin}" />
+    	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
+      	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
+      </classpath>
+    </java>
   </target>
 
   <target name="test_client" depends="init,ClientTest" description="test a client" >

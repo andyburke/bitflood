@@ -7,7 +7,7 @@
  * @author burke
  *
  */
-public class ClientTest 
+public class TrackerTest 
 {
   public static void main(String argv[]) 
   {
@@ -59,13 +59,13 @@ public class ClientTest
     System.out.println("local ip      : " + localIP);
     System.out.println("flood port    : " + localPort);
 
-    Peer client = new Peer();
-    client.JoinFlood( floodFilename );
+    Peer tracker = new Peer();
+    tracker.JoinFlood( floodFilename );
 
     boolean quit = false;
     while ( !quit )
     {
-      client.LoopOnce();
+      tracker.LoopOnce();
       try
       {
         Thread.sleep( 100 );
@@ -80,7 +80,7 @@ public class ClientTest
   public static void Usage() 
   {
     System.out.println("Usage:");
-    System.out.println("ClientTest -flood <flood filename> [-localIP <localIP>] [-localPort <localPort>]");
+    System.out.println("TrackerTest -flood <flood filename> [-localIP <localIP>] [-localPort <localPort>]");
     System.exit(0);
   }
 }

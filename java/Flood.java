@@ -18,31 +18,31 @@ public class Flood
   
   public Flood(String floodFilename)
   {
-  	floodFile = new FloodFile(floodFilename);	
+    floodFile = new FloodFile(floodFilename);	
   }
   
   public String Id()
   {
-  	return floodFile.contentHash;
+    return floodFile.contentHash;
   }
   
   public void LoopOnce()
   {
-  	if(peers == null)
-  	{
-  		return;
-  	}
+    if(peers == null)
+    {
+      return;
+    }
   	
-  	for(int peerIndex = 0; peerIndex < peers.length; peerIndex++)
-  	{
-  		if(peers[peerIndex] == null)
-  		{
-  			break;
-  		}
+    for(int peerIndex = 0; peerIndex < peers.length; peerIndex++)
+    {
+      if(peers[peerIndex] == null)
+      {
+        break;
+      }
   		
-  		peers[peerIndex].LoopOnce();
-  	}
+      peers[peerIndex].LoopOnce();
+    }
   	
-  	return;
+    return;
   }
 }

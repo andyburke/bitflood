@@ -336,13 +336,17 @@ public class FloodFile
       System.exit(0);
     }
     
-    try {
+    try
+    {
       parser.parse(new org.xml.sax.InputSource(inputStream));
       Document floodDataDoc = parser.getDocument();
 
       // get all our files and fill out our 'files' array
       NodeList fileinfoList = floodDataDoc.getElementsByTagName("FileInfo");
-      if(fileinfoList.getLength() == 1) { // should only be one fileinfo tag
+
+      // should only be one fileinfo tag
+      if(fileinfoList.getLength() == 1) 
+      { 
         Element fileinfo = (Element) fileinfoList.item(0);
         NodeList fileList = fileinfo.getElementsByTagName("File");
         if ( fileList.getLength() > 0)
@@ -389,34 +393,35 @@ public class FloodFile
             files[fileIndex] = targetFile;
           }
         }
-
-        // get all our trackers
-        NodeList trackersList = floodDataDoc.getElementsByTagName("Tracker");
-        if ( trackersList.getLength() > 0)
-        {
-          trackers = new String[trackersList.getLength()];
-          for ( int trackerIndex = 0; trackerIndex < trackersList.getLength(); trackerIndex++ )
-          {
-            Element tracker = (Element) trackersList.item(trackerIndex);
-            Node child   = tracker.getFirstChild();
-            if(trackerIndex >= trackers.length)
-            {
-              System.out.println("Too many trackers!");
-              System.exit(0);
-            }
-            trackers[trackerIndex] = child.getNodeValue().toString();
-          }     	
-        }
-        else
-        {
-          System.out.println("No trackers in flood file?");
-        }
-
-        //compute our content hash
-        ComputeContentHash();
-    	}
       }
-    } catch (Exception e) {
+
+      // get all our trackers
+      NodeList trackersList = floodDataDoc.getElementsByTagName("Tracker");
+      if ( trackersList.getLength() > 0)
+      {
+        trackers = new String[trackersList.getLength()];
+        for ( int trackerIndex = 0; trackerIndex < trackersList.getLength(); trackerIndex++ )
+        {
+          Element tracker = (Element) trackersList.item(trackerIndex);
+          Node child   = tracker.getFirstChild();
+          if(trackerIndex >= trackers.length)
+          {
+            System.out.println("Too many trackers!");
+            System.exit(0);
+          }
+          trackers[trackerIndex] = child.getNodeValue().toString();
+        }     	
+      }
+      else
+      {
+        System.out.println("No trackers in flood file?");
+      }
+
+      //compute our content hash
+      ComputeContentHash();
+    }
+    catch (Exception e) 
+    {
       System.out.println("Error: " + e);
     }
   }
@@ -606,9 +611,9 @@ public class FloodFile
     
       if(chunkIndex >= files[filesIndex].chunks.length)
       {
-      	// error: we shouldn't have gone beyond the number of chunks in the file
-      	// FIXME we should probably back out anything we've done so far in terms of adding this file
-      	return false;
+        // error: we shouldn't have gone beyond the number of chunks in the file
+        // FIXME we should probably back out anything we've done so far in terms of adding this file
+        return false;
       }
       
       files[filesIndex].chunks[chunkIndex] = chunk;
@@ -631,29 +636,29 @@ public class FloodFile
   	
   private void ComputeContentHash()
   {
-  	if(contentHash == null)
-  	{
-  		// calculate the content hash
-  		if(files != null)
-  		{
-  			String content = "";
+    if(contentHash == null)
+    {
+      // calculate the content hash
+      if(files != null)
+      {
+        String content = "";
   			
-  			Arrays.sort(files);
+        Arrays.sort(files);
 
-  			for(int fileIndex = 0; fileIndex < files.length; fileIndex++)
-  			{
-  				content = content + files[fileIndex].name;
-  				for(int chunkIndex = 0; chunkIndex < files[fileIndex].chunks.length; chunkIndex++)
-  				{
-  					content = content + files[fileIndex].chunks[chunkIndex].hash;
-  				}
-  			}
-  			System.out.println("Hashing on: " + content);
-  			sha1Encoder.reset();
-  			sha1Encoder.update(content.getBytes());
-  			contentHash = Base64.encodeToString(sha1Encoder.digest(), false).substring(0, 27);
-  		}
-  	}
+        for(int fileIndex = 0; fileIndex < files.length; fileIndex++)
+        {
+          content = content + files[fileIndex].name;
+          for(int chunkIndex = 0; chunkIndex < files[fileIndex].chunks.length; chunkIndex++)
+          {
+            content = content + files[fileIndex].chunks[chunkIndex].hash;
+          }
+        }
+        System.out.println("Hashing on: " + content);
+        sha1Encoder.reset();
+        sha1Encoder.update(content.getBytes());
+        contentHash = Base64.encodeToString(sha1Encoder.digest(), false).substring(0, 27);
+      }
+    }
   }
   
   private boolean RecursiveFilenameFind(String root, String[] result) 
