@@ -18,7 +18,7 @@ public class SendChunkMethodHandler implements MethodHandler
     return methodName;
   }
   
-  // TODO - implement
+  // TODO - test
   public void HandleMethod( PeerConnection receiver, final Vector parameters ) throws Exception
   {
     if ( receiver.flood == null )
