@@ -100,7 +100,7 @@ public class FloodFile
     }
     catch ( Exception e )
     {
-      System.out.println( "Error: " + e );
+      e.printStackTrace();
       System.exit( 0 );
     }
 
@@ -128,7 +128,7 @@ public class FloodFile
     }
     catch ( Exception e )
     {
-      System.out.println( "Error: " + e );
+      e.printStackTrace();
       System.exit( 0 );
     }
 
@@ -192,7 +192,7 @@ public class FloodFile
     }
     catch ( Exception e )
     {
-      System.out.println( "Error: " + e );
+      e.printStackTrace();
       System.exit( 0 );
     }
 
@@ -288,7 +288,7 @@ public class FloodFile
     }
     catch ( Exception e )
     {
-      System.out.println( "Error: " + e );
+      e.printStackTrace();
       System.exit( 0 );
     }
 
@@ -377,7 +377,7 @@ public class FloodFile
     }
     catch ( Exception e )
     {
-      System.out.println( "FloodFile FromXML parse error: " + e );
+      e.printStackTrace();
     }
   }
 
@@ -491,7 +491,7 @@ public class FloodFile
     }
     catch ( Exception e )
     {
-      System.out.println( "Error: " + e );
+      e.printStackTrace();
       System.exit( 0 );
     }
 
@@ -511,7 +511,7 @@ public class FloodFile
       }
       catch ( IOException e )
       {
-        System.out.println( "Error: " + e );
+        e.printStackTrace();
         System.exit( 0 );
       }
 
@@ -535,7 +535,7 @@ public class FloodFile
     }
     catch ( IOException e )
     {
-      System.out.println( "Error: " + e );
+      e.printStackTrace();
       System.exit( 0 );
     }
 
