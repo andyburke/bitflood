@@ -29,7 +29,7 @@ public class PeerConnection
   public int            listenPort      = 0;
   public String         id              = "";
   public Flood          flood           = null;
-  public char[][]       chunkMaps       = null;
+  public Hashtable      chunkMaps       = null;
 
   public PeerConnection()
   {

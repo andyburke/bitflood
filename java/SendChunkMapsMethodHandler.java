@@ -36,16 +36,19 @@ public class SendChunkMapsMethodHandler implements MethodHandler
       {
         throw new Exception( "Unknown target filename specified in " + methodName);
       }
-      
-      if( chunkMapstring.length() > runtimeTargetFile.chunkMap.length )
+            
+      char[] peerChunkMap = new char[runtimeTargetFile.chunkMap.length];
+      if( chunkMapstring.length() > peerChunkMap.length )
       {
          throw new Exception( "ChunkMap out of bounds in " + methodName);
       }
       
       for( int chunkMapIndex = 0; chunkMapIndex < runtimeTargetFile.chunkMap.length; chunkMapIndex++ )
       {
-        runtimeTargetFile.chunkMap[chunkMapIndex] = chunkMapstring.charAt(chunkMapIndex);
+        peerChunkMap[chunkMapIndex] = chunkMapstring.charAt(chunkMapIndex);
       }
+      
+      receiver.chunkMaps.put(targetFilename, peerChunkMap);
     }
   }
 }
