@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
   WSADATA wsaData;
   WSAStartup( MAKEWORD( 2, 2 ), &wsaData );
 
-  XmlRpc::setVerbosity(5);
+  //XmlRpc::setVerbosity(5);
 
   FloodFile theflood;
   ParseFloodFile( argv[1], theflood );
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 
     client.GetChunks();
     client.LoopOnce();
-    Sleep( 0 );
+    Sleep( 100 );
   }
 
   // 

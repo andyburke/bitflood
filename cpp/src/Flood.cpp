@@ -2,6 +2,7 @@
 #include "Flood.H"
 #include "Client.H"
 #include "PeerConnection.H"
+#include "Encoder.H"
 
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/util/XMLString.hpp>
@@ -11,12 +12,9 @@
 #include <xercesc/dom/StDOMNode.hpp>
 #include <sstream>
 #include <iostream>
-#include <sha.h>
-#include <hex.h>
-#include <channels.h>
-#include <files.h>
-#include <sstream>
-#include <base64.h>
+#include <algorithm>
+#include <assert.h>
+
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -314,19 +312,7 @@ namespace libBitFlood
 
     // hash 
     std::string tohash_str = tohash.str();
-    using namespace CryptoPP;
-    SHA sha;
-    HashFilter shaFilter(sha);
-    std::auto_ptr<ChannelSwitch> channelSwitch(new ChannelSwitch);
-    channelSwitch->AddDefaultRoute(shaFilter);
-    
-    StringSource( (const byte*)tohash_str.data(), tohash_str.length(), true, channelSwitch.release() );
-    std::stringstream out;
-    Base64Encoder encoder( new FileSink( out ), false );
-    shaFilter.TransferTo( encoder );
-
-    o_hash = out.str();
-
+    Encoder::Base64Encode( (const U8*)tohash_str.data(), tohash_str.length(), o_hash );
       
     return Error::NO_ERROR_LBF;
   }
@@ -525,18 +511,9 @@ namespace libBitFlood
             byte* data = (byte*)malloc( chunk.m_size );
             if ( fread( data, 1, chunk.m_size, fileptr ) == chunk.m_size )
             {
-              using namespace CryptoPP;
-              SHA sha;
-              HashFilter shaFilter(sha);
-              std::auto_ptr<ChannelSwitch> channelSwitch(new ChannelSwitch);
-              channelSwitch->AddDefaultRoute(shaFilter);
-
-              StringSource( data, chunk.m_size, true, channelSwitch.release() );
-              std::stringstream out;
-              Base64Encoder encoder( new FileSink( out ), false );
-              shaFilter.TransferTo( encoder );
-
-              if( chunk.m_hash.compare( out.str() ) == 0 )
+              std::string test;
+              Encoder::Base64Encode( data, chunk.m_size, test );
+              if( chunk.m_hash.compare( test ) == 0 )
               {
                 rtf.m_chunkmap[ chunk.m_index ] = '1';
               }

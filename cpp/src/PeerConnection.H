@@ -22,6 +22,8 @@ namespace libBitFlood
       const std::string& GetRequest( void ) const { return _request; }
       bool ExternalGenerateRequest(const char* i_method, const XmlRpcValue& i_args) { return generateRequest( i_method, i_args ); }
 
+    protected:
+      virtual std::string generateHeader(std::string const& body) { return ""; }
     };
 
     class FakeServer : public XmlRpcServerConnection

@@ -1,12 +1,9 @@
 #include "stdafx.H"
 #include "Client.H"
-#include <sha.h>
-#include <hex.h>
-#include <channels.h>
-#include <files.h>
+#include "Encoder.H"
 #include <sstream>
-#include <base64.h>
 #include <Ws2tcpip.h>
+#include <iostream>
 
 namespace libBitFlood
 {
@@ -20,18 +17,7 @@ namespace libBitFlood
       std::stringstream idstrm;
       idstrm << m_setup.m_localIP << m_setup.m_localPort;
 
-      using namespace CryptoPP;
-      SHA sha;
-      HashFilter shaFilter(sha);
-      std::auto_ptr<ChannelSwitch> channelSwitch(new ChannelSwitch);
-      channelSwitch->AddDefaultRoute(shaFilter);
-
-      StringSource( (const byte*)idstrm.str().c_str(), idstrm.str().length(), true, channelSwitch.release() );
-      std::stringstream out;
-      Base64Encoder encoder( new FileSink( out ), false );
-      shaFilter.TransferTo( encoder );
-
-      m_id = out.str();
+      Encoder::Base64Encode( (const U8*)idstrm.str().c_str(), idstrm.str().length(), m_id );
     }
 
     // Open a listen socket
@@ -151,7 +137,7 @@ namespace libBitFlood
     FD_ZERO( &set );
     FD_SET( m_listensocket, &set );
     timeval timeout;
-    timeout.tv_sec = 0;
+    timeout.tv_sec = timeout.tv_usec = 0;
     U32 num = ::select( 0, &set, NULL, NULL, &timeout ); 
     if ( num == 1 )
     {

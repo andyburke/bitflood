@@ -3,6 +3,7 @@
 #include "PeerConnection.H"
 #include "Flood.H"
 #include "Client.H"
+#include "Encoder.H"
 
 #include <sha.h>
 #include <hex.h>
@@ -227,18 +228,9 @@ namespace libBitFlood
           byte* data = (byte*)malloc( thechunk.m_size );
           if ( fread( data, 1, thechunk.m_size, fileptr ) == thechunk.m_size )
           {
-            using namespace CryptoPP;
-            SHA sha;
-            HashFilter shaFilter(sha);
-            std::auto_ptr<ChannelSwitch> channelSwitch(new ChannelSwitch);
-            channelSwitch->AddDefaultRoute(shaFilter);
-
-            StringSource( data, thechunk.m_size, true, channelSwitch.release() );
-            std::stringstream out;
-            Base64Encoder encoder( new FileSink( out ), false );
-            shaFilter.TransferTo( encoder );
-
-            if( thechunk.m_hash.compare( out.str() ) == 0 )
+            std::string test;
+            Encoder::Base64Encode( data, thechunk.m_size, test );
+            if( thechunk.m_hash.compare( test ) == 0 )
             {
               args[3] = XmlRpcValue( data, thechunk.m_size );
 
@@ -305,7 +297,7 @@ namespace libBitFlood
         FD_ZERO( &set );
         FD_SET( m_socket, &set );
         timeval timeout;
-        timeout.tv_sec = 0;
+        timeout.tv_sec = timeout.tv_usec = 0;
         U32 num = ::select( 0, NULL, &set, NULL, &timeout ); 
         if ( num == 1 )
         {
@@ -428,6 +420,9 @@ namespace libBitFlood
     {
       o_bytesRead = -1;
     }
+    else
+    {
+    }
 
     return Error::NO_ERROR_LBF;
   }
@@ -446,6 +441,9 @@ namespace libBitFlood
       else if( WSAGetLastError() == WSAEWOULDBLOCK )
       {
         o_bytesWritten = -1;
+      }
+      else
+      {
       }
     }
 
@@ -592,18 +590,9 @@ namespace libBitFlood
             data_ptr[data_index] = data[data_index];
           }
 
-          using namespace CryptoPP;
-          SHA sha;
-          HashFilter shaFilter(sha);
-          std::auto_ptr<ChannelSwitch> channelSwitch(new ChannelSwitch);
-          channelSwitch->AddDefaultRoute(shaFilter);
-
-          StringSource( data_ptr, data_size, true, channelSwitch.release() );
-          std::stringstream out;
-          Base64Encoder encoder( new FileSink( out ), false );
-          shaFilter.TransferTo( encoder );
-          
-          if( thechunk.m_hash.compare( out.str() ) == 0 )
+          std::string test;
+          Encoder::Base64Encode( data_ptr, data_size, test );
+          if( thechunk.m_hash.compare( test ) == 0 )
           {
             FILE* fileptr = fopen( filename.c_str(), "wb" );
             if ( fileptr != NULL && fseek( fileptr, chunkoffset, SEEK_SET ) == 0 )

@@ -59,22 +59,11 @@ namespace libBitFlood
               {
                 filesize += bytesRead;
 
-                using namespace CryptoPP;
-                SHA sha;
-                HashFilter shaFilter(sha);
-                std::auto_ptr<ChannelSwitch> channelSwitch(new ChannelSwitch);
-                channelSwitch->AddDefaultRoute(shaFilter);
-
-                StringSource( buffer, bytesRead, true, channelSwitch.release() );
-                std::stringstream out;
-                Base64Encoder encoder( new FileSink( out ), false );
-                shaFilter.TransferTo( encoder );
-
                 libBitFlood::FloodFile::Chunk chunk;
                 chunk.m_index = index;
                 chunk.m_size = bytesRead;
                 chunk.m_weight = 0;
-                chunk.m_hash = out.str();
+                Base64Encode( buffer, bytesRead, chunk.m_hash );
                 fileInfo.m_chunks.push_back( chunk );
               }
               else
@@ -99,6 +88,24 @@ namespace libBitFlood
       }
 
       return ret;
+    }
+
+    static const byte s_Base64[] =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    Error::ErrorCode Base64Encode( const U8* i_data, U32 i_size, std::string& o_string )
+    {
+      using namespace CryptoPP;
+      SHA sha;
+      std::stringstream out;
+      HashFilter shaFilter(sha, new BaseN_Encoder( s_Base64, 6, new FileSink( out ) ) );
+      std::auto_ptr<ChannelSwitch> channelSwitch(new ChannelSwitch);
+      channelSwitch->AddDefaultRoute(shaFilter);
+      
+      StringSource( i_data, i_size, true, channelSwitch.release() );
+      o_string = out.str();
+
+      return Error::NO_ERROR_LBF;
     }
   }
 };

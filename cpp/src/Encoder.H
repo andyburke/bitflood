@@ -22,6 +22,7 @@ namespace libBitFlood
     };
 
     Error::ErrorCode EncodeFile( const ToEncode& i_toencode, FloodFile& o_xml );
+    Error::ErrorCode Base64Encode( const U8* i_data, U32 i_size, std::string& o_string );
   }
 };
 
