@@ -19,7 +19,7 @@ sub FindChunk {
     my $file = $flood->Files->{$neededChunk->{filename}};
     my $chunk = $neededChunk->{chunk};
 
-    foreach my $peer (@{$client->peers}) {
+    foreach my $peer (sort { rand() <=> rand() } @{$client->peers}) {
       next if !$peer->chunkMaps;
       my $peerChunkMap = $peer->chunkMaps->{$flood->contentHash}->{$file->{name}};
       next if !$peerChunkMap or !$peerChunkMap->bit_test($chunk->{index}) or $chunk->{downloading};
