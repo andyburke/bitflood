@@ -47,11 +47,8 @@ namespace libBitFlood
   {
     assert( i_receiver->m_flood != NULL );
 
-    // call SendChunkMap, args are:
-    //  1: and array of strings, file name then the chunkmap for that file
+    // call SendChunkMap
     XmlRpcValue args;
-    args[0];
-
     U32 argindex = 0;
     U32 fileindex;
     for ( fileindex = 0; fileindex < i_receiver->m_flood->m_runtimefiles.size(); ++fileindex )
@@ -59,8 +56,8 @@ namespace libBitFlood
       const Flood::RuntimeFile& rtf = i_receiver->m_flood->m_runtimefiles[fileindex];
       const FloodFile::File& fileinfo = i_receiver->m_flood->m_floodfile->m_files[fileindex];
       
-      args[0][argindex++] = fileinfo.m_name;
-      args[0][argindex++] = rtf.m_chunkmap;
+      args[argindex++] = fileinfo.m_name;
+      args[argindex++] = rtf.m_chunkmap;
     }
 
     // send the method
@@ -73,7 +70,7 @@ namespace libBitFlood
   {
     assert( i_receiver->m_flood != NULL );
 
-    // we'll get an array of 
+    // 
     const std::string& peerid = i_receiver->m_id;
 
     if ( !peerid.empty() )
@@ -85,9 +82,9 @@ namespace libBitFlood
       }
 
       U32 arg_index;
-      for ( arg_index = 0; arg_index < i_args[0].size(); arg_index += 2 )
+      for ( arg_index = 0; arg_index < i_args.size(); arg_index += 2 )
       {
-        (*peeriter).second[ i_args[0][arg_index] ] = i_args[0][ arg_index + 1 ];
+        (*peeriter).second[ i_args[arg_index] ] = i_args[ arg_index + 1 ];
       }
     }
 

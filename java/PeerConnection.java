@@ -29,6 +29,7 @@ public class PeerConnection
   public int            listenPort      = 0;
   public String         id              = "";
   public Flood          flood           = null;
+  public char[][]       chunkMaps       = null;
 
   public PeerConnection()
   {
@@ -121,9 +122,9 @@ public class PeerConnection
 
         // Remove it from the list to indicate that it is being processed
         it.remove();
-
+        
         // 
-        if ( selKey.isConnectable() )
+        if ( selKey.isValid() && selKey.isConnectable() )
         {
           SocketChannel sChannel = (SocketChannel) selKey.channel();
 
@@ -139,12 +140,12 @@ public class PeerConnection
           }
         }
 
-        if ( selKey.isReadable() )
+        if ( selKey.isValid() && selKey.isReadable() )
         {
           ReadOnce();
         }
 
-        if ( selKey.isWritable() )
+        if ( selKey.isValid() && selKey.isWritable() )
         {
           WriteOnce();
         }
