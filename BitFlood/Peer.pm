@@ -71,8 +71,13 @@ sub new {
   if ($self->socket) {
     Debug("connected from: " . $self->id . "(" . $self->host . ":" . $self->port . ")");
 
-    $self->socket->blocking(0)
-      or die ("Non-blocking sockets not supported");
+    # FIXME: windows assness
+    if($^O eq 'MSWin32') {
+      $self->socket->setsockopt(SOL_SOCKET, SO_DONTLINGER, 1);
+      my $temp=1; $self->socket->ioctl(0x8004667E, \$temp); # FIXME: constant is 'FIONBIO' (define it elsewhere?)
+    } else {
+      defined($self->socket->blocking(0)) or die("non-blocking not supported!");
+    }
 
     $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
     $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
@@ -156,7 +161,7 @@ sub Connect {
 	Debug("connection timed out: " . $self->id);
 	$self->disconnected(1);
       }
-    } else {
+    } elsif($!) {
       # some other error, signaling the connect actually failed
       Debug("failed to connect: $!");
       $self->disconnected(1);
