@@ -13,6 +13,7 @@ my $username   = 'bftest';
 my $password   = 'bftest';
 my $resource   = 'listener';
 my $help;
+my %files;
 
 if(!GetOptions(
 	       "server=s"     => \$server,
@@ -29,7 +30,7 @@ if(!GetOptions(
 
 
 my $client = Net::Jabber::Client->new;
-if (!$client->connect(hostname => $server,
+if (!$client->Connect(hostname => $server,
 		      port     => $serverPort)) {
   print "could not connect to server\n";
   exit;
@@ -60,7 +61,18 @@ exit;
 
 
 sub handle_message {
-  my $message = Net::Jabber::Message->new(@_);
+  my $id = shift;
+  my $message = shift;
 
-  print Dumper($message);
+  my $from = $message->GetFrom("jid");
+  my $resource = $from->GetResource;
+  my $body = $message->GetBody;
+
+  if (!$files{$resource}) {
+    print "== $resource : opening file\n";
+    $files{$resource} = IO::File->new(">>$resource.log");
+  }
+  $files{$resource}->print($body . "\n");
+
+  print "<- $resource\n";
 }
