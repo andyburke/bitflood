@@ -10,11 +10,10 @@ use BitFlood::Utils;
 use BitFlood::Debug;
 
 sub new {
-  my $prototype = shift;
+  my $class = shift;
   my $args = shift;
 
-  my $class = ref($prototype) || $prototype;
-  my $self = bless({}, $class);
+  my $self = $class->SUPER::new($args);
 
   $self->filters([]);
   $self->muted(0);
