@@ -9,8 +9,11 @@ import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.*;
 
+import sdk.Base64.Base64;
+
 import java.io.IOException;
 import java.io.StringWriter;
+import java.security.MessageDigest;
 import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -25,14 +28,18 @@ public class XMLEnvelopeProcessor
   private static DocumentBuilderFactory docBuilderFactory = null;
   private static DocumentBuilder        docBuilder        = null;
 
-  private Document doc = null;
-  
+  private static MessageDigest sha1Encoder = null;
+
+  private Document                      doc               = null;
+
   static
   {
     try
     {
       docBuilderFactory = DocumentBuilderFactoryImpl.newInstance();
       docBuilder = docBuilderFactory.newDocumentBuilder();
+
+      sha1Encoder = MessageDigest.getInstance( "SHA-1" );
     }
     catch ( Exception e )
     {
@@ -49,7 +56,7 @@ public class XMLEnvelopeProcessor
   public String encode( String methodName, Vector arguments )
   {
     doc = docBuilder.newDocument();
-
+    
     Element methodCallElement = doc.createElement( "methodCall" );
 
     Element methodNameElement = doc.createElement( "methodName" );
@@ -68,13 +75,13 @@ public class XMLEnvelopeProcessor
       param.appendChild( value );
       params.appendChild( param );
     }
-    
+
     methodCallElement.appendChild( params );
-    doc.appendChild(methodCallElement);
-    
-    XMLSerializer          xmlSerializer     = null;
-    StringWriter           strWriter         = null;
-    OutputFormat           outFormat         = null;
+    doc.appendChild( methodCallElement );
+
+    XMLSerializer xmlSerializer = null;
+    StringWriter strWriter = null;
+    OutputFormat outFormat = null;
     try
     {
       xmlSerializer = new XMLSerializer();
@@ -85,8 +92,8 @@ public class XMLEnvelopeProcessor
       outFormat.setVersion( "1.0" );
       outFormat.setIndenting( false );
       outFormat.setLineWidth( 0 );
-      outFormat.setLineSeparator("");
-           
+      outFormat.setLineSeparator( "" );
+
       xmlSerializer.setOutputCharStream( strWriter );
       xmlSerializer.setOutputFormat( outFormat );
     }
@@ -130,6 +137,16 @@ public class XMLEnvelopeProcessor
       integer.appendChild( doc.createTextNode( tmp.toString() ) );
       return integer;
     }
+    else if ( arg instanceof byte[] )
+    {
+      byte[] tmp = (byte[]) arg;
+      Element base64 = doc.createElement( "base64");
+     
+      sha1Encoder.reset();
+      sha1Encoder.update( tmp );
+      base64.appendChild( doc.createTextNode( Base64.encodeToString( sha1Encoder.digest(), false)));
+      return base64;
+    }
     else if ( arg instanceof Vector )
     {
       Vector tmp = (Vector) arg;
@@ -143,14 +160,14 @@ public class XMLEnvelopeProcessor
       {
         Object element = tmpIter.nextElement();
         Element value = doc.createElement( "value" );
-        value.appendChild( encodeArg( element ));
+        value.appendChild( encodeArg( element ) );
         data.appendChild( value );
       }
       return array;
     }
     else
     {
-      System.out.println(arg.toString());
+      System.out.println( arg.toString() );
       System.out.println( "Uknown type encountered!" );
       return null;
     }
