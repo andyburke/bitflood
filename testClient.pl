@@ -28,6 +28,8 @@ foreach my $floodFile (@ARGV) {
 my $UPDATE_INTERVAL = 20; #seconds
 my $last_update = 0;
 
+print "\n==> ready to go <==\n\n";
+
 while(1) {
 #  my $stime = time();
   if (time() - $last_update >= $UPDATE_INTERVAL) {
