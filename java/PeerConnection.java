@@ -204,10 +204,9 @@ public class PeerConnection
       {
         int diff = readBuffer.position() - readIndex;
         byte[] message = new byte[readIndex];
-        readBuffer.flip();
+        readBuffer.position( 0 );
         readBuffer.get( message, 0, readIndex );
         readBuffer.compact();
-        readBuffer.clear();
         readBuffer.position( diff );
         readIndex = 0;
 

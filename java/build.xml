@@ -47,6 +47,7 @@
       </classpath>
       <include name="Peer.java"/>
       <include name="PeerConnection.java"/>
+      <include name="Flood.java"/>
       <include name="FloodFile.java"/>
       <include name="ClientTest.java"/>
     </javac>
@@ -63,6 +64,7 @@
       <include name="Peer.java"/>
       <include name="PeerConnection.java"/>
       <include name="FloodFile.java"/>
+      <include name="Flood.java"/>
       <include name="TrackerTest.java"/>
     </javac>
   </target>

@@ -3,17 +3,21 @@
  *
  */
 
+import java.util.*;
+
 /**
  * @author burke
  *
  */
 public class Flood 
 {
-  private PeerConnection[] peers     = null;
-  private FloodFile        floodFile = null;
+  private Vector    peers             = null;
+  private FloodFile floodFile         = null;
+  private Date      lastTrackerUpdate = null;
   
   public Flood()
   {
+    peers = new Vector();
   }
   
   public Flood(String floodFilename)
@@ -28,21 +32,25 @@ public class Flood
   
   public void LoopOnce()
   {
-    if(peers == null)
+    if( peers != null )
     {
-      return;
-    }
-  	
-    for(int peerIndex = 0; peerIndex < peers.length; peerIndex++)
-    {
-      if(peers[peerIndex] == null)
+      Enumeration peeriter = peers.elements();
+      for ( ; peeriter.hasMoreElements() ; )
       {
-        break;
+        PeerConnection peer = (PeerConnection)peeriter.nextElement();
+        peer.LoopOnce();
       }
-  		
-      peers[peerIndex].LoopOnce();
     }
-  	
-    return;
+    
+    Date now = new Date();
+    if ( lastTrackerUpdate == null || ( now.getTime() - lastTrackerUpdate.getTime() >= 20 ) )
+    {
+      UpdateTrackers();
+      lastTrackerUpdate = new Date();
+    }
+  }
+
+  protected void UpdateTrackers()
+  {
   }
 }

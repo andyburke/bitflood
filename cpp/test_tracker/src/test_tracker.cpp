@@ -62,14 +62,14 @@ int main(int argc, char* argv[])
     convert >> port;
   }
 
-  PeerSPtr client( new Peer() );
-  client->Initialize( host, port );
-  client->AddFloodFile( theflood );
-  client->AddHandler( MethodHandlerSPtr( new TrackerMethodHandler() ) );
+  PeerSPtr tracker( new Peer() );
+  tracker->Initialize( host, port );
+  tracker->AddFloodFile( theflood );
+  tracker->AddHandler( MethodHandlerSPtr( new TrackerMethodHandler() ) );
 
   while( !quit )
   {
-    client->LoopOnce();
+    tracker->LoopOnce();
     Sleep( 100 );
   }
 }
