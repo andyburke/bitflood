@@ -285,14 +285,14 @@ sub HandleSendChunk {
     $flood->downloadBytes($flood->downloadBytes + $chunk->{size});
 
     foreach my $peer (grep { exists($_->floods->{$flood->contentHash}) } @{$self->client->peers}) {
-      $self->SendMessage(
+      $peer->SendMessage(
 			 'NotifyHaveChunk',
 			 $flood,
 			 $file->{name},
 			 $chunk->{index}
 			);
     }
-
+ 
     # pull the chunk we got out of the list of the ones we need
     for(my $index = 0; $index < @{$flood->neededChunksByWeight}; $index++) {
       my $chunkToRemove = $flood->neededChunksByWeight->[$index];
