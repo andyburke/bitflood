@@ -68,8 +68,18 @@ sub new {
   $self->port(10101) if(!defined($self->port));
   Debug("Setting port to: " . $self->port, 7);
   if ($self->socket) {
-    $self->socket->blocking(0)
-      or die ("This system does not support O_NONBLOCK!");
+    if($^O eq 'MSWin32')
+    {
+      if (!$self->socket->ioctl(FIONBIO, pack("L", 1))) {
+        Debug("Error setting nonblocking using ioctl: " . ($!));
+        die("Error setting non-blocking using ioctl! ($!)");
+      }
+    }
+    else
+    {
+      $self->socket->blocking(0)
+	  or die ("This system does not support O_NONBLOCK!");
+    }
 
     Debug("giving ref to: " . \$self->{readBuffer}, 50);
     $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
