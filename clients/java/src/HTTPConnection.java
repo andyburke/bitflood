@@ -2,12 +2,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-
+import java.util.*;
 import java.io.*;
 
 import com.net.BitFlood.*;
-
+import com.sun.corba.se.internal.ior.WireObjectKeyTemplate;
 
 /**
  * Created on Dec 6, 2004
@@ -22,13 +21,18 @@ public class HTTPConnection // FIXME should this be in its own file?
   
   private SocketChannel socketChannel = null;
   private Selector socketSelector = null;
+  private ByteArrayOutputStream byteArrayStream = null;
+  private ChunkedOutputStream chunkedStream = null;
 
   private int           BUFFER_SIZE       = 1024 * 1024; // 1MB
   private ByteBuffer    readBuffer        = ByteBuffer.allocate( 2048 ); // 2kb should be fine for URLS
   private int           readIndex         = 0;
   private ByteBuffer    writeBuffer       = ByteBuffer.allocate( BUFFER_SIZE ); // 1MB for writing
   private int           writeIndex        = 0;
-
+  private int           bytesWritten      = 0;
+  
+  private static final byte[] crlf = { 13, 10 };
+  
   public boolean disconnected = false;
   public boolean headersSent = false;
   
@@ -51,6 +55,8 @@ public class HTTPConnection // FIXME should this be in its own file?
       socketSelector = Selector.open();
       socketChannel.configureBlocking( false );
       socketChannel.register( socketSelector, socketChannel.validOps() );
+      byteArrayStream = new ByteArrayOutputStream();
+      chunkedStream = new ChunkedOutputStream(byteArrayStream);
     }
     catch(Exception e)
     {
@@ -145,23 +151,63 @@ public class HTTPConnection // FIXME should this be in its own file?
   
   private boolean Stream()
   {
+    
+    if (disconnected)
+    {
+      return false;
+    }
+    
     if (floodingFileHandle != null )
     {
       if(!headersSent)
       {
         try
         {
-          ByteBuffer b = ByteBuffer.allocate(2048);
-          b.put(new String("HTTP/1.1 200 OK\n").getBytes());
-          socketChannel.write(b);
-          b.clear();
-          b.put(new String("Connection: close\n").getBytes());
-          socketChannel.write(b);
+          writeBuffer.clear();
+          writeBuffer.put(new String("HTTP/1.1 200 OK").getBytes());
+          writeBuffer.put(crlf);
+          writeBuffer.put(new String("Accept-Ranges: bytes").getBytes());
+          writeBuffer.put(crlf);
+          writeBuffer.put(new String("Content-Length: " + runtimeTargetFile.targetFile.size).getBytes());
+          writeBuffer.put(crlf);
+          writeBuffer.put(new String("Connection: close").getBytes());
+          writeBuffer.put(crlf);
+          writeBuffer.put(crlf);
           
+          writeBuffer.limit(writeBuffer.position());
+          socketChannel.write(writeBuffer);
+          writeBuffer.clear();
+          headersSent = true;
         }
         catch(Exception e)
         {
           e.printStackTrace();
+          disconnected = true;
+          return false;
+        }
+      }
+      if(chunkIndex >= runtimeTargetFile.chunkMap.length)
+      {
+        try
+        {
+          byte[] zero = {0};
+          writeBuffer.clear();
+          writeBuffer.put(zero);
+          writeBuffer.put(crlf);
+          writeBuffer.put(crlf);
+          writeBuffer.limit(writeBuffer.position());
+          socketChannel.write(writeBuffer);
+          writeBuffer.clear();
+          socketChannel.close();
+          System.out.println("Bytes written: " + bytesWritten);
+          disconnected = true;
+          return false;
+        }
+        catch(Exception e)
+        {
+          e.printStackTrace();
+          disconnected = true;
+          return false;
         }
       }
       if(runtimeTargetFile.chunkMap[chunkIndex] == '1') {
@@ -172,15 +218,31 @@ public class HTTPConnection // FIXME should this be in its own file?
           System.out.println("Sending a part of the file (" + chunkIndex + ")");
           floodingFileHandle.seek(runtimeTargetFile.chunkOffsets[chunkIndex]);
           floodingFileHandle.read(chunkData);
-          ByteBuffer outputBuffer = ByteBuffer.allocate(chunk.size);
-          outputBuffer.put(chunkData);
-          socketChannel.write(outputBuffer);
+          String lenString = Integer.toString(chunkData.length, 16);
+
+          writeBuffer.clear();
+          writeBuffer.put(lenString.getBytes());
+          writeBuffer.put(crlf);
+          writeBuffer.put(chunkData);
+          writeBuffer.put(crlf);
+          int bytesToWrite = writeBuffer.position();
+          writeBuffer.limit(bytesToWrite);
+          writeBuffer.rewind();
+          
+          int bytesOut = 0;
+          while(bytesOut < bytesToWrite && writeBuffer.hasRemaining())  // FIXME this loop scares me
+          {
+            bytesOut += socketChannel.write(writeBuffer);
+          }
+          System.out.println("wrote: " + bytesOut);
+          bytesWritten += bytesOut;
           chunkIndex++;
           return true;
         }
         catch(Exception e)
         {
           e.printStackTrace();
+          disconnected = true;
           return false;
         }
       }

@@ -93,7 +93,14 @@ public class ThrumHTTPProxy
       while(connectionIter.hasNext())
       {
         HTTPConnection httpconn = (HTTPConnection) connectionIter.next();
-        httpconn.LoopOnce();
+        if(!httpconn.disconnected)
+        {
+          httpconn.LoopOnce();
+        }
+        else
+        {
+          connectionIter.remove();
+        }
       }
     }
     
@@ -137,6 +144,7 @@ public class ThrumHTTPProxy
 
           if ( incomingSocket != null )
           {
+            System.out.println("Spinning off incoming connection...");
             connections.add(new HTTPConnection(this, incomingSocket));
           }
         }
