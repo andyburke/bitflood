@@ -284,7 +284,7 @@ sub HandleSendChunk {
     $file->{downloadBytes} += $chunk->{size};
     $flood->downloadBytes($flood->downloadBytes + $chunk->{size});
 
-    foreach my $peer (grep { $_->floods->{$flood->contentHash} } @{$self->client->peers}) {
+    foreach my $peer (grep { exists($_->floods->{$flood->contentHash}) } @{$self->client->peers}) {
       $self->SendMessage(
 			 'NotifyHaveChunk',
 			 $flood,
