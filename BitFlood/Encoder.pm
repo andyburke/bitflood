@@ -22,7 +22,7 @@ sub new {
   $self->data({});
   $self->data->{Tracker} = $args{tracker};
   $self->filename($args{filename});
-  $self->chunkSize($args{chunkSize} || 16384); # default to 1024
+  $self->chunkSize($args{chunkSize} || 2**18); # default to 256k
   $self->weightingFunction($args{weightingFunction});
 
   return $self;
@@ -65,10 +65,10 @@ sub _EncodeFile {
   
   my $buffer;
   my $index = 0;
-  while(read(INFILE, $buffer, $self->chunkSize)) {
+  while(my $read_length = read(INFILE, $buffer, $self->chunkSize)) {
     push(@{$self->data->{Files}->{$cleanFilename}->{Chunk}}, { index => $index++,
                                                                hash => sha1_base64($buffer),
-                                                               size => length($buffer),
+                                                               size => $read_length,
                                                              });
     $self->data->{Files}->{$cleanFilename}->{Size} += length($buffer);
   }
