@@ -131,10 +131,11 @@ sub Connect {
   my $connected = $select->can_write(0);
   Debug("checking for completed connection (" . $self->host . "): $connected [error: $! (" . ($!+0) . ")]", 25);
 
-    #if ($!{ENOTCONN}) {
-    #  # force "error slippage" to get the real error (credit DJB)
-    #  $self->socket->sysread(undef, 1);
-    #}
+  if ($!{ENOTCONN}) {
+    $connected = 0;
+    # force "error slippage" to get the real error (credit DJB)
+    $self->socket->sysread(undef, 1);
+  }
 
   if ($connected) {
 
