@@ -153,7 +153,7 @@ sub configure {
 	    # set some win32-specific options
 	    if (!$sock->blocking) {
 	      setsockopt($sock, SOL_SOCKET, SO_DONTLINGER, 1);
-	      ioctl($sock, 0x8004667E, \1); # FIXME: constant is 'FIONBIO' (define it elsewhere?)
+	      my $temp=1; ioctl($sock, 0x8004667E, \$temp); # FIXME: constant is 'FIONBIO' (define it elsewhere?)
 	    }
 	  } else {
 	    defined $result or
