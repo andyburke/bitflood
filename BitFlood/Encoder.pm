@@ -34,18 +34,39 @@ sub encode {
 
   $self->filename([$self->filename]) if(!ref($self->filename)); # just a string, make it into an array
   
-  my @filenames;
+  my @fileInfo;
   foreach my $filename (@{$self->filename}) {
-    push(@filenames, $filename) if(-f LocalFilename($filename)); # regular file
-    find({ wanted => sub { push(@filenames, $File::Find::name); },
-           no_chdir => 1 },
-         LocalFilename($filename)) if(-d LocalFilename($filename));
+    $filename = LocalFilename($filename);
+    if(-f $filename)  # regular file
+    {
+      my (undef, $dirPart) = File::Spec->splitpath($filename, 1);
+      my (@dirs) = File::Spec->splitdir($dirPart);
+      my $cleanFilename = pop(@dirs);
+      push(@fileInfo, { cleanFilename => CleanFilename($cleanFilename),
+                        fullFilename => $filename } );
+    }
+    elsif(-d $filename) 
+    {
+      find({ wanted => sub {
+               return if(-d $_);
+               my $fullFilename = $_;
+               my $cleanFilename = $_;
+               my @dirs = File::Spec->splitdir($filename);
+               my $lastDir = pop(@dirs);
+               $cleanFilename =~ s/\Q$filename\E/\Q$lastDir\E/;
+               push(@fileInfo, { cleanFilename => CleanFilename($cleanFilename),
+                                 fullFilename => LocalFilename($fullFilename) });
+             },
+             no_chdir => 1
+           },
+           $filename);
+    }
   }
 
   my $startTime = time();
-  print "Encoding " . scalar(@filenames) . " files:\n";
-  foreach my $filename (sort @filenames) {
-    $self->_EncodeFile($filename);
+  print "Encoding " . scalar(@fileInfo) . " files:\n";
+  foreach my $fileStruct (sort { $a->{cleanFilename} cmp $b->{cleanFilename} } @fileInfo) {
+    $self->_EncodeFile($fileStruct);
   }
   print "Total Time: " . (time() - $startTime) . "s\n";
 
@@ -64,9 +85,10 @@ sub encode {
 
 sub _EncodeFile {
   my $self = shift;
-  my $filename = shift;
-  my $cleanFilename = CleanFilename($filename);
-  my $localFilename = LocalFilename($filename);
+  my $args = shift;
+
+  my $cleanFilename = $args->{cleanFilename};
+  my $localFilename = $args->{fullFilename};
 
   return if(-d $localFilename);
 
