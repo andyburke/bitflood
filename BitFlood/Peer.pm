@@ -446,7 +446,10 @@ sub LoopOnce {
 
   Debug(">>>", 10);
 
-  $self->Connect or return;
+  if (!$self->Connect) {
+    Debug("<<<", 10);
+    return;
+  }
 
   $self->ReadOnce;
   $self->WriteOnce;
@@ -479,13 +482,16 @@ sub ReadOnce {
 
   if ($result == -1) {
     Debug("Would block...", 50);
+    Debug("<<<", 10);
     return;
   } elsif($result == 0) {
     Debug("read error, disconnecting peer: " . $self->id);
     $self->disconnected(1);
+    Debug("<<<", 10);
     return;
   }
 
+  Debug("<<<", 10);
 }
 
 sub WriteOnce {

@@ -61,9 +61,11 @@ sub Write {
     if (!defined $bytesWritten) {
       if ($! == EWOULDBLOCK) {
 	Debug("would block", 50);
+        Debug("<<<", 10);
 	return -1;
       } else {
 	Debug("unexpected socket error: $!");
+        Debug("<<<", 10);
 	return 0;
       }
     }
@@ -73,8 +75,8 @@ sub Write {
     Debug(length(${$self->buffer}) . " bytes remain", 50);
   }
 
-  return $bytesWritten;
   Debug("<<<", 10);
+  return $bytesWritten;
 }
 
 1;
