@@ -76,6 +76,8 @@ sub new {
 
     $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
     $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
+
+    $self->connectCompleted(1);
   }
 
   return $self;
