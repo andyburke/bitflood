@@ -4,6 +4,7 @@
  */
 
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.*;
 import java.net.*;
 import java.util.*;
@@ -18,15 +19,12 @@ public class PeerConnection
 
   private SocketChannel     socketChannel     = null;
   private Selector          socketSelector    = null;
-  private SelectionKey      socketConnectKey  = null;
   private InetSocketAddress socketAddress     = null;
 
   private int               BUFFER_SIZE       = 256 * 1024 * 2; // 2 times the normal chunk size
   
-  private SelectionKey      readerReadyKey    = null;
   private ByteBuffer        readBuffer        = ByteBuffer.allocate(BUFFER_SIZE);
-  
-  private SelectionKey      writerReadyKey    = null;
+  private int               readIndex         = 0;
   private ByteBuffer        writeBuffer       = ByteBuffer.allocate(BUFFER_SIZE);
   
   public Peer               parentPeer        = null;
@@ -53,6 +51,7 @@ public class PeerConnection
       disconnected = true;
       return;
     }
+
   }
   
   public PeerConnection(SocketChannel incomingSocketConnection)
@@ -65,6 +64,17 @@ public class PeerConnection
     }
   	
     socketChannel = incomingSocketConnection;
+   
+    try
+    {
+      socketSelector = Selector.open();
+      socketChannel.configureBlocking( false );
+    }
+    catch(Exception e)
+    {
+      System.out.println("Error setting incoming connection to be non-blocking: " + e );
+    }
+
     connected = true;
     if(!InitializeBufferedIO())
     {
@@ -81,167 +91,135 @@ public class PeerConnection
   	
     try
     {
-      readerReadyKey = socketChannel.register(socketSelector, SelectionKey.OP_READ);
+      socketChannel.register(socketSelector, socketChannel.validOps() );
     }
     catch(Exception e)
     {
-      System.out.println("Error creating readerReadyKey on incoming connection: " + e);
+      System.out.println("Error registering sockets on incoming connection: " + e);
       disconnected = true;
       return false;
     }
 
-    try
-    {
-      writerReadyKey = socketChannel.register(socketSelector, SelectionKey.OP_WRITE);
-    }
-    catch(Exception e)
-    {
-      System.out.println("Error creating writerReadyKey on incoming connection: " + e);
-      disconnected = true;
-      return false;
-    }
   	
     return true;
   }
   
   public void LoopOnce()
   {
-    if(Connect())
+    if ( socketSelector != null )
     {
-      ReadOnce();
-      WriteOnce();
-      ProcessReadBuffer();
+      try
+      {
+        socketSelector.selectNow();
+      }
+      catch ( Exception e )
+      {
+        System.out.println("Error selecing from socketSelector: " + e );
+      }
+      
+      // Get list of selection keys with pending events
+      Iterator it = socketSelector.selectedKeys().iterator();
+      while( it.hasNext() )
+      {
+        // Get the selection key
+        SelectionKey selKey = (SelectionKey)it.next();
+    
+        // Remove it from the list to indicate that it is being processed
+        it.remove();
+    
+        // 
+        if ( selKey.isConnectable() )
+        {
+          System.out.println( "Connecting" );
+          SocketChannel sChannel = (SocketChannel)selKey.channel();
+
+          try
+          {
+            sChannel.finishConnect();
+          }
+          catch(Exception e)
+          {
+            System.out.println("Error connecting? " + e );
+          }
+        }
+
+        if ( selKey.isReadable() )
+        {
+          ReadOnce();
+        }
+
+        if ( selKey.isWritable() )
+        {
+          WriteOnce();
+        }
+      }
     }
+
+    ProcessReadBuffer();
   }
   
   public boolean Connect()
   {
-  	
-    if(connected)
-    {
-      return true;
-    }
-
-    if(disconnected)
-    {
-      return false;
-    }
-  	
-    // we're not connected yet...
-    if(socketChannel == null) // we need to make the outgoing connectiong
-    {
-      try
-      {
-        socketChannel = SocketChannel.open();
-        socketChannel.configureBlocking(false);
-      }
-      catch(Exception e)
-      {
-        System.out.println("Error opening SocketChannel during connect: " + e);
-        disconnected = true; // since this is a weird error
-        return false;
-      }
-
-      try
-      {
-        socketSelector = Selector.open();
-        socketConnectKey = socketChannel.register(socketSelector, SelectionKey.OP_CONNECT);
-      }
-      catch(Exception e)
-      {
-        System.out.println("Error creating socket selector: " + e);
-        disconnected = true;
-        return false;
-      }
-  			
-      try
-      {
-        socketChannel.connect(socketAddress);
-      }
-      catch(Exception e)
-      {
-        System.out.println("Error connecting to " + hostname + ":" + port + ": " + e);
-        disconnected = true;
-        return false;
-      }
-    }
-    else // we have a socketChannel, see if it's connected...
-    {
-      if(socketConnectKey.isConnectable())
-      {
-        if(socketChannel.isConnectionPending())
-        {
-          try
-          {
-            socketChannel.finishConnect();
-            connected = true;
-          }
-          catch(Exception e)
-          {
-            System.out.println("Error finalizing outgoing connection: " + e);
-            disconnected = true;
-            return false;
-          }
-  				
-          if(!InitializeBufferedIO()) // I don't know that i like how i'm initializing this stuff
-          {
-            disconnected = true;
-            return false;
-          }
-        }
-      }
-    }
-    return false; // even if we connect, we let ourselves fall through for one cycle...
+    return false; 
   }
 
   private boolean ReadOnce()
   {
-    if(readerReadyKey.isReadable())
+    try
     {
-      try
-      {
-        int bytesRead = socketChannel.read(readBuffer);
-      }
-      catch(Exception e)
-      {
-        System.out.println("Error reading from socketChannel: " + e);
-        disconnected = true;
-        return false;
-      }
+      int bytesRead = socketChannel.read(readBuffer);
     }
+    catch(Exception e)
+    {
+      System.out.println("Error reading from socketChannel: " + e);
+      disconnected = true;
+      return false;
+    }
+
     return true;
   }
   	
   private boolean WriteOnce()
   {
-    if(writerReadyKey.isWritable())
+    try
     {
-      try
-      {
-        int bytesWritten = socketChannel.write(writeBuffer);
-      }
-      catch(Exception e)
-      {
-        System.out.println("Error writing to socketChannel: " + e);
-        disconnected = true;
-        return false;
-      }
+      int bytesWritten = socketChannel.write(writeBuffer);
     }
+    catch(Exception e)
+    {
+      System.out.println("Error writing to socketChannel: " + e);
+      disconnected = true;
+      return false;
+    }
+
     return true;
   }
  
   private boolean ProcessReadBuffer()
   {
-    while(readBuffer.hasRemaining())
+    while( readBuffer.position() > readIndex )
     {
-      if(readBuffer.get() == '\n')
+      byte b = readBuffer.get( readIndex++ );
+      if ( b == '\n' )
       {
-        byte[] message = new byte[readBuffer.position()];
-        readBuffer.get(message);
-        readBuffer.compact(); // smush the buffer down...
-        System.out.println("Got message: " + message.toString());
+        int diff = readBuffer.position() - readIndex;
+        byte[] message = new byte[readIndex];
+        readBuffer.flip();
+        readBuffer.get( message, 0, readIndex );
+        readBuffer.compact();
+        readBuffer.clear();
+        readBuffer.position( diff );
+        readIndex = 0;
+
+        System.out.print("Got message: '" );
+        for ( int i = 0; i < message.length; i++ )
+        {
+          System.out.print( (char)message[i] );
+        }
+        System.out.println( "'" );
       }
     }
+
     return true;
   }
   

@@ -13,13 +13,11 @@ import java.net.*;
  */
 public class Peer 
 {
-  private Vector           pendingpeers;
+  private Vector           pendingpeers               = null;
   private Hashtable        floods                     = null;
 
   private ServerSocketChannel listenSocketChannel   = null;
   private Selector            listenSocketSelector  = null;
-  private SelectionKey        listenSocketReadyKey  = null;
-  private InetSocketAddress   listenSocketAddress   = null;
 
   public String             hostname                  = "";
   public int                port                      = 0;
@@ -34,6 +32,7 @@ public class Peer
     port = localPort;
     SetupListenSocket();
     
+    pendingpeers = new Vector();
     floods = new Hashtable();
   }
   
@@ -71,38 +70,54 @@ public class Peer
       }
     }
 
-    // if the socket can accept, test for an incoming connection
-    if( listenSocketReadyKey != null && listenSocketReadyKey.isAcceptable() )
+    if ( listenSocketSelector != null )
     {
-      SocketChannel incomingSocket = null;
       try
       {
-        incomingSocket = listenSocketChannel.accept();
+        listenSocketSelector.selectNow();
       }
       catch ( Exception e )
       {
-        System.out.println("Error accepting connection from listenSocketChannel: " + e );
+        System.out.println("Error selecing from listenSocketSelector: " + e );
       }
 
-      if( incomingSocket != null )
+      // if the socket can accept, test for an incoming connection
+      // Get list of selection keys with pending events
+      Iterator it = listenSocketSelector.selectedKeys().iterator();
+      while( it.hasNext() )
       {
-        PeerConnection incomingPeer = new PeerConnection( incomingSocket );
-        pendingpeers.add( incomingPeer );
+        // Get the selection key
+        SelectionKey selKey = (SelectionKey)it.next();
+    
+        // Remove it from the list to indicate that it is being processed
+        it.remove();
+    
+        // Check if it's a connection request
+        if (selKey.isAcceptable()) 
+        {
+          int tmp = listenSocketChannel.socket().getLocalPort();
+          SocketChannel incomingSocket = null;
+          try
+          {
+            incomingSocket = listenSocketChannel.accept();
+          }
+          catch ( Exception e )
+          {
+            System.out.println("Error accepting connection from listenSocketChannel: " + e );
+          }
+          
+          if( incomingSocket != null )
+          {
+            PeerConnection incomingPeer = new PeerConnection( incomingSocket );
+            pendingpeers.add( incomingPeer );
+          }
+        }
       }
     }
   }
 
   private void SetupListenSocket()
   {
-    try
-    {
-      listenSocketAddress = new InetSocketAddress( InetAddress.getByName(hostname), port );
-    }
-    catch ( Exception e )
-    {
-      System.out.println("Error making listen socket address: " + e );
-    }
-
     try
     {
       listenSocketChannel = ServerSocketChannel.open();
@@ -123,20 +138,20 @@ public class Peer
 
     try
     {
+      listenSocketChannel.socket().bind( new InetSocketAddress( port ) );
+    }
+    catch ( Exception e )
+    {
+      System.out.println("Error binding to address: " + e );
+    }
+
+    try
+    {
       listenSocketChannel.socket().setReuseAddress( true );
     }
     catch ( Exception e )
     {
       System.out.println("Error setting resuse address: " + e );
-    }
-
-    try
-    {
-      listenSocketChannel.socket().bind( listenSocketAddress );
-    }
-    catch ( Exception e )
-    {
-      System.out.println("Error binding to address: " + e );
     }
 
     try
@@ -150,11 +165,11 @@ public class Peer
     
     try
     {
-      listenSocketReadyKey = listenSocketChannel.register(listenSocketSelector, SelectionKey.OP_ACCEPT);
+      listenSocketChannel.register(listenSocketSelector, SelectionKey.OP_ACCEPT);
     }
     catch ( Exception e )
     {
-      System.out.println("Error making the listen socket read key: " + e );
+      System.out.println("Error registering listen socket selector: " + e );
     }
   }
 }

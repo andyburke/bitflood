@@ -46,6 +46,8 @@
       	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
       </classpath>
       <include name="Peer.java"/>
+      <include name="PeerConnection.java"/>
+      <include name="FloodFile.java"/>
       <include name="ClientTest.java"/>
     </javac>
   </target>
@@ -59,6 +61,8 @@
       	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
       </classpath>
       <include name="Peer.java"/>
+      <include name="PeerConnection.java"/>
+      <include name="FloodFile.java"/>
       <include name="TrackerTest.java"/>
     </javac>
   </target>
@@ -66,6 +70,7 @@
   <target name="test_tracker" depends="init,TrackerTest" description="test a tracker" >
     <mkdir dir="${test}"/>
     <java classname="TrackerTest" dir="${test}" fork="true">
+      <arg value="-d"/>
       <arg value="-flood"/>
       <arg value="test.mp3.flood"/>
       <arg value="-localPort"/>
