@@ -80,7 +80,9 @@ public class EncoderTest
       Usage();
       System.exit(0);
     }
-		
+
+    FloodFile floodFile = new FloodFile(floodFilename, chunkSize, trackers);
+    
     System.out.println("flood filename: " + floodFilename);
     System.out.println("weighting function: " + weightingFunction);
     for(int i = 0; i < trackers.length; i++) 
@@ -103,12 +105,16 @@ public class EncoderTest
       }
       if(filesToAdd[i].length() > 0)
       {
-        System.out.println("file to add: " + filesToAdd[i]);
+        System.out.println("adding file: " + filesToAdd[i]);
+        if(!floodFile.Add(filesToAdd[i]))
+        {
+        	System.out.println("error adding file: " + filesToAdd[i]);
+        	System.exit(0);
+        }
       }
     }
-		
-    Encoder encoder = new Encoder(floodFilename, chunkSize, weightingFunction, trackers, filesToAdd);
-    encoder.Encode();
+
+    floodFile.Write();
   }
   
   public static void Usage() 
