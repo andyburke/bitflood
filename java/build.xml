@@ -12,7 +12,8 @@
 
   <target name="EncoderTest" depends="init" description="build the encoder " >
     <javac destdir="${bin}"
-    	   srcdir=".">
+    	   srcdir="."
+           debug="true">
       <classpath>
     	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
       	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
@@ -21,5 +22,11 @@
       <include name="Encoder.java" />
       <include name="FloodFile.java" />
     </javac>
+  </target>
+
+  <target name="clean" depends="init" description="clean the output" >
+    <delete includeemptydirs="true">
+      <fileset dir="${bin}" includes="**/*"/>
+    </delete>
   </target>
 </project> 
