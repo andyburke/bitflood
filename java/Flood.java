@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Vector;
-import java.util.Hashtable;
 import java.util.HashSet;
 import java.util.Date;
 import java.util.Iterator;
@@ -27,7 +26,6 @@ public class Flood
   // runtime flood data
   public class RuntimeTargetFile
   {
-    public Hashtable chunkIndicies = null;
     int[]            chunkOffsets  = null;
     char[]           chunkMap      = null;
   }
@@ -154,7 +152,6 @@ public class Flood
         totalBytes += file.size;
 
         int numChunks = file.chunks.size();
-        rtf.chunkIndicies = new Hashtable( numChunks );
         rtf.chunkOffsets = new int[numChunks];
         rtf.chunkMap = new char[numChunks];
 
@@ -172,12 +169,6 @@ public class Flood
         for ( int nextOffset = 0; chunkiter.hasNext(); )
         {
           FloodFile.Chunk chunk = (FloodFile.Chunk) chunkiter.next();
-
-          // FIXME throw some error
-          // map the hash to an index for fast lookups
-          if ( rtf.chunkIndicies.put( chunk.hash, new Integer( chunk.index ) ) != null )
-          {
-          }
 
           // track the offsets
           rtf.chunkOffsets[chunk.index] = nextOffset;
