@@ -49,7 +49,7 @@ namespace libBitFlood
   public:
     Error::ErrorCode Initialize( const FloodFile& i_floodfile );
     Error::ErrorCode Register( const Client& i_client );
-    Error::ErrorCode UpdatePeerList( void );
+    Error::ErrorCode UpdatePeerList( Client& i_client );
 
     typedef std::map< std::string, U32 > M_StrToU32;
     struct RuntimeFile

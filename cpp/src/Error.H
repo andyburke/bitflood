@@ -7,8 +7,8 @@ namespace libBitFlood
   {
     enum ErrorCode
     {
-      UNKNOWN_ERROR = 0,
-      NO_ERROR      = 1,
+      UNKNOWN_ERROR_LBF = 0,
+      NO_ERROR_LBF      = 1,
     } ERRORCODE;
   }
 };

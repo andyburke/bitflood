@@ -6,6 +6,7 @@
 #include <files.h>
 #include <sstream>
 #include <base64.h>
+#include <Ws2tcpip.h>
 
 namespace libBitFlood
 {
@@ -36,7 +37,7 @@ namespace libBitFlood
     // Open a listen socket
     _OpenListenSocket();
 
-    return Error::NO_ERROR;
+    return Error::NO_ERROR_LBF;
   }
 
   Error::ErrorCode Client::AddFloodFile( const FloodFile& i_floodfile )
@@ -45,7 +46,7 @@ namespace libBitFlood
     f.Initialize( i_floodfile );
     m_floods.push_back( f );
 
-    return Error::NO_ERROR;
+    return Error::NO_ERROR_LBF;
   }
 
   Error::ErrorCode Client::Register( void )
@@ -59,7 +60,7 @@ namespace libBitFlood
       flood.Register( *this );
     }
 
-    return Error::NO_ERROR;
+    return Error::NO_ERROR_LBF;
   }
 
   Error::ErrorCode Client::UpdatePeerList( void )
@@ -70,10 +71,10 @@ namespace libBitFlood
     for ( ; flooditer != floodend; ++flooditer )
     {
       Flood& flood = *flooditer;
-      flood.UpdatePeerList();
+      flood.UpdatePeerList( *this );
     }
 
-    return Error::NO_ERROR;
+    return Error::NO_ERROR_LBF;
   }
 
   Error::ErrorCode Client::GetChunks( void )
@@ -85,7 +86,7 @@ namespace libBitFlood
     {
     }
 
-    return Error::NO_ERROR;
+    return Error::NO_ERROR_LBF;
   }
 
   Error::ErrorCode Client::LoopOnce( void )
@@ -93,25 +94,87 @@ namespace libBitFlood
     _ProcessPeers();
 
     // if socket can read
-    // if socked accept
-    // add connection
+    fd_set set;
+    FD_ZERO( &set );
+    FD_SET( m_listensocket, &set );
+    timeval timeout;
+    timeout.tv_sec = 0;
+    U32 num = ::select( 0, &set, NULL, NULL, &timeout ); 
+    if ( num == 1 )
+    {
+      // if socked accept, add incoming connection
+      struct sockaddr_in addr;
+      int addrlen = sizeof( addr );
+      SOCKET incoming = ::accept( m_listensocket, (struct sockaddr*)&addr, &addrlen);
+      U32 error = WSAGetLastError();
 
-    return Error::NO_ERROR;
+      if ( incoming != INVALID_SOCKET )
+      {
+        char hostbuff[ NI_MAXHOST ];
+        getnameinfo( (const sockaddr*)&addr, addrlen, hostbuff, NI_MAXHOST, NULL, 0, NI_NUMERICHOST );
+
+        PeerConnection* peer = new PeerConnection();
+        peer->InitializeIncoming( incoming, hostbuff, ntohs( addr.sin_port ) );
+        m_peers.push_back( peer );
+      }
+    }
+
+    return Error::NO_ERROR_LBF;
   }
 
   Error::ErrorCode Client::_OpenListenSocket( void )
   {
-    return Error::NO_ERROR;
+    bool ok = true;
+
+    // create the socket
+    m_listensocket = ::socket( AF_INET, SOCK_STREAM, 0 );
+
+    // 
+    ok = m_listensocket != INVALID_SOCKET;
+
+    // make it non-blocking
+    u_long flag = 1;
+    ok = ioctlsocket( m_listensocket, FIONBIO, &flag) == 0;
+
+    // turn on reuse
+    int sflag = 1;
+    ok = setsockopt( m_listensocket, SOL_SOCKET, SO_REUSEADDR, (const char *)&sflag, sizeof(sflag) ) == 0;
+
+    // bind to the port
+    struct sockaddr_in saddr;
+    memset(&saddr, 0, sizeof(saddr));
+    saddr.sin_family = AF_INET;
+    saddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    saddr.sin_port = htons((u_short) m_setup.m_localPort );
+    ok = ::bind( m_listensocket, (struct sockaddr *)&saddr, sizeof(saddr) ) == 0;
+
+    // tell the socket to listen
+    ok = ::listen( m_listensocket,  5 ) == 0;
+
+    return Error::NO_ERROR_LBF;
   }
 
   Error::ErrorCode Client::_ProcessPeers( void )
   {
-    return Error::NO_ERROR;
-  }
+    V_PeerConnectionPtr::iterator peeriter = m_peers.begin();
+    V_PeerConnectionPtr::iterator peerend  = m_peers.end();
 
-  Error::ErrorCode Client::_AddConnection( void )
-  {
-    return Error::NO_ERROR;
+    for ( ; peeriter != peerend; )
+    {
+      (*peeriter)->LoopOnce();
+
+      // reap defunct peer connections
+      if ( (*peeriter)->m_disconnected )
+      {
+        m_peers.erase( peeriter );
+      }
+      else
+      {
+        ++peeriter;
+      }
+    }
+
+    return Error::NO_ERROR_LBF;
   }
 };
 

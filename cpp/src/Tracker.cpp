@@ -15,7 +15,7 @@ namespace libBitFlood
     bindAndListen( port );
     enableIntrospection( true );
 
-    return Error::NO_ERROR;
+    return Error::NO_ERROR_LBF;
   }
 
   Error::ErrorCode Tracker::Run( double time )
@@ -23,7 +23,7 @@ namespace libBitFlood
     // wait for requests for the time specified
     work( time );
 
-    return Error::NO_ERROR;
+    return Error::NO_ERROR_LBF;
   }
 
   Tracker::_Register::_Register(XmlRpcServer* s)

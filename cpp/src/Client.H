@@ -1,7 +1,9 @@
 #ifndef _LBF_CLIENT_H_
 #define _LBF_CLIENT_H_
 
+#include <Winsock2.h>
 #include "Flood.H"
+#include "PeerConnection.H"
 
 namespace libBitFlood
 {
@@ -14,9 +16,11 @@ namespace libBitFlood
       U32         m_localPort;
     };
 
-    Setup m_setup;
-    V_Flood m_floods;
-    std::string m_id;
+    Setup               m_setup;
+    V_Flood             m_floods;
+    std::string         m_id;
+    V_PeerConnectionPtr m_peers;
+    SOCKET              m_listensocket;
 
   public:
     Error::ErrorCode Initialize( const Setup& i_setup );
@@ -29,7 +33,6 @@ namespace libBitFlood
   protected:
     Error::ErrorCode _OpenListenSocket( void );
     Error::ErrorCode _ProcessPeers( void );
-    Error::ErrorCode _AddConnection( void );
   };
 };
 

@@ -1,6 +1,8 @@
 #include "stdafx.H"
 #include "Flood.H"
 #include "Client.H"
+#include "PeerConnection.H"
+
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/OutOfMemoryException.hpp>
@@ -38,7 +40,7 @@ namespace libBitFlood
 
   Error::ErrorCode FloodFile::ToXML( std::string& o_xml )
   {
-    Error::ErrorCode ret = Error::NO_ERROR;
+    Error::ErrorCode ret = Error::NO_ERROR_LBF;
 
     using namespace FloodFileKeywords;
 
@@ -47,7 +49,7 @@ namespace libBitFlood
     {  
       try
       {
-        DOMDocument* doc = impl->createDocument( 0,                    // root element namespace URI.
+        xercesc_2_6::DOMDocument* doc = impl->createDocument( 0,                    // root element namespace URI.
           ROOT,         // root element name
           0);                   // document type object (DTD).
 
@@ -117,17 +119,17 @@ namespace libBitFlood
       catch (const OutOfMemoryException&)
       {
         XERCES_STD_QUALIFIER cerr << "OutOfMemoryException" << XERCES_STD_QUALIFIER endl;
-        ret = Error::UNKNOWN_ERROR;
+        ret = Error::UNKNOWN_ERROR_LBF;
       }
       catch (const DOMException& e)
       {
         XERCES_STD_QUALIFIER cerr << "DOMException code is:  " << e.code << XERCES_STD_QUALIFIER endl;
-        ret = Error::UNKNOWN_ERROR;
+        ret = Error::UNKNOWN_ERROR_LBF;
       }
       catch (...)
       {
         XERCES_STD_QUALIFIER cerr << "An error occurred creating the document" << XERCES_STD_QUALIFIER endl;
-        ret = Error::UNKNOWN_ERROR;
+        ret = Error::UNKNOWN_ERROR_LBF;
       }
     }
 
@@ -210,7 +212,7 @@ namespace libBitFlood
     {
       using namespace FloodFileKeywords;
       // get the DOM representation
-      DOMDocument *doc = parser->getDocument();
+      xercesc_2_6::DOMDocument *doc = parser->getDocument();
 
       DOMNodeList* list = doc->getElementsByTagName( FILEINFO );
       if ( list && list->getLength() == 1 )
@@ -291,12 +293,12 @@ namespace libBitFlood
     //
     delete parser;
 
-    return Error::NO_ERROR;
+    return Error::NO_ERROR_LBF;
   }
 
   Error::ErrorCode FloodFile::ComputeHash( std::string& o_hash )
   {
-    return Error::NO_ERROR;
+    return Error::NO_ERROR_LBF;
   }
 
   //
@@ -331,7 +333,7 @@ namespace libBitFlood
     // and the chunks that we either have already downloaded or want to download
     _SetupFilesAndChunks();
 
-    return Error::NO_ERROR;
+    return Error::NO_ERROR_LBF;
   }
 
   Error::ErrorCode Flood::Register( const Client& i_client )
@@ -353,10 +355,10 @@ namespace libBitFlood
         std::cout << "Error calling 'Register'\n\n";
     }
 
-    return Error::NO_ERROR;
+    return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode Flood::UpdatePeerList( void )
+  Error::ErrorCode Flood::UpdatePeerList( Client& i_client )
   {
     XmlRpcValue args, result;
     args[0] = m_floodfile.m_contentHash;
@@ -381,8 +383,34 @@ namespace libBitFlood
           std::string peerHost = cur_res.substr( startIndex, 
             cur_res.find( ':', startIndex ) - startIndex );
           startIndex += peerHost.length() + 1;
-          std::string peerPort = cur_res.substr( startIndex, std::string::npos );
+          U32 peerPort;
+          std::stringstream peerPort_converter;
+          peerPort_converter << cur_res.substr( startIndex, std::string::npos );
+          peerPort_converter >> peerPort;
 
+          // the client doesn't need himself as a peer
+          if( peerId.compare( i_client.m_id ) != 0 )
+          {
+            bool foundpeer = false;
+            V_PeerConnectionPtr::iterator peeriter = i_client.m_peers.begin();
+            V_PeerConnectionPtr::iterator peerend  = i_client.m_peers.end();
+
+            for ( ; peeriter != peerend; ++peeriter )
+            {
+              if ( (*peeriter)->m_id.compare( peerId ) == 0 )
+              {
+                foundpeer = true;
+                break;
+              }
+            }
+
+            if ( !foundpeer )
+            {
+              PeerConnection* peer = new PeerConnection();
+              peer->InitializeOutgoing( peerId, peerHost, peerPort );
+              i_client.m_peers.push_back( peer );
+            }
+          }          
         }
       }
       else
@@ -391,7 +419,7 @@ namespace libBitFlood
       }
     }
 
-    return Error::NO_ERROR;
+    return Error::NO_ERROR_LBF;
   }
 
   Error::ErrorCode Flood::_SetupFilesAndChunks( void )
@@ -482,7 +510,7 @@ namespace libBitFlood
     }
 
     // done
-    return Error::NO_ERROR;
+    return Error::NO_ERROR_LBF;
   }
 };
 

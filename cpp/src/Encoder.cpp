@@ -16,7 +16,7 @@ namespace libBitFlood
     /*static*/
     Error::ErrorCode EncodeFile( const ToEncode& i_toencode, FloodFile& o_floodfile )
     {
-      Error::ErrorCode ret = Error::NO_ERROR;
+      Error::ErrorCode ret = Error::NO_ERROR_LBF;
 
       libBitFlood::FloodFile toReturn;
       toReturn.m_trackers = i_toencode.m_trackers;
@@ -24,11 +24,11 @@ namespace libBitFlood
       // check incoming data - move to a function in ToEncode?
       if ( i_toencode.m_files.empty() )
       {
-        ret = Error::UNKNOWN_ERROR;
+        ret = Error::UNKNOWN_ERROR_LBF;
       }
       else if ( i_toencode.m_chunksize <= 0 )
       {
-        ret = Error::UNKNOWN_ERROR;
+        ret = Error::UNKNOWN_ERROR_LBF;
       }
       else
       {
@@ -44,7 +44,7 @@ namespace libBitFlood
           FILE* file = fopen( fileiter->c_str(), "rb" );
           if ( file == NULL )
           {
-            ret = Error::UNKNOWN_ERROR;
+            ret = Error::UNKNOWN_ERROR_LBF;
           }
           else
           {
@@ -93,7 +93,7 @@ namespace libBitFlood
         delete [] buffer;
       }
 
-      if ( ret == Error::NO_ERROR )
+      if ( ret == Error::NO_ERROR_LBF )
       {
         o_floodfile = toReturn;
       }
