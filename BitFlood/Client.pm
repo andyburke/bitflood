@@ -46,30 +46,26 @@ sub InitializeTargetFiles {
        mkpath(GetLocalPathFromFilename($localFilename));
        open(OUTFILE, ">$localFilename");
        my $fileSize = $file->{data}->{FileInfo}->{File}->{$targetFile}->{Size};
-       my $curSize = 0;
-       my $buffer = 0 x 32768;
-       while(1) {
-         if($curSize < $fileSize - 32768) {
-           $curSize += syswrite(OUTFILE, $buffer, 32768);
-         } elsif($curSize < $fileSize) {
-           $curSize += syswrite(OUTFILE, 0, $fileSize - $curSize);
-         } else {
-           last;
-         }
+       if($fileSize > 0) {
+         seek(OUTFILE, $fileSize-1, 0);
+         syswrite(OUTFILE, 0, 1);
        }
        close(OUTFILE);
      }
      else # file DOES exist, we need to decide what we need to get...
      {
        open(OUTFILE, "<$localFilename");
-       my $curPos = 0;
+#       my $curPos = 0;
        foreach my $chunk (sort { $a->{index} <=> $b->{index} } @{$file->{data}->{FileInfo}->{File}->{$targetFile}->{Chunk}}) {
          my $buffer;
-         seek(OUTFILE, $curPos, 0);
+#         seek(OUTFILE, $curPos, 0);
          read(OUTFILE, $buffer, $chunk->{size});
          my $hash = sha1_base64($buffer);
+         if($hash ne $chunk->{hash}) {
+           print "chunk $chunk->{index} mismatch\n";
+         }
          # FIXME: add the chunk to a list of chunks we need...
-         $curPos += $chunk->{size};
+ #        $curPos += $chunk->{size};
        }
        close(OUTFILE);
      }
