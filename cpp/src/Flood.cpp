@@ -89,12 +89,20 @@ namespace libBitFlood
           }
         }
 
-        DOMElement* trackerElem = doc->createElement( TRACKER );
-        rootElem->appendChild(trackerElem);
+        // write the trackers
+        V_String::const_iterator trackeriter = m_trackers.begin();
+        V_String::const_iterator trackerend  = m_trackers.end();
 
-        DOMText* trackerName = doc->createTextNode( XMLString::transcode( m_tracker.c_str() ) );
-        trackerElem->appendChild(trackerName);
+        for ( ; trackeriter != trackerend; ++trackeriter )
+        { 
+          DOMElement* trackerElem = doc->createElement( TRACKER );
+          rootElem->appendChild(trackerElem);
 
+          DOMText* trackerName = doc->createTextNode( XMLString::transcode( trackeriter->c_str() ) );
+          trackerElem->appendChild(trackerName);
+        }
+
+        // write the the output string
         DOMWriter* writer = impl->createDOMWriter();
         writer->setFeature( XMLUni::fgDOMWRTFormatPrettyPrint, 1 );
         o_xml = writer->writeToString( *rootElem );
@@ -237,14 +245,18 @@ namespace libBitFlood
         list = NULL;
       }
 
+      // read the trackers
       list = doc->getElementsByTagName( TRACKER );
-      if ( list && list->getLength() == 1 )
+      if ( list )
       {
-        DOMNodeSPtr tracker = list->item( 0 );
-        DOMNodeSPtr tracker_child = tracker->getFirstChild();
-        if ( tracker_child )
+        for ( U32 trackerindex = 0; trackerindex < list->getLength(); ++trackerindex )
         {
-          m_tracker = XMLString::transcode( tracker_child->getNodeValue() );
+          DOMNodeSPtr tracker = list->item( trackerindex );
+          DOMNodeSPtr tracker_child = tracker->getFirstChild();
+          if ( tracker_child )
+          {
+            m_trackers.push_back( XMLString::transcode( tracker_child->getNodeValue() ) );
+          }
         }
         list = NULL;
       }

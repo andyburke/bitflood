@@ -19,7 +19,7 @@ namespace libBitFlood
       Error::ErrorCode ret = Error::NO_ERROR;
 
       libBitFlood::Flood toReturn;
-      toReturn.m_tracker = i_toencode.m_tracker;
+      toReturn.m_trackers = i_toencode.m_trackers;
 
       // check incoming data - move to a function in ToEncode?
       if ( i_toencode.m_files.empty() )

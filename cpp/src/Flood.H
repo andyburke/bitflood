@@ -25,8 +25,8 @@ namespace libBitFlood
 
     typedef std::vector< File > V_File;
 
-    std::string m_tracker;
-    V_File      m_files;
+    V_String m_trackers;
+    V_File   m_files;
 
   public:
     Error::ErrorCode ToXML( std::wstring& o_xml );

@@ -31,8 +31,8 @@ int main(int argc, char* argv[])
     {
       char *pMsg = XMLString::transcode(toCatch.getMessage());
       XERCES_STD_QUALIFIER cerr << "Error during Xerces-c Initialization.\n"
-				<< "  Exception message:"
-				<< pMsg;
+        << "  Exception message:"
+        << pMsg;
       XMLString::release(&pMsg);
       return 1;
     }
@@ -40,8 +40,8 @@ int main(int argc, char* argv[])
     Encoder::ToEncode e;
     e.m_files.push_back( argv[1] );
     e.m_chunksize = 262144;
-    e.m_tracker = argv[2];
-  
+    e.m_trackers.push_back( argv[2] );
+
     Flood out;
     Encoder::EncodeFile( e, out );
 

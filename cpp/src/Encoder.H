@@ -18,7 +18,7 @@ namespace libBitFlood
     {
       V_String m_files;
       U32 m_chunksize;
-      std::string m_tracker;
+      V_String m_trackers;
     };
 
     Error::ErrorCode EncodeFile( const ToEncode& i_toencode, Flood& o_xml );
