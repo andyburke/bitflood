@@ -97,23 +97,26 @@ void ParseFloodFile( const std::string& file, FloodFile& floodfile )
     return;
   }
 
-  char* data = NULL;
+  std::string xml;
   FILE* infile = fopen( file.c_str(), "r" );
   if ( infile )
   {
     fseek(infile,0,SEEK_END);
 
     U32 size = ftell( infile );
-    data = (char *)malloc( size + 1 );
+    char* data = (char *)malloc( size + 1 );
     data[ size ] = 0;
 
     rewind( infile );
     fread( data, 1, size, infile );
 
     fclose(infile);
+
+    xml = data;
+    free( data );
   }
 
-  floodfile.FromXML( data );
+  floodfile.FromXML( xml );
 
   XMLPlatformUtils::Terminate();
 

@@ -50,6 +50,8 @@ namespace libBitFlood
   typedef std::vector<std::wstring> V_WString;
   typedef std::set<std::wstring> S_WString;
 
+  typedef std::vector<bool> V_Bool;
+
 };
 
 #endif; // _LBF_TYPES_H_

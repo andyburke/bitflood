@@ -37,6 +37,7 @@ namespace libBitFlood
   public:
     Error::ErrorCode ToXML( std::string& o_xml );
     Error::ErrorCode FromXML( const std::string& i_xml );
+    Error::ErrorCode ComputeHash( std::string& o_hash );
   };
 
   typedef std::vector< FloodFile > V_FloodFile;
@@ -50,8 +51,26 @@ namespace libBitFlood
     Error::ErrorCode Register( const Client& i_client );
     Error::ErrorCode UpdatePeerList( void );
 
-    FloodFile m_floodfile;
+    typedef std::map< std::string, U32 > M_StrToU32;
+    struct RuntimeFile
+    {
+      M_StrToU32  m_chunkindices;
+      V_U32       m_chunkoffsets;
+      std::string m_chunkmap;
+    };
+
+    typedef std::pair< U32, U32 > P_ChunkKey;
+    typedef std::vector< P_ChunkKey > V_ChunkKey;
+    typedef std::vector< RuntimeFile > V_RuntimeFile;
+    
+    FloodFile         m_floodfile;
     V_XmlRpcClientPtr m_trackerConnections;
+    V_RuntimeFile     m_runtimefiles;
+    U32               m_totalbytes;
+    V_ChunkKey        m_chunkstodownload;
+
+  protected:
+    Error::ErrorCode _SetupFilesAndChunks( void );
   };
 
   typedef std::vector< Flood > V_Flood;

@@ -294,6 +294,11 @@ namespace libBitFlood
     return Error::NO_ERROR;
   }
 
+  Error::ErrorCode FloodFile::ComputeHash( std::string& o_hash )
+  {
+    return Error::NO_ERROR;
+  }
+
   //
   Error::ErrorCode Flood::Initialize( const FloodFile& i_floodfile )
   {
@@ -312,15 +317,19 @@ namespace libBitFlood
 
       std::string host = trackerurl.substr( h_start, p_start - h_start - 1 );
       std::string uri  = trackerurl.substr( u_start, std::string::npos );
+
       U32 port;
-      
       std::stringstream port_converter;
       port_converter << trackerurl.substr( p_start, u_start - p_start - 1 );
       port_converter >> port;
-     
+
       XmlRpcClient* client = new XmlRpcClient( host.c_str(), port, uri.c_str() );
       m_trackerConnections.push_back( client );
     }
+
+    // here we setup our internal representation of the state of the files
+    // and the chunks that we either have already downloaded or want to download
+    _SetupFilesAndChunks();
 
     return Error::NO_ERROR;
   }
@@ -335,7 +344,7 @@ namespace libBitFlood
 
     V_XmlRpcClientPtr::iterator trackeriter = m_trackerConnections.begin();
     V_XmlRpcClientPtr::iterator trackerend  = m_trackerConnections.end();
-    
+
     for ( ; trackeriter != trackerend; ++trackeriter )
     {
       if ( (*trackeriter)->execute("Register", args, result) )
@@ -354,7 +363,7 @@ namespace libBitFlood
 
     V_XmlRpcClientPtr::iterator trackeriter = m_trackerConnections.begin();
     V_XmlRpcClientPtr::iterator trackerend  = m_trackerConnections.end();
-    
+
     for ( ; trackeriter != trackerend; ++trackeriter )
     {
       if ( (*trackeriter)->execute("RequestPeers", args, result) )
@@ -367,10 +376,10 @@ namespace libBitFlood
           U32 startIndex = 0;
           const std::string& cur_res = result[ res_index ];
           std::string peerId   = cur_res.substr( startIndex, 
-                                                 cur_res.find( ':', startIndex ) - startIndex );
+            cur_res.find( ':', startIndex ) - startIndex );
           startIndex += peerId.length() + 1;
           std::string peerHost = cur_res.substr( startIndex, 
-                                                 cur_res.find( ':', startIndex ) - startIndex );
+            cur_res.find( ':', startIndex ) - startIndex );
           startIndex += peerHost.length() + 1;
           std::string peerPort = cur_res.substr( startIndex, std::string::npos );
 
@@ -385,6 +394,95 @@ namespace libBitFlood
     return Error::NO_ERROR;
   }
 
+  Error::ErrorCode Flood::_SetupFilesAndChunks( void )
+  {
+    m_totalbytes = 0;
 
+    FloodFile::V_File::const_iterator fileiter = m_floodfile.m_files.begin();
+    FloodFile::V_File::const_iterator fileend  = m_floodfile.m_files.end();
+
+    for ( ; fileiter != fileend; ++fileiter )
+    {
+      const FloodFile::File& file = *fileiter;
+
+      // track the total size of the flood
+      m_totalbytes += file.m_size;
+
+      // setup runtime data
+      RuntimeFile rtf;
+      rtf.m_chunkoffsets = V_U32( file.m_chunks.size(), 0 );
+      rtf.m_chunkmap = std::string( file.m_chunks.size(), '0' );
+
+      FloodFile::V_Chunk::const_iterator chunkiter = file.m_chunks.begin();
+      FloodFile::V_Chunk::const_iterator chunkend  = file.m_chunks.end();
+
+      FILE* fileptr = fopen( file.m_name.c_str(), "rb" );
+
+      U32 next_offset = 0;
+      for ( ; chunkiter != chunkend; ++chunkiter )
+      {
+        const FloodFile::Chunk& chunk = *chunkiter;
+
+        assert( rtf.m_chunkindices.find( chunk.m_hash ) == rtf.m_chunkindices.end() );
+        assert( rtf.m_chunkoffsets[ chunk.m_index ] == 0 );
+        assert( rtf.m_chunkmap[ chunk.m_index ] == '0' );
+
+        rtf.m_chunkindices[ chunk.m_hash ]  = chunk.m_index;
+        rtf.m_chunkoffsets[ chunk.m_index ] = next_offset;
+
+        // if the file exists we need to see if this chunk is valid
+        // allocate a buffer the size of the chunk and attempt to read in that data
+        // if we can read it in and it hashes the same as what is in our flood file, 
+        // we don't need to download it
+        if ( fileptr )
+        {
+          if ( fseek( fileptr, next_offset, SEEK_SET ) == 0 )
+          {
+            byte* data = (byte*)malloc( chunk.m_size );
+            if ( fread( data, 1, chunk.m_size, fileptr ) == chunk.m_size )
+            {
+              using namespace CryptoPP;
+              SHA sha;
+              HashFilter shaFilter(sha);
+              std::auto_ptr<ChannelSwitch> channelSwitch(new ChannelSwitch);
+              channelSwitch->AddDefaultRoute(shaFilter);
+
+              StringSource( data, chunk.m_size, true, channelSwitch.release() );
+              std::stringstream out;
+              Base64Encoder encoder( new FileSink( out ), false );
+              shaFilter.TransferTo( encoder );
+
+              if( chunk.m_hash.compare( out.str() ) == 0 )
+              {
+                rtf.m_chunkmap[ chunk.m_index ] = '1';
+              }
+            }
+            free( data );
+          }
+        }
+
+        // update the next offset
+        next_offset += chunk.m_size;
+
+        // do we need to download this chunk?  remember that somewhere
+        if ( rtf.m_chunkmap[ chunk.m_index ] == '0' )
+        {
+          m_chunkstodownload.push_back( P_ChunkKey( m_runtimefiles.size(), chunk.m_index ) );
+        }
+      }
+
+      // don't forget to close the file handle
+      if ( fileptr )
+      {
+        fclose( fileptr );
+      }
+
+      // add this file data to our vector
+      m_runtimefiles.push_back( rtf );
+    }
+
+    // done
+    return Error::NO_ERROR;
+  }
 };
 
