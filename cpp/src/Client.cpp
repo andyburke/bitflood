@@ -114,8 +114,65 @@ namespace libBitFlood
         getnameinfo( (const sockaddr*)&addr, addrlen, hostbuff, NI_MAXHOST, NULL, 0, NI_NUMERICHOST );
 
         PeerConnection* peer = new PeerConnection();
-        peer->InitializeIncoming( incoming, hostbuff, ntohs( addr.sin_port ) );
+        peer->InitializeCommon( this, hostbuff, ntohs( addr.sin_port ) );
+        peer->InitializeIncoming( incoming );
         m_peers.push_back( peer );
+      }
+    }
+
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode Client::Disconnect( void )
+  {
+    V_Flood::iterator flooditer = m_floods.begin();
+    V_Flood::iterator floodend  = m_floods.end();
+
+    for ( ; flooditer != floodend; ++flooditer )
+    {
+      Flood& flood = *flooditer;
+      flood.Disconnect( *this );
+    }
+
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode Client::InqFlood( const std::string& i_floodid, Flood*& o_flood )
+  {
+    o_flood = NULL;
+    if ( !i_floodid.empty() )
+    {
+      V_Flood::iterator flooditer = m_floods.begin();
+      V_Flood::iterator floodend  = m_floods.end();
+
+      for ( ; flooditer != floodend; ++flooditer )
+      {
+        if ( (*flooditer).m_floodfile.m_contentHash.compare( i_floodid ) == 0 )
+        {
+          o_flood = &(*flooditer);
+          break;
+        }
+      }
+    }
+
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode Client::InqPeer( const std::string& i_peerid, PeerConnection*& o_peer )
+  {
+    o_peer = NULL;
+    if ( !i_peerid.empty() )
+    {
+      V_PeerConnectionPtr::iterator peeriter = m_peers.begin();
+      V_PeerConnectionPtr::iterator peerend  = m_peers.end();
+
+      for ( ; peeriter != peerend; ++peeriter )
+      {
+        if ( (*peeriter)->m_id.compare( i_peerid ) == 0 )
+        {
+          o_peer = (*peeriter);
+          break;
+        }
       }
     }
 

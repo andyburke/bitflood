@@ -391,27 +391,53 @@ namespace libBitFlood
           // the client doesn't need himself as a peer
           if( peerId.compare( i_client.m_id ) != 0 )
           {
-            bool foundpeer = false;
-            V_PeerConnectionPtr::iterator peeriter = i_client.m_peers.begin();
-            V_PeerConnectionPtr::iterator peerend  = i_client.m_peers.end();
+            PeerConnection* peer = NULL;
+            i_client.InqPeer( peerId, peer );
 
-            for ( ; peeriter != peerend; ++peeriter )
+            if ( peer == NULL )
             {
-              if ( (*peeriter)->m_id.compare( peerId ) == 0 )
-              {
-                foundpeer = true;
-                break;
-              }
+              peer = new PeerConnection();
+              peer->InitializeCommon( &i_client, peerHost, peerPort );
+              peer->InitializeOutgoing( peerId );
+              i_client.m_peers.push_back( peer );
             }
 
-            if ( !foundpeer )
+            // if this peer isn't registered yet
+            if ( peer->m_registeredFloods.find( m_floodfile.m_contentHash ) == peer->m_registeredFloods.end() )
             {
-              PeerConnection* peer = new PeerConnection();
-              peer->InitializeOutgoing( peerId, peerHost, peerPort );
-              i_client.m_peers.push_back( peer );
+              peer->Register( m_floodfile.m_contentHash, i_client.m_id );
+              peer->RequestChunkMaps( m_floodfile.m_contentHash );
+
+              // mark as registered
+              peer->m_registeredFloods.insert( m_floodfile.m_contentHash );
+
             }
           }          
         }
+      }
+      else
+      {
+        std::cout << "Error calling 'RequestPeers'\n\n";
+      }
+    }
+
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode Flood::Disconnect( Client& i_client )
+  {
+    XmlRpcValue args, result;
+    args[0] = i_client.m_id;
+    args[1] = m_floodfile.m_contentHash;
+
+    V_XmlRpcClientPtr::iterator trackeriter = m_trackerConnections.begin();
+    V_XmlRpcClientPtr::iterator trackerend  = m_trackerConnections.end();
+
+    for ( ; trackeriter != trackerend; ++trackeriter )
+    {
+      if ( (*trackeriter)->execute("Disconnect", args, result) )
+      {
+        std::cout << result << "\n\n";
       }
       else
       {

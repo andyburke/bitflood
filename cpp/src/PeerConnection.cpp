@@ -1,14 +1,52 @@
 #include "stdafx.H"
+
 #include "PeerConnection.H"
+#include "Flood.H"
+#include "Client.H"
 
 namespace libBitFlood
 {
-  Error::ErrorCode PeerConnection::InitializeIncoming( SOCKET s,
-                                                       const std::string& i_peerHost,
-                                                       U32                i_peerPort )
+  namespace PeerConnectionMessages
+  {
+    const char* Register         = "Register";
+    const char* RequestChunkMaps = "RequestChunkMaps";
+    const char* SendChunkMaps    = "SendChunkMaps";
+    const char* NotifyHaveChunk  = "NotifyHaveChunk";
+    const char* RequestChunk     = "RequestChunk";
+    const char* SendChunk        = "SendChunk";
+  }
+
+  // forward declare our message handlers
+  Error::ErrorCode _HandleRegister( PeerConnection& i_receiver, XmlRpcValue& i_args );
+  Error::ErrorCode _HandleRequestChunkMaps( PeerConnection& i_receiver, XmlRpcValue& i_args );
+  Error::ErrorCode _HandleSendChunkMaps( PeerConnection& i_receiver, XmlRpcValue& i_args );
+  Error::ErrorCode _HandleNotifyHaveChunk( PeerConnection& i_receiver, XmlRpcValue& i_args );
+  Error::ErrorCode _HandleRequestChunk( PeerConnection& i_receiver, XmlRpcValue& i_args );
+  Error::ErrorCode _HandleSendChunk( PeerConnection& i_receiver, XmlRpcValue& i_args );
+
+  Error::ErrorCode PeerConnection::InitializeCommon( Client* i_client,
+    const std::string& i_peerHost,
+    U32                i_peerPort )
 
   {
+    // cache relevant data (host, port, client)
+    m_client = i_client;
+    m_host   = i_peerHost;
+    m_port   = i_peerPort;
+
+    // setup our message handlers
+    _SetupMessageHandlers();
+
+    return Error::NO_ERROR_LBF;
+  }
+
+
+  Error::ErrorCode PeerConnection::InitializeIncoming( SOCKET s )
+  {
     bool ok = (s != INVALID_SOCKET);
+
+    // we have no id
+    m_id.clear();
 
     // inherit the socket
     m_socket = s;
@@ -25,22 +63,14 @@ namespace libBitFlood
     m_reader.m_socket = m_socket;
     m_writer.m_socket = m_socket;
 
-    // cache relevant data (host, port)
-    m_host = i_peerHost;
-    m_port = i_peerPort;
-
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode PeerConnection::InitializeOutgoing( const std::string& i_peerId,
-    const std::string& i_peerHost,
-    U32                i_peerPort )
+  Error::ErrorCode PeerConnection::InitializeOutgoing( const std::string& i_peerId )
   {
     // cache the data and attempt a connection
     m_socket = INVALID_SOCKET;
     m_id     = i_peerId;
-    m_host   = i_peerHost;
-    m_port   = i_peerPort;
 
     // 
     m_connected = false;
@@ -61,6 +91,98 @@ namespace libBitFlood
       _WriteOnce();
       _ProcessReadBuffer();
     }
+
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode PeerConnection::Register( const std::string i_floodhash,
+    const std::string i_clientid )
+  {
+    XmlRpcValue args;
+    args[0] = i_floodhash;
+    args[1] = i_clientid;
+    _SendMessage( PeerConnectionMessages::Register, args );
+
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode PeerConnection::RequestChunkMaps( const std::string i_floodhash )
+  {
+    XmlRpcValue args;
+    args[0] = i_floodhash;
+    _SendMessage( PeerConnectionMessages::RequestChunkMaps, args );
+
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode PeerConnection::SendChunkMaps( const std::string i_floodhash )
+  {
+    // get the appropriate flood from the client
+    Flood* theflood = NULL;
+    m_client->InqFlood( i_floodhash, theflood );
+
+    // call SendChunkMap, args are:
+    //  1: the floodId
+    //  2: and array of strings, file name then the chunkmap for that file
+    XmlRpcValue args;
+    args[0] = i_floodhash;
+    args[1];
+
+    if ( theflood != NULL )
+    {
+      U32 argindex = 0;
+      U32 fileindex;
+      for ( fileindex = 0; fileindex < theflood->m_runtimefiles.size(); ++fileindex )
+      {
+        const Flood::RuntimeFile& rtf = theflood->m_runtimefiles[fileindex];
+        const FloodFile::File& fileinfo = theflood->m_floodfile.m_files[fileindex];
+
+        args[1][argindex++] = fileinfo.m_name;
+        args[1][argindex++] = rtf.m_chunkmap;
+      }
+    }
+
+    // send the message
+    _SendMessage( PeerConnectionMessages::SendChunkMaps, args );
+    return Error::NO_ERROR_LBF;
+  }
+
+
+  Error::ErrorCode PeerConnection::NotifyHaveChunk( const std::string i_floodhash )
+  {
+    XmlRpcValue args;
+    args[0] = i_floodhash;
+    _SendMessage( PeerConnectionMessages::NotifyHaveChunk, args );
+
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode PeerConnection::RequestChunk( const std::string i_floodhash )
+  {
+    XmlRpcValue args;
+    args[0] = i_floodhash;
+    _SendMessage( PeerConnectionMessages::RequestChunk, args );
+
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode PeerConnection::SendChunk( const std::string i_floodhash )
+  {
+    XmlRpcValue args;
+    args[0] = i_floodhash;
+    _SendMessage( PeerConnectionMessages::SendChunk, args );
+
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode PeerConnection::_SetupMessageHandlers( void )
+  {
+    m_messageHandlers[ PeerConnectionMessages::Register ]         = _HandleRegister;
+    m_messageHandlers[ PeerConnectionMessages::RequestChunkMaps ] = _HandleRequestChunkMaps;
+    m_messageHandlers[ PeerConnectionMessages::SendChunkMaps ]    = _HandleSendChunkMaps;
+    m_messageHandlers[ PeerConnectionMessages::NotifyHaveChunk ]  = _HandleNotifyHaveChunk;
+    m_messageHandlers[ PeerConnectionMessages::RequestChunk ]     = _HandleRequestChunk;
+    m_messageHandlers[ PeerConnectionMessages::SendChunk ]        = _HandleSendChunk;
 
     return Error::NO_ERROR_LBF;
   }
@@ -154,12 +276,64 @@ namespace libBitFlood
 
   Error::ErrorCode PeerConnection::_ProcessReadBuffer( void )
   {
+
+    while( !m_reader.m_buffer.empty() )
+    {
+      U32 tail = m_reader.m_buffer.find( '\n', 0 );
+      if ( tail == std::string::npos )
+      {
+        break;
+      }
+
+      m_fakeServer.SetRequest( m_reader.m_buffer.substr( 0, tail ) );
+      m_reader.m_buffer = m_reader.m_buffer.substr( tail + 1, std::string::npos );
+
+      // parse and dispatch the message
+      XmlRpcValue args;
+      std::string methodName = m_fakeServer.ExternalParseRequest( args );
+
+      _DispatchMessage( methodName, args );
+    } 
+
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode PeerConnection::_SendMessage( const std::string& i_methodName,
+    const XmlRpcValue& i_args )
+  {
+    m_fakeClient.ExternalGenerateRequest( i_methodName.c_str(), i_args );
+
+    // kill the newlines
+    std::string request = m_fakeClient.GetRequest();
+    U32 index = request.find_first_of( "\r\n" );
+    while( index != std::string::npos )
+    {
+      request.erase( index, 1 );
+      index = request.find_first_of( "\r\n" );
+    }
+
+    m_writer.m_buffer.append( request );
+    m_writer.m_buffer.append( 1, '\n' );
+
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode PeerConnection::_DispatchMessage( const std::string& i_methodName,
+    XmlRpcValue& i_args )
+  {
+    M_StrToMessageHandler::iterator iter = m_messageHandlers.find( i_methodName );
+    if ( iter != m_messageHandlers.end() )
+    {
+      // call the function
+      (*(*iter).second)( *this, i_args );
+    }
+
     return Error::NO_ERROR_LBF;
   }
 
   Error::ErrorCode PeerConnection::Reader::Read( I32& o_bytesRead )
   {
-     // Number of bytes to attempt to read at a time
+    // Number of bytes to attempt to read at a time
     const U32 READ_SIZE = 4096;
     char readBuf[READ_SIZE];
 
@@ -194,6 +368,83 @@ namespace libBitFlood
       }
     }
 
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode _HandleRegister( PeerConnection& i_receiver, XmlRpcValue& i_args )
+  {
+    std::string floodId = i_args[0];
+    std::string peerId = i_args[1];
+
+    // see if the peer is already registered
+    if ( !peerId.empty() )
+    {
+      PeerConnection* peer = NULL;
+      i_receiver.m_client->InqPeer( peerId, peer );
+      if ( peer == NULL )
+      {
+        // disconnect duplicate peers
+        peer->m_disconnected = true;
+      }
+      else if ( i_receiver.m_registeredFloods.find( floodId ) != i_receiver.m_registeredFloods.end() )
+      {
+        // strange duplicate registration from a peer for a given flood
+      }
+      else
+      {
+        i_receiver.m_id = peerId;
+        i_receiver.RequestChunkMaps( floodId );
+        i_receiver.m_registeredFloods.insert( floodId );
+      }
+    }
+
+
+
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode _HandleRequestChunkMaps( PeerConnection& i_receiver, XmlRpcValue& i_args )
+  {
+    i_receiver.SendChunkMaps( i_args[0] );
+
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode _HandleSendChunkMaps( PeerConnection& i_receiver, XmlRpcValue& i_args )
+  {
+    // we'll get an array of 
+    std::string& floodId = i_args[0];
+
+    if ( !floodId.empty() )
+    {
+      PeerConnection::M_StrToStrToStr::iterator iter = i_receiver.m_chunkMaps.find( floodId );
+      if ( iter == i_receiver.m_chunkMaps.end() )
+      {
+        iter = i_receiver.m_chunkMaps.insert( PeerConnection::M_StrToStrToStr::value_type( floodId, PeerConnection::M_StrToStr() ) ).first;
+      }
+
+      U32 arg_index;
+      for ( arg_index = 0; arg_index < i_args[1].size(); arg_index += 2 )
+      {
+        (*iter).second[ i_args[1][arg_index] ] = i_args[1][ arg_index + 1 ];
+      }
+    }
+
+    return Error::NO_ERROR_LBF;
+  }
+  Error::ErrorCode _HandleNotifyHaveChunk( PeerConnection& i_receiver, XmlRpcValue& i_args )
+  {
+    std::string& floodId = i_args[0];
+    return Error::NO_ERROR_LBF;
+  }
+  Error::ErrorCode _HandleRequestChunk( PeerConnection& i_receiver, XmlRpcValue& i_args )
+  {
+    std::string& floodId = i_args[0];
+    return Error::NO_ERROR_LBF;
+  }
+  Error::ErrorCode _HandleSendChunk( PeerConnection& i_receiver, XmlRpcValue& i_args )
+  {
+    std::string& floodId = i_args[0];
     return Error::NO_ERROR_LBF;
   }
 };

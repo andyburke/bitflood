@@ -29,6 +29,11 @@ namespace libBitFlood
     Error::ErrorCode UpdatePeerList( void );
     Error::ErrorCode GetChunks( void );
     Error::ErrorCode LoopOnce( void );
+    Error::ErrorCode Disconnect( void );
+
+  public:
+    Error::ErrorCode InqFlood( const std::string& i_floodid, Flood*& o_flood );
+    Error::ErrorCode InqPeer( const std::string& i_peerid, PeerConnection*& o_peer );
 
   protected:
     Error::ErrorCode _OpenListenSocket( void );

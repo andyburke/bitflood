@@ -6,6 +6,7 @@
 #include <WINSOCK2.H>
 #include <Ws2tcpip.h>
 #include <time.h>
+#include <signal.h>
 
 #include <Flood.H>
 #include <Client.H>
@@ -18,8 +19,10 @@ XERCES_CPP_NAMESPACE_USE
 
 using namespace libBitFlood;
 
+bool quit = false;
 const U32 UPDATE_INTERVAL = 20;
 void ParseFloodFile( const std::string& file, FloodFile& floodfile );
+void HandleSignal( I32 sig );
 
 int main(int argc, char* argv[])
 {
@@ -28,6 +31,12 @@ int main(int argc, char* argv[])
     std::cerr << "Please use three arguments: the name of the flood file, the local ip and the local port" << std::endl;
     return 1;
   }
+
+  // connect a signal handler
+  signal( SIGINT,   HandleSignal );
+  signal( SIGBREAK, HandleSignal );
+  signal( SIGTERM,  HandleSignal );
+  signal( SIGABRT,  HandleSignal );
 
   // startup winsock
   WSADATA wsaData;
@@ -62,7 +71,7 @@ int main(int argc, char* argv[])
   client.AddFloodFile( theflood );
 
   time_t last_update = 0;
-  while( 1 )
+  while( !quit )
   {
     time_t now;
     time( &now );
@@ -77,6 +86,9 @@ int main(int argc, char* argv[])
     client.LoopOnce();
     Sleep( 0 );
   }
+
+  // 
+  client.Disconnect();
 }
 
 void ParseFloodFile( const std::string& file, FloodFile& floodfile )
@@ -119,6 +131,10 @@ void ParseFloodFile( const std::string& file, FloodFile& floodfile )
   floodfile.FromXML( xml );
 
   XMLPlatformUtils::Terminate();
+}
 
+void HandleSignal( I32 sig )
+{
+  quit = true;
 }
 

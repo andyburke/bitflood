@@ -7,8 +7,12 @@
 #include <Tracker.H>
 #include <XmlRpc.H>
 #include <sstream>
+#include <signal.h>
 
 using namespace libBitFlood;
+
+bool quit = false;
+void HandleSignal( I32 sig );
 
 int main(int argc, char* argv[])
 {
@@ -17,6 +21,12 @@ int main(int argc, char* argv[])
     std::cerr << "Please use one arguments: the local port" << std::endl;
     return 1;
   }
+
+  // connect a signal handler
+  signal( SIGINT,   HandleSignal );
+  signal( SIGBREAK, HandleSignal );
+  signal( SIGTERM,  HandleSignal );
+  signal( SIGABRT,  HandleSignal );
 
   XmlRpc::setVerbosity(5);
 
@@ -31,9 +41,14 @@ int main(int argc, char* argv[])
   Tracker t;
   t.Initialize( localPort );
 
-  while( 1 )
+  while( !quit )
   {
     t.Run( 1.0f );
     Sleep(0);
   }
+}
+
+void HandleSignal( I32 sig )
+{
+  quit = true;
 }
