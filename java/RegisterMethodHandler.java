@@ -47,6 +47,7 @@ public class RegisterMethodHandler implements MethodHandler
 
     receiver.id = peerId;
     receiver.listenPort = peerListen.intValue();
+    receiver.hostname = receiver.socketChannel.socket().getInetAddress().getHostAddress();
     receiver.flood = flood;
     
     // ask for chunks

@@ -15,7 +15,7 @@ import java.util.*;
 public class PeerConnection
 {
   private Hashtable     messageHandlers   = null;
-  private SocketChannel socketChannel     = null;
+  public  SocketChannel socketChannel     = null;
   private Selector      socketSelector    = null;
   private int           BUFFER_SIZE       = 256 * 1024 * 2;                    // 2 times thenormal chunk size
   private ByteBuffer    readBuffer        = ByteBuffer.allocate( BUFFER_SIZE );
