@@ -21,6 +21,7 @@ sub new {
 
   $self->filename(File::Spec->rel2abs($filename));
   $self->filehandle(new IO::File);
+  $self->filehandle->autoflush(1);
   $self->append(exists($args{append}) ? $args{append} : 1);
 
   unlink($self->filename) if(-e $self->filename and !$self->append);
