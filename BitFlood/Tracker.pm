@@ -16,6 +16,8 @@ use File::Spec;
 use File::Spec::Unix;
 use File::Find;
 
+my $TIMEOUT = 300; # 5 minute timeout for clients
+
 sub new {
   my $class = shift;
   my %args = @_;
@@ -90,7 +92,7 @@ sub CleanFilehashClientList {
 
   my $index = 0;
   foreach my $client (@{$self->{filehashClientList}->{$filehash}}) {
-    splice(@{$self->{filehashClientList}->{$filehash}}, $index, 1) if(time() - $client->{timestamp} > 15);
+    splice(@{$self->{filehashClientList}->{$filehash}}, $index, 1) if(time() - $client->{timestamp} > $TIMEOUT);
     $index++;
   }
   
