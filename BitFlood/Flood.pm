@@ -39,7 +39,7 @@ sub open {
   my $fileHandle = IO::File->new($self->filename, 'r');
   defined($fileHandle) or die("Could not open file: " . $self->filename . " ($!)");
   my $contents = join('', $fileHandle->getlines());
-  $self->data(XMLin($contents, ForceArray => [qw(File Tracker)]));
+  $self->data(XMLin($contents, ForceArray => [qw(File Tracker Chunk)]));
   $self->contentHash(sha1_base64($contents));
   undef $contents;
   $fileHandle->close();

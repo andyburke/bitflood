@@ -2,8 +2,8 @@ package BitFlood::Client;
 
 use strict;
 
-use threads;
-use threads::shared;
+#use threads;
+#use threads::shared;
 
 use RPC::XML;
 use RPC::XML::Server;
