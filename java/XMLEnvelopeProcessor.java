@@ -142,7 +142,8 @@ public class XMLEnvelopeProcessor
       while ( tmpIter.hasMoreElements() )
       {
         Object element = tmpIter.nextElement();
-        Element value = encodeArg( element );
+        Element value = doc.createElement( "value" );
+        value.appendChild( encodeArg( element ));
         data.appendChild( value );
       }
       return array;
