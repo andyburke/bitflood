@@ -21,7 +21,7 @@ public class ChunkPrioritizer implements Comparator
     Flood.RuntimeChunk c1 = (Flood.RuntimeChunk) o1;
     Flood.RuntimeChunk c2 = (Flood.RuntimeChunk) o2;
 
-    return c1.weight - c2.weight;
+    return c2.weight - c1.weight; // we want the reverse of the usual
   }
   
 }
