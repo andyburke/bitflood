@@ -16,14 +16,16 @@ namespace libBitFlood
 
     typedef std::vector< Chunk > V_Chunk;
 
-    struct File
+    class File : public ReferenceCountBase
     {
+    public:
       std::string m_name;
       U32         m_size;
       V_Chunk     m_chunks;
     };
 
-    typedef std::vector< File > V_File;
+    typedef ReferenceCountTemplate< File > FileSPtr;
+    typedef std::map< std::string, FileSPtr > M_StrToFileSPtr;
 
     struct TrackerInfo
     {
@@ -34,9 +36,9 @@ namespace libBitFlood
 
     typedef std::vector< TrackerInfo > V_TrackerInfo;
 
-    V_TrackerInfo m_trackers;
-    V_File        m_files;
-    std::string   m_contentHash;
+    V_TrackerInfo   m_trackers;
+    M_StrToFileSPtr m_files;
+    std::string     m_contentHash;
 
   public:
     Error::ErrorCode ToXML( std::string& o_xml );

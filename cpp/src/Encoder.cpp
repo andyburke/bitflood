@@ -47,8 +47,8 @@ namespace libBitFlood
           }
           else
           {
-            libBitFlood::FloodFile::File fileInfo;
-            fileInfo.m_name = *fileiter;
+            FloodFile::FileSPtr fileInfo( new FloodFile::File() );
+            fileInfo->m_name = *fileiter;
 
             U32 index = 0;
             for( ;; ++index )
@@ -63,7 +63,7 @@ namespace libBitFlood
                 chunk.m_size = bytesRead;
                 chunk.m_weight = 0;
                 Base64Encode( buffer, bytesRead, chunk.m_hash );
-                fileInfo.m_chunks.push_back( chunk );
+                fileInfo->m_chunks.push_back( chunk );
               }
               else
               {
@@ -73,8 +73,8 @@ namespace libBitFlood
 
             fclose( file );
 
-            fileInfo.m_size = filesize;
-            toReturn.m_files.push_back( fileInfo );
+            fileInfo->m_size = filesize;
+            toReturn.m_files[ *fileiter ] = fileInfo;
           }
         }
 

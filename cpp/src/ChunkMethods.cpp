@@ -50,13 +50,13 @@ namespace libBitFlood
     // call SendChunkMap
     XmlRpcValue args;
     U32 argindex = 0;
-    U32 fileindex;
-    for ( fileindex = 0; fileindex < i_receiver->m_flood->m_runtimefiles.size(); ++fileindex )
+    Flood::M_StrToRuntimeFile::const_iterator rtfiter = i_receiver->m_flood->m_runtimefiles.begin();
+    Flood::M_StrToRuntimeFile::const_iterator rtfend  = i_receiver->m_flood->m_runtimefiles.end();
+    for ( ; rtfiter != rtfend; ++rtfiter )
     {
-      const Flood::RuntimeFile& rtf = i_receiver->m_flood->m_runtimefiles[fileindex];
-      const FloodFile::File& fileinfo = i_receiver->m_flood->m_floodfile->m_files[fileindex];
-      
-      args[argindex++] = fileinfo.m_name;
+      const std::string& filename = (*rtfiter).first;
+      const Flood::RuntimeFile& rtf = (*rtfiter).second;
+      args[argindex++] = filename;
       args[argindex++] = rtf.m_chunkmap;
     }
 
@@ -71,20 +71,15 @@ namespace libBitFlood
     assert( i_receiver->m_flood != NULL );
 
     // 
-    const std::string& peerid = i_receiver->m_id;
+    PeerConnectionSPtr peer;
+    i_receiver->m_flood->InqPeer( i_receiver->m_id, peer );
 
-    if ( !peerid.empty() )
+    if ( peer.Get() != NULL )
     {
-      Flood::M_StrToStrToStr::iterator peeriter = i_receiver->m_flood->m_peerchunkmaps.find( peerid );
-      if ( peeriter == i_receiver->m_flood->m_peerchunkmaps.end() )
-      {
-        peeriter = i_receiver->m_flood->m_peerchunkmaps.insert( Flood::M_StrToStrToStr::value_type( peerid, Flood::M_StrToStr() ) ).first;
-      }
-
       U32 arg_index;
       for ( arg_index = 0; arg_index < i_args.size(); arg_index += 2 )
       {
-        (*peeriter).second[ i_args[arg_index] ] = i_args[ arg_index + 1 ];
+        peer->m_chunkmaps[ i_args[ arg_index ] ] = i_args[ arg_index + 1 ];
       }
     }
 
@@ -103,24 +98,14 @@ namespace libBitFlood
     args[1] = (int)chunkindex;
 
     // read in the appropriate chunk data and send it across the wire
-    FloodFile::File* thefile = NULL;
-    U32 thefile_index;
-    for ( thefile_index = 0; thefile_index < i_receiver->m_flood->m_floodfile->m_files.size(); ++thefile_index )
-    {
-      if ( i_receiver->m_flood->m_floodfile->m_files[ thefile_index ].m_name.compare( filename ) == 0 )
-      {
-        thefile = &i_receiver->m_flood->m_floodfile->m_files[ thefile_index ];
-        break;
-      }
-    }
-
-    if ( thefile == NULL )
+    Flood::M_StrToRuntimeFile::const_iterator rtfiter = i_receiver->m_flood->m_runtimefiles.find( filename );
+    if ( rtfiter == i_receiver->m_flood->m_runtimefiles.end() )
     {
     }
     else
     {
-      const FloodFile::Chunk& thechunk = thefile->m_chunks[ chunkindex ];
-      U32 chunkoffset = i_receiver->m_flood->m_runtimefiles[ thefile_index ].m_chunkoffsets[ chunkindex ];
+      const FloodFile::Chunk& thechunk = (*rtfiter).second.m_file->m_chunks[ chunkindex ];
+      U32 chunkoffset = (*rtfiter).second.m_chunkoffsets[ chunkindex ];
 
       FILE* fileptr = fopen( filename.c_str(), "rb" );
       if ( fileptr != NULL && fseek( fileptr, chunkoffset, SEEK_SET ) == 0 )
@@ -157,24 +142,15 @@ namespace libBitFlood
     U32 chunkindex = (int)i_args[1];
     XmlRpcValue::BinaryData& data = i_args[2];
 
-    FloodFile::File* thefile = NULL;
-    U32 thefile_index;
-    for ( thefile_index = 0; thefile_index < i_receiver->m_flood->m_floodfile->m_files.size(); ++thefile_index )
-    {
-      if ( i_receiver->m_flood->m_floodfile->m_files[ thefile_index ].m_name.compare( filename ) == 0 )
-      {
-        thefile = &i_receiver->m_flood->m_floodfile->m_files[ thefile_index ];
-        break;
-      }
-    }
-    
-    if ( thefile == NULL )
+    // read in the appropriate chunk data and send it across the wire
+    Flood::M_StrToRuntimeFile::iterator rtfiter = i_receiver->m_flood->m_runtimefiles.find( filename );
+    if ( rtfiter == i_receiver->m_flood->m_runtimefiles.end() )
     {
     }
     else
     {
-      const FloodFile::Chunk& thechunk = thefile->m_chunks[ chunkindex ];
-      U32 chunkoffset = i_receiver->m_flood->m_runtimefiles[ thefile_index ].m_chunkoffsets[ chunkindex ];
+      const FloodFile::Chunk& thechunk = (*rtfiter).second.m_file->m_chunks[ chunkindex ];
+      U32 chunkoffset = (*rtfiter).second.m_chunkoffsets[ chunkindex ];
       
       U32 data_size = data.size();
       if ( thechunk.m_size == data_size )
@@ -202,8 +178,8 @@ namespace libBitFlood
             {
             }
             
-            Flood::P_ChunkKey chunkkey( thefile_index, chunkindex );
-            i_receiver->m_flood->m_runtimefiles[ thefile_index ].m_chunkmap[ chunkindex ] = '1';
+            Flood::P_ChunkKey chunkkey( (*rtfiter).first, chunkindex );
+            (*rtfiter).second.m_chunkmap[ chunkindex ] = '1';
             
             Flood::V_ChunkKey::iterator chunkiter = i_receiver->m_flood->m_chunkstodownload.begin();
             Flood::V_ChunkKey::iterator chunkend  = i_receiver->m_flood->m_chunkstodownload.end();
@@ -245,15 +221,11 @@ namespace libBitFlood
     const std::string& filename = i_args[0];
     U32 chunkindex = (int)i_args[1];
 
-    Flood::M_StrToStrToStr::iterator peerchunkmap = i_receiver->m_flood->m_peerchunkmaps.find( i_receiver->m_id );
-    if ( peerchunkmap != i_receiver->m_flood->m_peerchunkmaps.end() )
+    PeerConnection::M_StrToStr::iterator filechunkmap = i_receiver->m_chunkmaps.find( filename );
+    if( filechunkmap != i_receiver->m_chunkmaps.end() )
     {
-      Flood::M_StrToStr::iterator filechunkmap = (*peerchunkmap).second.find( filename );
-      if( filechunkmap != (*peerchunkmap).second.end() )
-      {
-        std::string& chunkmap = (*filechunkmap).second;
-        chunkmap[ chunkindex ] = '1';
-      }
+      std::string& chunkmap = (*filechunkmap).second;
+      chunkmap[ chunkindex ] = '1';
     }
     
     return Error::NO_ERROR_LBF;

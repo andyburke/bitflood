@@ -9,30 +9,33 @@ namespace libBitFlood
   class Flood : public ReferenceCountBase
   {
   public:
-    typedef std::map< std::string, U32 > M_StrToU32;
     struct RuntimeFile
     {
-      M_StrToU32  m_chunkindices;
-      V_U32       m_chunkoffsets;
-      std::string m_chunkmap;
+      V_U32               m_chunkoffsets;
+      std::string         m_chunkmap;
+      FloodFile::FileSPtr m_file;
     };
 
-    typedef std::pair< U32, U32 > P_ChunkKey;
+    struct ChunkDownload
+    {
+      time_t             m_start;
+      PeerConnectionSPtr m_from;
+    };
+
+    typedef std::pair< std::string, U32 > P_ChunkKey;
+    typedef std::map< P_ChunkKey, ChunkDownload > M_P_ChunkKeyToChunkDownload;
     typedef std::set< P_ChunkKey > S_ChunkKey;
     typedef std::vector< P_ChunkKey > V_ChunkKey;
-    typedef std::vector< RuntimeFile > V_RuntimeFile;
-    typedef std::map< std::string, std::string > M_StrToStr;
-    typedef std::map< std::string, M_StrToStr > M_StrToStrToStr;
+    typedef std::map< std::string, RuntimeFile > M_StrToRuntimeFile;
 
-    Peer*                m_localpeer;
-    FloodFileSPtr        m_floodfile;
-    V_RuntimeFile        m_runtimefiles;
-    U32                  m_totalbytes;
-    V_ChunkKey           m_chunkstodownload;
-    S_ChunkKey           m_chunksdownloading;
-    V_PeerConnectionSPtr m_peers;
-    time_t               m_lasttrackerupdate;
-    M_StrToStrToStr      m_peerchunkmaps;
+    Peer*                       m_localpeer;
+    FloodFileSPtr               m_floodfile;
+    M_StrToRuntimeFile          m_runtimefiles;
+    U32                         m_totalbytes;
+    V_ChunkKey                  m_chunkstodownload;
+    M_P_ChunkKeyToChunkDownload m_chunksdownloading;
+    V_PeerConnectionSPtr        m_peers;
+    time_t                      m_lasttrackerupdate;
 
     Error::ErrorCode Initialize( PeerSPtr& i_localpeer, FloodFileSPtr& i_floodfile );
     Error::ErrorCode GetChunks( void );

@@ -82,7 +82,7 @@ public class RequestChunkMethodHandler implements MethodHandler
     try
     {
       inputFileStream.skip( chunkOffset );
-      inputFileStream.read( chunkData );
+      bytesRead = inputFileStream.read( chunkData );
     }
     catch ( IOException e )
     {

@@ -72,7 +72,6 @@ namespace libBitFlood
 
   public:
     typedef std::map< std::string, std::string > M_StrToStr;
-    typedef std::map< std::string, M_StrToStr > M_StrToStrToStr;
 
   public:
     Error::ErrorCode InitializeCommon( PeerSPtr&          i_localpeer,
@@ -91,19 +90,22 @@ namespace libBitFlood
 
     // member variables
   public:
-    Peer*       m_localpeer;
-    Flood*      m_flood;
-    SocketSPtr  m_socket;
-    std::string m_id;
-    bool        m_disconnected;
-    bool        m_connected;
-    std::string m_host;
-    U32         m_port;
-    U32         m_listenport;
-    FakeClient  m_fakeClient;
+    Peer*        m_localpeer;
+    Flood*       m_flood;
+    SocketSPtr   m_socket;
+    std::string  m_id;
+    bool         m_disconnected;
+    bool         m_connected;
+    std::string  m_host;
+    U32          m_port;
+    U32          m_listenport;
+    FakeClient   m_fakeClient;
     FakeServer*  m_fakeServer;
-    Reader      m_reader;
-    Writer      m_writer;
+    Reader       m_reader;
+    Writer       m_writer;
+    M_StrToStr   m_chunkmaps;
+    U32          m_chunksdownloading;
+    
 
   protected:
     Error::ErrorCode _Connect( void );

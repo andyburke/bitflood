@@ -65,7 +65,7 @@ namespace libBitFlood
 
     return Error::NO_ERROR_LBF;
   }
-  
+
   Error::ErrorCode Peer::AddHandler( MethodHandlerSPtr& i_handler )
   {
     m_methodhandlers.push_back( i_handler );
@@ -73,16 +73,16 @@ namespace libBitFlood
   }
 
   Error::ErrorCode Peer::HandleMethod( const std::string&  i_method, 
-                                       PeerConnectionSPtr& i_receiver, 
-                                       XmlRpcValue&        i_args )
+    PeerConnectionSPtr& i_receiver, 
+    XmlRpcValue&        i_args )
   {
     V_MethodHandlerSPtr::iterator handleriter = m_methodhandlers.begin();
     V_MethodHandlerSPtr::iterator handlerend  = m_methodhandlers.end();
     for ( ; handleriter != handlerend; ++handleriter )
     {
       (*handleriter)->HandleMethod( i_method,
-                                    i_receiver,
-                                    i_args );
+        i_receiver,
+        i_args );
     }
 
     return Error::NO_ERROR_LBF;
@@ -139,11 +139,11 @@ namespace libBitFlood
     {
       V_PeerConnectionSPtr::iterator peeriter = pendingpeers.begin();
       V_PeerConnectionSPtr::iterator peerend  = pendingpeers.end();
-      
+
       for ( ; peeriter != peerend; ++peeriter )
       {
-	// process
-	(*peeriter)->LoopOnce();
+        // process
+        (*peeriter)->LoopOnce();
       }
     }
 
@@ -151,17 +151,18 @@ namespace libBitFlood
     {
       V_PeerConnectionSPtr::iterator peeriter = m_pendingpeers.begin();
       V_PeerConnectionSPtr::iterator peerend  = m_pendingpeers.end();
-      
+
       for ( ; peeriter != peerend; )
       {
-	if ( (*peeriter)->m_disconnected )
-	{
-	  peeriter = m_pendingpeers.erase( peeriter );
-	}
-	else
-	{
-	  ++peeriter;
-	}
+        if ( (*peeriter)->m_disconnected )
+        {
+          printf( "Reaping %s (pending)\n", (*peeriter)->m_id.c_str() );
+          peeriter = m_pendingpeers.erase( peeriter );
+        }
+        else
+        {
+          ++peeriter;
+        }
       }
     }
 

@@ -59,23 +59,23 @@ namespace libBitFlood
         DOMElement* fileInfoElem = doc->createElement( FILEINFO );
         rootElem->appendChild(fileInfoElem);
 
-        V_File::const_iterator fileiter = m_files.begin();
-        V_File::const_iterator fileend  = m_files.end();
+        M_StrToFileSPtr::const_iterator fileiter = m_files.begin();
+        M_StrToFileSPtr::const_iterator fileend  = m_files.end();
 
         for ( ; fileiter != fileend; ++fileiter )
         {
-          const File& file = *fileiter;
+          const FileSPtr& file = (*fileiter).second;
           DOMElement*  fileElem = doc->createElement( FILE );
           fileInfoElem->appendChild(fileElem);
 
           std::wstringstream fileSizeStrm;
-          fileSizeStrm << file.m_size;
+          fileSizeStrm << file->m_size;
 
-          fileElem->setAttribute( FILE_NAME, XMLString::transcode( file.m_name.c_str() ) );
+          fileElem->setAttribute( FILE_NAME, XMLString::transcode( file->m_name.c_str() ) );
           fileElem->setAttribute( FILE_SIZE, fileSizeStrm.str().c_str() );
 
-          V_Chunk::const_iterator chunkiter = file.m_chunks.begin();
-          V_Chunk::const_iterator chunkend  = file.m_chunks.end();
+          V_Chunk::const_iterator chunkiter = file->m_chunks.begin();
+          V_Chunk::const_iterator chunkend  = file->m_chunks.end();
 
           for ( ; chunkiter != chunkend; ++chunkiter )
           {
@@ -141,6 +141,7 @@ namespace libBitFlood
     return ret;
   }
 
+  
   // our sorting functions
   bool SortFilesAlphabetically ( const FloodFile::File& i_rhs, const FloodFile::File& i_lhs )
   {
@@ -224,15 +225,15 @@ namespace libBitFlood
           for ( U32 fileindex = 0; fileindex < filelist->getLength(); ++fileindex )
           {
             DOMElementSPtr file = (DOMElement*)filelist->item( fileindex );
-            File lbffile;
+            FileSPtr lbffile( new File() );
 
             std::wstring file_size = file->getAttribute( FILE_SIZE );
 
-            lbffile.m_name = XMLString::transcode( file->getAttribute( FILE_NAME ) );
+            lbffile->m_name = XMLString::transcode( file->getAttribute( FILE_NAME ) );
 
             std::wstringstream file_size_convert;
             file_size_convert << file_size;
-            file_size_convert >> lbffile.m_size;
+            file_size_convert >> lbffile->m_size;
 
             DOMNodeList* chunklist = file->getElementsByTagName( CHUNK );
             if ( chunklist )
@@ -260,14 +261,14 @@ namespace libBitFlood
                 chunk_size_convert << chunk_size;
                 chunk_size_convert >> lbfchunk.m_size;
 
-                lbffile.m_chunks.push_back( lbfchunk );
+                lbffile->m_chunks.push_back( lbfchunk );
               }
 
               // sort the chunks in index order
-              std::sort( lbffile.m_chunks.begin(), lbffile.m_chunks.end(), SortChunksByIndex );
+              std::sort( lbffile->m_chunks.begin(), lbffile->m_chunks.end(), SortChunksByIndex );
             }
 
-            m_files.push_back( lbffile );
+            m_files[ lbffile->m_name ] = lbffile;
           }
         }
 
@@ -305,7 +306,7 @@ namespace libBitFlood
     }
 
     // sort the files alphabetically
-    std::sort( m_files.begin(), m_files.end(), SortFilesAlphabetically );
+    //std::sort( m_files.begin(), m_files.end(), SortFilesAlphabetically );
 
 
 
@@ -324,15 +325,15 @@ namespace libBitFlood
   {
     std::stringstream tohash;
 
-    V_File::const_iterator fileiter = m_files.begin();
-    V_File::const_iterator fileend  = m_files.end();
+    M_StrToFileSPtr::const_iterator fileiter = m_files.begin();
+    M_StrToFileSPtr::const_iterator fileend  = m_files.end();
 
     for ( ; fileiter != fileend; ++fileiter )
     {
-      tohash << (*fileiter).m_name;
+      tohash << (*fileiter).second->m_name;
 
-      V_Chunk::const_iterator chunkiter = (*fileiter).m_chunks.begin();
-      V_Chunk::const_iterator chunkend  = (*fileiter).m_chunks.end();
+      V_Chunk::const_iterator chunkiter = (*fileiter).second->m_chunks.begin();
+      V_Chunk::const_iterator chunkend  = (*fileiter).second->m_chunks.end();
 
       for ( ; chunkiter != chunkend; ++chunkiter )
       {

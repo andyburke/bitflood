@@ -234,6 +234,6 @@ public class Peer
 
   protected void AddMethodHandler( MethodHandler handler )
   {
-    methodHandlers.put( handler.getMethodName(), new RequestPeerListMethodHandler() );
+    methodHandlers.put( handler.getMethodName(), handler );
   }
 }
