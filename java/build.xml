@@ -45,6 +45,7 @@
     	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
       	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
       </classpath>
+      <include name="PeerConnection.java" />
       <include name="ClientTest.java" />
       <include name="FloodFile.java" />
     </javac>

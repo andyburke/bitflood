@@ -99,16 +99,16 @@
 			Name="src"
 			Filter="">
 			<File
-				RelativePath=".\src\ChunkHandler.cpp">
+				RelativePath=".\src\ChunkMethods.cpp">
 			</File>
 			<File
-				RelativePath=".\src\ChunkHandler.H">
+				RelativePath=".\src\ChunkMethods.H">
 			</File>
 			<File
-				RelativePath=".\src\Client.cpp">
+				RelativePath=".\src\Peer.cpp">
 			</File>
 			<File
-				RelativePath=".\src\Client.H">
+				RelativePath=".\src\Peer.H">
 			</File>
 			<File
 				RelativePath=".\src\Encoder.cpp">
@@ -124,6 +124,12 @@
 			</File>
 			<File
 				RelativePath=".\src\Flood.H">
+			</File>
+			<File
+				RelativePath=".\src\FloodFile.cpp">
+			</File>
+			<File
+				RelativePath=".\src\FloodFile.H">
 			</File>
 			<File
 				RelativePath=".\src\PeerConnection.cpp">
@@ -159,10 +165,16 @@
 				RelativePath=".\src\stdafx.H">
 			</File>
 			<File
-				RelativePath=".\src\Tracker.cpp">
+				RelativePath=".\src\TrackerMethods.cpp">
 			</File>
 			<File
-				RelativePath=".\src\Tracker.H">
+				RelativePath=".\src\TrackerMethods.H">
+			</File>
+			<File
+				RelativePath=".\src\PeerMethods.cpp">
+			</File>
+			<File
+				RelativePath=".\src\PeerMethods.H">
 			</File>
 			<File
 				RelativePath=".\src\Types.H">

@@ -1,6 +1,5 @@
 #include "stdafx.H"
 #include "Flood.H"
-#include "Client.H"
 #include "PeerConnection.H"
 #include "Encoder.H"
 

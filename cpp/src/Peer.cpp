@@ -2,6 +2,7 @@
 
 #include "Peer.H"
 #include "Encoder.H"
+#include "PeerMethods.H"
 #include "TrackerMethods.H"
 #include "ChunkMethods.H"
 
@@ -26,8 +27,8 @@ namespace libBitFlood
     // Open a listen socket
     _OpenListenSocket();
 
-    // setup some basic message handlers
-    AddMessageHandler( MessageHandlerSPtr( new BasicMessageHandler() ) );
+    // setup some basic method handlers
+    AddMethodHandler( MethodHandlerSPtr( new PeerMethodHandler() ) );
 
     return Error::NO_ERROR_LBF;
   }
@@ -62,7 +63,7 @@ namespace libBitFlood
         if ( peer.Get() == NULL )
         {
           peer = PeerConnectionSPtr( new PeerConnection() );
-          peer->InitializeCommon( this, tracker.m_host, tracker.m_port );
+          peer->InitializeCommon( PeerSPtr( this ), tracker.m_host, tracker.m_port );
           peer->InitializeOutgoing( tracker.m_id );
           m_peers.push_back( peer );
         }
@@ -79,14 +80,14 @@ namespace libBitFlood
             args[0] = flood->m_floodfile.m_contentHash;
             args[1] = m_id;
             args[2] = (int)m_setup.m_localPort;
-            peer->SendMessage( PeerMethodHandler::RegisterWithPeer, args );
+            peer->SendMethod( PeerMethodHandler::RegisterWithPeer, args );
           }
 
           // request some chunks
           {
             XmlRpcValue args;
             args[0] = flood->m_floodfile.m_contentHash;
-            peer->SendMessage( ChunkMethodHandler::RequestChunkMaps, args );
+            peer->SendMethod( ChunkMethodHandler::RequestChunkMaps, args );
           }
         }
 
@@ -94,7 +95,7 @@ namespace libBitFlood
         {
           XmlRpcValue args;
           args[0] = flood->m_floodfile.m_contentHash;
-          peer->SendMessage( TrackerMethodHandler::RequestPeerList, args );
+          peer->SendMethod( TrackerMethodHandler::RequestPeerList, args );
         }
       }
     }
@@ -116,7 +117,7 @@ namespace libBitFlood
       if ( m_listensocket->Accept( incoming, host, port ) )
       {
         PeerConnectionSPtr peer( new PeerConnection() );
-        peer->InitializeCommon( this, host, port );
+        peer->InitializeCommon( PeerSPtr( this ), host, port );
         peer->InitializeIncoming( incoming );
         m_peers.push_back( peer );
       }
@@ -125,37 +126,37 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
   
-  Error::ErrorCode Peer::AddMessageHandler( MessageHandlerSPtr& i_handler )
+  Error::ErrorCode Peer::AddMethodHandler( MethodHandlerSPtr& i_handler )
   {
-    V_String messages;
-    i_handler->QueryAPI( messages );
+    V_String methods;
+    i_handler->QueryMethods( methods );
     
-    V_String::const_iterator iter = messages.begin();
-    V_String::const_iterator end  = messages.end();
+    V_String::const_iterator iter = methods.begin();
+    V_String::const_iterator end  = methods.end();
 
     for( ; iter != end; ++iter )
     {
-      const std::string& message = *iter;
-      m_messagehandlers[ message ].push_back( i_handler );
+      const std::string& method = *iter;
+      m_methodhandlers[ method ].push_back( i_handler );
     }
 
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode Peer::DispatchMessage( const std::string& i_message, 
+  Error::ErrorCode Peer::DispatchMethod( const std::string& i_method, 
                                             PeerConnectionSPtr& i_receiver, 
                                             XmlRpcValue& i_args )
   {
-    M_StrToV_MessageHandlerSPtr::iterator messageiter = m_messagehandlers.find( i_message );
-    if ( messageiter != m_messagehandlers.end() )
+    M_StrToV_MethodHandlerSPtr::iterator methoditer = m_methodhandlers.find( i_method );
+    if ( methoditer != m_methodhandlers.end() )
     {
-      V_MessageHandlerSPtr::iterator handleriter = (*messageiter).second.begin();
-      V_MessageHandlerSPtr::iterator handlerend  = (*messageiter).second.end();
+      V_MethodHandlerSPtr::iterator handleriter = (*methoditer).second.begin();
+      V_MethodHandlerSPtr::iterator handlerend  = (*methoditer).second.end();
       for ( ; handleriter != handlerend; ++handleriter )
       {
-        (*handleriter)->HandleMessage( i_message,
-                                       i_receiver,
-                                       i_args );
+        (*handleriter)->HandleMethod( i_method,
+				      i_receiver,
+				      i_args );
       }
     }
 
