@@ -18,14 +18,16 @@ require Exporter;
 @EXPORT = qw(&Debug);
 
 my %loggers; # hash on channel name
+my %levels;  # same
 
-our $debugLevel       = $ENV{BITFLOOD_DEBUG};
 our $debugLineNumbers = $ENV{BITFLOOD_DEBUG_LINENUMBERS};
 our $debugPid         = $ENV{BITFLOOD_DEBUG_PID};
 
-OpenChannel(''); # default channel
-foreach my $channel (split(',', $ENV{BITFLOOD_DEBUG_CHANNELS})) {
+# '' is the default channel
+my $defaultDebugLevel = $ENV{BITFLOOD_DEBUG};
+foreach my $channel ('', split(',', $ENV{BITFLOOD_DEBUG_CHANNELS})) {
   OpenChannel($channel);
+  SetChannelLevel($channel, $defaultDebugLevel) if defined $defaultDebugLevel;
 }
 
 # FIXME this sucks, move it somewhere else?
@@ -60,7 +62,7 @@ sub OpenChannel {
   my $channel = shift;
   my $loggerObject = shift;
 
-  die("channel '$channel' already open") if $loggers{$channel};
+  return undef if $loggers{$channel};
 
   if ($loggerObject) {
     if (!UNIVERSAL::isa($loggerObject, 'BitFlood::Logger')) {
@@ -71,13 +73,18 @@ sub OpenChannel {
   }    
 
   $loggers{$channel} = $loggerObject;
+  return 1;
 }
 
 sub CloseChannel {
   my $channel = shift;
 
+  return undef if !$loggers{$channel};
+
   $loggers{$channel}->close;
   delete $loggers{$channel};
+  delete $levels{$channel};
+  return 1;
 }
 
 sub MuteChannel {
@@ -92,6 +99,16 @@ sub UnmuteChannel {
   $loggers{$channel}->muted(0);
 }
 
+sub SetChannelLevel {
+  my $channel = shift;
+  my $level = shift;
+
+  return undef if !$loggers{$channel};
+
+  $levels{$channel} = $level;  
+  return 1;
+}
+
 
 sub AddLogger {
   my $channel = shift;
@@ -99,7 +116,7 @@ sub AddLogger {
   my @loggerParams = @_;
 
   $loggers{$channel} and $loggers{$channel}->isa('BitFlood::Logger::Multi')
-    or return; # FIXME warn here?
+    or return undef; # FIXME warn here?
 
   my $loggerObject;
 
@@ -140,8 +157,8 @@ sub Debug {
     return;
   }
 
-  return unless ( defined($debugLevel)
-		  and $debugLevel >= $level
+  return unless ( defined $levels{$channel}
+		  and $level <= $levels{$channel}
 		  and $loggers{$channel} );
 
   # we allow people to execute code at given debug levels...
