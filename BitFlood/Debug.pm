@@ -6,8 +6,7 @@ $| = 1; # autoflush
 
 use BitFlood::Utils;
 use BitFlood::Logger::Multi;
-use BitFlood::Logger::Stdout;
-use BitFlood::Logger::File;
+use Sys::Hostname;
 
 use vars qw(@ISA @EXPORT);
 require Exporter;
@@ -17,20 +16,29 @@ require Exporter;
 # symbols to export
 @EXPORT = qw(&Debug);
 
-my $debugLevel;
-my $debugLineNumbers;
 my %loggers; # hash on channel name
 
-SetDebugLevel($ENV{BITFLOOD_DEBUG}) if(defined($ENV{BITFLOOD_DEBUG}));
-SetDebugLineNumbers($ENV{BITFLOOD_DEBUG_LINENUMBERS}) if(defined($ENV{BITFLOOD_DEBUG_LINENUMBERS}));
+our $debugLevel       = $ENV{BITFLOOD_DEBUG};
+our $debugLineNumbers = $ENV{BITFLOOD_DEBUG_LINENUMBERS};
+our $debugPid         = $ENV{BITFLOOD_DEBUG_PID};
 
 OpenChannel(''); # default channel
+# FIXME this sucks, move it somewhere else?
 AddLogger('', 'Stdout')
-  unless defined($ENV{BITFLOOD_DEBUG_QUIET});
+  unless $ENV{BITFLOOD_DEBUG_QUIET};
 AddLogger('', 'Stderr')
-  if defined($ENV{BITFLOOD_DEBUG_STDERR});
+  if $ENV{BITFLOOD_DEBUG_STDERR};
 AddLogger('', 'File', $ENV{BITFLOOD_DEBUG_FILENAME} || 'debug.log', append => 0)
-  if defined($ENV{BITFLOOD_DEBUG_FILE});  
+  if $ENV{BITFLOOD_DEBUG_FILE};  
+AddLogger('', 'Jabber',
+          recipient  => 'bftest@jabber.org/listener',
+          serverHost => 'jabber.org',
+          serverPort => 5222,
+          username   => 'bftest',
+          password   => 'bftest',
+          resource   => 'logger',
+          infoString => hostname() || 'unknown')
+  if $ENV{BITFLOOD_DEBUG_JABBER};
 
 foreach my $channel (split(',', $ENV{BITFLOOD_DEBUG_CHANNELS})) {
   OpenChannel($channel);
@@ -40,14 +48,6 @@ AddLogger('trace', 'Stdout');
 AddLogger('net', 'Stdout');
 AddLogger('perf', 'File', 'perf.log');
 
-
-sub SetDebugLevel {
-  $debugLevel = shift;
-}
-
-sub SetDebugLineNumbers {
-  $debugLineNumbers = shift;
-}
 
 sub OpenChannel {
   my $channel = shift;
@@ -153,8 +153,10 @@ sub Debug {
   $line       ||= 'unknown';
   $subroutine ||= 'unknown';
 
-  my $output = "($$) $subroutine";
-  $output .= " ($filename, line $line)" if(defined($debugLineNumbers));
+  my $output;
+  $output .= "($$) "                    if $debugPid;
+  $output .= "$subroutine";
+  $output .= " ($filename, line $line)" if $debugLineNumbers;
   $output .= ": ";
   $output .= BitFlood::Utils::Stringify($ref);
 
