@@ -15,9 +15,11 @@ use IO::File;
 use Data::Dumper; # XXX
 
 use BitFlood::Utils;
+use BitFlood::Debug;
 
 __PACKAGE__->mk_accessors(qw(data filename contentHash localPath 
-                             trackers peers));
+                             trackers peers startTime downloadBytes
+                             neededChunksByWeight));
 
 
 sub new {
@@ -27,6 +29,8 @@ sub new {
 
   $self->trackers([]);
   $self->peers([]);
+  $self->downloadBytes(0);
+  $self->neededChunksByWeight([]);
 
   $self->open if defined $self->filename;
 
@@ -41,6 +45,7 @@ sub open {
   my $contents = join('', $fileHandle->getlines());
   $self->data(XMLin($contents, ForceArray => [qw(File Tracker Chunk)]));
   $self->contentHash(sha1_base64($contents));
+  Debug("content hash: ".$self->contentHash, 5);
   undef $contents;
   $fileHandle->close();
 
@@ -53,6 +58,7 @@ sub open {
   $self->BuildChunkOffsets();
   $self->BuildLocalFilenames();
   $self->InitializeFiles();
+  $self->SortNeededChunksByWeight();
 }
 
 sub SetFilenames {
@@ -71,6 +77,12 @@ sub SortChunksInPlace {
     $targetFile->{Chunk} = [ sort { $a->{index} <=> $b->{index} } @{$targetFile->{Chunk}} ];
   }
 }
+
+sub SortNeededChunksByWeight {
+  my $self = shift;
+  $self->neededChunksByWeight([ sort { $b->{chunk}->{weight} <=> $a->{chunk}->{weight} } @{$self->neededChunksByWeight} ]);
+}
+
 
 sub BuildChunkMaps {
   my $self = shift;
@@ -117,6 +129,9 @@ sub InitializeFiles {
         $outfile->syswrite(0, 1);
       }
       $outfile->close;
+      foreach my $chunk (@{$file->{Chunk}}) {
+	push(@{$self->neededChunksByWeight}, { filename => $file->{name}, chunk => $chunk});
+      }
     }
     else # file DOES exist, we need to decide what we need to get...
     {
@@ -125,19 +140,21 @@ sub InitializeFiles {
       my $totalChunks = scalar(@{$file->{Chunk}});
       my $validChunkCount = 0;
       foreach my $chunk (@{$file->{Chunk}}) {
-	printf("Checking: $file->{name} [%6.2f%%]\r", 100 * $chunk->{index} / $totalChunks);
+	printf("Checking: %-35.35s [%6.2f%%]\r", substr($file->{name}, -35), 100 * $chunk->{index} / $totalChunks);
         $outfile->read($buffer, $chunk->{size});
         my $hash = sha1_base64($buffer);
         if($hash eq $chunk->{hash}) {
 	  $validChunkCount++;
           $file->{chunkMap}->Bit_On($chunk->{index});
-        }
+        } else {
+	  push(@{$self->neededChunksByWeight}, { filename => $file->{name}, chunk => $chunk});
+	}
       }
       $outfile->close;
-      printf("Checking: $file->{name} [%6.2f%%] [%d/%d chunks OK]\n", 100, $validChunkCount, $totalChunks);
+
+      printf("Checking: %-35.35s [%6.2f%%] [%d/%d chunks OK]\n", substr($file->{name}, -35), 100, $validChunkCount, $totalChunks);
     }
   }
-
 }
 
 

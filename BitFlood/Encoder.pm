@@ -123,7 +123,7 @@ sub _EncodeFile {
       $self->data->{Files}->{$cleanFilename}->{Chunk}->[$i]->{weight} = $i;
     }
   } else {
-    for(my $i = 0; $i <= $index; $i++) {
+    for(my $i = 0; $i < $index; $i++) {
       $self->data->{Files}->{$cleanFilename}->{Chunk}->[$i]->{weight} = 0;
     }
   }

@@ -34,21 +34,21 @@ sub new {
     name => 'Register', # the name of the method
     version => '0.0.1', # the method version
     hidden => undef,    # is it hidden? undef = no, 1 = yes
-    signature => ['int string string int'], # return int, take filehash, ip, port
+    signature => ['int string string string int'], # return int, take filehash, ip, port
     help => 'A method to register with the tracker.', # help for this method
     code => sub {
       my $self = shift;
+      my $clientId = shift;
       my $filehash = shift;
       my $ip = shift;
       my $port = shift;
       
-      print "registering: ip: $ip port: $port fh: $filehash\n";
-      my $url = "http://$ip:$port/RPCSERV";
-      my ($peer) = grep { $_->{url} eq $url } @{$self->filehashClientList->{$filehash}};
+      print "registering: $clientId [ $ip:$port / fh: $filehash ]\n";
+      my ($peer) = grep { $_->{id} eq $clientId } @{$self->filehashClientList->{$filehash}};
       if (!$peer)
       {
         print "  -> (new peer)\n";
-        $peer = { url => $url };
+        $peer = { id => $clientId, ip => $ip, port => $port };
         push(@{$self->filehashClientList->{$filehash}}, $peer);
       }
       $peer->{timestamp} = time();
@@ -60,17 +60,15 @@ sub new {
     name => 'Disconnect', # the name of the method
     version => '0.0.1', # the method version
     hidden => undef,    # is it hidden? undef = no, 1 = yes
-    signature => ['int string string int'], # return int, take filehash, ip, port
+    signature => ['int string string'], # return int, take filehash, ip, port
     help => 'A method to register with the tracker.', # help for this method
     code => sub {
       my $self = shift;
+      my $clientId = shift;
       my $filehash = shift;
-      my $ip = shift;
-      my $port = shift;
       
-      print "disconnecting: ip: $ip port: $port fh: $filehash\n";
-      my $url = "http://$ip:$port/RPCSERV";
-      my @newPeerList = grep { $_->{url} ne $url } @{$self->filehashClientList->{$filehash}};
+      print "disconnecting: $clientId [ fh: $filehash ]\n";
+      my @newPeerList = grep { $_->{id} ne $clientId } @{$self->filehashClientList->{$filehash}};
       $self->filehashClientList->{$filehash} = \@newPeerList;
     },
       
@@ -91,7 +89,7 @@ sub new {
 
       if(scalar(@{$self->filehashClientList->{$filehash}}) < $PEER_LIST_LENGTH)
       {
-        @peers = map { $_->{url} } @{$self->filehashClientList->{$filehash}};
+        @peers = map { "$_->{id}:$_->{ip}:$_->{port}" } @{$self->filehashClientList->{$filehash}};
       }
       else
       {

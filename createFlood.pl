@@ -17,12 +17,12 @@ GetOptions(
 	   "help"        => \$getHelp, 
 	   );
 
-if($getHelp) {
+if($getHelp or !$floodFile or !@trackerUrls or !@ARGV) {
   my ($appName) = $0 =~ /[\\\/]?(.*?)$/;
-  print qq{
+  print <<USAGE;
 Usage:
   $appName -flood <floodname.flood> -tracker <host> [-tracker <host>...] [-weighting [topheavy|bottomheavy]] <files/dirs to add>
-  };
+USAGE
   exit(0);
 }
 

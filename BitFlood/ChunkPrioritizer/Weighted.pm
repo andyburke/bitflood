@@ -3,39 +3,30 @@ package BitFlood::ChunkPrioritizer::Weighted;
 use strict;
 use base qw(BitFlood::ChunkPrioritizer);
 
+use BitFlood::Debug;
+
+use constant MAX_CHUNKS_TO_DOWNLOAD => 3;
 
 sub FindChunk {
   my $self = shift;
+  my $client = shift;
   my $flood = shift;
+  
+  return undef if($flood->{totalDownloading} >= MAX_CHUNKS_TO_DOWNLOAD);
 
-  my %incompleteFiles;
-  my $files = [ grep { ! $_->{chunkMap}->is_full } values %{$flood->Files} ];
-  $incompleteFiles{$flood->contentHash} = $files if @$files;
+  foreach my $neededChunk (@{$flood->neededChunksByWeight}) {
+    my $file = $flood->Files->{$neededChunk->{filename}};
+    my $chunk = $neededChunk->{chunk};
 
-  return undef if !%incompleteFiles;
-
-  my ($bestFile, $bestChunk);
-  while (my ($floodFileHash, $files) = each %incompleteFiles) {
-    foreach my $file (@$files) {
-
-      my $chunkMap = $file->{chunkMap};
-      for (my $index = 0; $index < $chunkMap->Size; $index++) {
-	next if $chunkMap->bit_test($index);
-	foreach my $peer (@{$flood->peers}) {
-	  my $peerChunkMap = $peer->chunkMaps->{$file->{name}};
-	  next if !$peerChunkMap or !$peerChunkMap->bit_test($index);
-#	  return ($file, $file->{Chunk}[$index]);
-	  if(!defined($bestChunk) || $file->{Chunk}[$index]->{weight} > $bestChunk->{weight}) {
-	      $bestFile = $file;
-	      $bestChunk = $file->{Chunk}[$index];
-	  }
-	}
-      }
-
+    foreach my $peer (@{$client->peers}) {
+      next if !$peer->chunkMaps;
+      my $peerChunkMap = $peer->chunkMaps->{$flood->contentHash}->{$file->{name}};
+      next if !$peerChunkMap or !$peerChunkMap->bit_test($chunk->{index}) or $chunk->{downloading};
+      return $peer, $file, $chunk;
     }
   }
 
-  return $bestFile, $bestChunk;
+  return undef;
 }
 
 
