@@ -7,6 +7,7 @@ $| = 1; # autoflush
 use BitFlood::Utils;
 use BitFlood::Logger::Multi;
 use Sys::Hostname;
+use Socket;
 
 use vars qw(@ISA @EXPORT);
 require Exporter;
@@ -34,14 +35,6 @@ AddLogger('', 'Stderr')
   if $ENV{BITFLOOD_DEBUG_STDERR};
 AddLogger('', 'File', $ENV{BITFLOOD_DEBUG_FILENAME} || 'debug.log', append => 0)
   if $ENV{BITFLOOD_DEBUG_FILE};  
-AddLogger('', 'Jabber',
-          recipient  => 'bftest@jabber.org/listener',
-          serverHost => 'jabber.org',
-          serverPort => 5222,
-          username   => 'bftest',
-          password   => 'bftest',
-          resource   => hostname() . '_' . inet_ntoa(scalar gethostbyname(hostname())))
-  if $ENV{BITFLOOD_DEBUG_JABBER};
 
 AddLogger('trace', 'Stdout');
 
@@ -49,6 +42,14 @@ AddLogger('perf', 'File', 'perf.log');
 
 if ($ENV{BITFLOOD_DEBUG_NET_FILE}) {
   AddLogger('net', 'File', 'net.log', append => 0);
+} elsif ($ENV{BITFLOOD_DEBUG_NET_JABBER}) {
+  AddLogger('net', 'Jabber',
+            recipient  => 'bftest@jabber.org/listener',
+            serverHost => 'jabber.org',
+            serverPort => 5222,
+            username   => 'bftest',
+            password   => 'bftest',
+            resource   => hostname() . '_' . inet_ntoa(scalar gethostbyname(hostname())));
 } else {
   AddLogger('net', 'Stdout');
 }
