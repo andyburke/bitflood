@@ -134,6 +134,17 @@ namespace libBitFlood
     return ret;
   }
 
+  // our sorting functions
+  bool SortFilesAlphabetically ( const FloodFile::File& i_rhs, const FloodFile::File& i_lhs )
+  {
+    return i_rhs.m_name.compare( i_lhs.m_name ) < 0;
+  }
+
+  bool SortChunksByIndex ( const FloodFile::Chunk& i_rhs, const FloodFile::Chunk& i_lhs )
+  {
+    return i_rhs.m_index < i_lhs.m_index;
+  }
+
   Error::ErrorCode FloodFile::FromXML( const std::string& i_xml )
   {
     //
@@ -244,6 +255,9 @@ namespace libBitFlood
 
                 lbffile.m_chunks.push_back( lbfchunk );
               }
+
+              // sort the chunks in index order
+              std::sort( lbffile.m_chunks.begin(), lbf.m_chunks.end(), SortChunksByIndex );
             }
 
             m_files.push_back( lbffile );
@@ -270,6 +284,11 @@ namespace libBitFlood
       }
     }
 
+    // sort the files alphabetically
+    std::sort( m_files.begin(), m_files.end(), SortFilesAlphabetically );
+    
+
+
     // compute our content hash
     ComputeHash( m_contentHash );
 
@@ -281,21 +300,12 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  // our sorting function
-  bool SortFilesAlphabetically ( const FloodFile::File& i_rhs, const FloodFile::File& i_lhs )
-  {
-    return i_rhs.m_name.compare( i_lhs.m_name ) < 0;
-  }
-
   Error::ErrorCode FloodFile::ComputeHash( std::string& o_hash )
   {
-    V_File sortedfiles = m_files;
-    std::sort( sortedfiles.begin(), sortedfiles.end(), SortFilesAlphabetically );
-    
     std::stringstream tohash;
 
-    V_File::const_iterator fileiter = sortedfiles.begin();
-    V_File::const_iterator fileend  = sortedfiles.end();
+    V_File::const_iterator fileiter = m_files.begin();
+    V_File::const_iterator fileend  = m_files.end();
     
     for ( ; fileiter != fileend; ++fileiter )
     {
