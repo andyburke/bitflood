@@ -319,7 +319,7 @@ namespace libBitFlood
       port_converter >> port;
      
       XmlRpcClient* client = new XmlRpcClient( host.c_str(), port, uri.c_str() );
-      m_trackers.push_back( client );
+      m_trackerConnections.push_back( client );
     }
 
     return Error::NO_ERROR;
@@ -333,8 +333,8 @@ namespace libBitFlood
     args[2] = i_client.m_setup.m_localIP;
     args[3] = (int)i_client.m_setup.m_localPort;
 
-    V_XmlRpcClientPtr::iterator trackeriter = m_trackers.begin();
-    V_XmlRpcClientPtr::iterator trackerend  = m_trackers.end();
+    V_XmlRpcClientPtr::iterator trackeriter = m_trackerConnections.begin();
+    V_XmlRpcClientPtr::iterator trackerend  = m_trackerConnections.end();
     
     for ( ; trackeriter != trackerend; ++trackeriter )
     {
@@ -352,8 +352,8 @@ namespace libBitFlood
     XmlRpcValue args, result;
     args[0] = m_floodfile.m_contentHash;
 
-    V_XmlRpcClientPtr::iterator trackeriter = m_trackers.begin();
-    V_XmlRpcClientPtr::iterator trackerend  = m_trackers.end();
+    V_XmlRpcClientPtr::iterator trackeriter = m_trackerConnections.begin();
+    V_XmlRpcClientPtr::iterator trackerend  = m_trackerConnections.end();
     
     for ( ; trackeriter != trackerend; ++trackeriter )
     {

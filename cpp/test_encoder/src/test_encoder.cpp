@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     e.m_chunksize = 262144;
     e.m_trackers.push_back( argv[2] );
 
-    Flood out;
+    FloodFile out;
     Encoder::EncodeFile( e, out );
 
     std::string txt;

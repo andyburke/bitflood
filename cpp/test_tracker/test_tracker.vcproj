@@ -2,8 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="libBitFlood"
-	ProjectGUID="{535FB9F7-8394-44DE-B99A-4DFA1C95D9DC}"
+	Name="test_tracker"
+	ProjectGUID="{284B5175-B4EE-4AA5-9179-D48D9DD40798}"
+	RootNamespace="test_tracker"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -14,29 +15,37 @@
 			Name="Debug|Win32"
 			OutputDirectory=".\built\$(ConfigurationName)"
 			IntermediateDirectory=".\built\$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;.\extern\xercesc++\2.6.0\src\&quot;;&quot;.\extern\crypto++\5.2.1\&quot;;&quot;.\extern\xmlrpc++\0.7\src\&quot;"
+				AdditionalIncludeDirectories="&quot;..\extern\xercesc++\2.6.0\src\&quot;;&quot;..\extern\xmlrpc++\0.7\src&quot;;..\src\"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="3"
-				PrecompiledHeaderThrough="stdafx.H"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="libBitFlood.lib Ws2_32.lib"
+				OutputFile="$(OutDir)/test_tracker.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\built\$(ConfigurationName)"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile="$(OutDir)/test_tracker.pdb"
+				SubSystem="1"
+				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="xcopy ..\extern\xercesc++\2.6.0\Build\Win32\VC7\$(ConfigurationName)\xerces-c_2_6D.dll $(OutDir)\"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -47,6 +56,8 @@
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
 			<Tool
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool
@@ -56,26 +67,35 @@
 			Name="Release|Win32"
 			OutputDirectory=".\built\$(ConfigurationName)"
 			IntermediateDirectory=".\built\$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;.\extern\xmlrpc++\0.7\src\&quot;;&quot;.\extern\xercesc++\2.6.0\src\&quot;;&quot;.\extern\crypto++\5.2.1\&quot;"
+				AdditionalIncludeDirectories="&quot;..\extern\xercesc++\2.6.0\src\&quot;;&quot;..\extern\xmlrpc++\0.7\src&quot;;..\src\"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="3"
-				PrecompiledHeaderThrough="stdafx.H"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="libBitFlood.lib Ws2_32.lib"
+				OutputFile="$(OutDir)/test_tracker.exe"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\built\$(ConfigurationName)"
+				GenerateDebugInformation="TRUE"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="xcopy ..\extern\xercesc++\2.6.0\Build\Win32\VC7\$(ConfigurationName)\xerces-c_2_6.dll $(OutDir)\"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -86,6 +106,8 @@
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
 			<Tool
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool
@@ -97,34 +119,8 @@
 	<Files>
 		<Filter
 			Name="src"
-			Filter="">
-			<File
-				RelativePath=".\src\Client.cpp">
-			</File>
-			<File
-				RelativePath=".\src\Client.H">
-			</File>
-			<File
-				RelativePath=".\src\Encoder.cpp">
-			</File>
-			<File
-				RelativePath=".\src\Encoder.H">
-			</File>
-			<File
-				RelativePath=".\src\Error.H">
-			</File>
-			<File
-				RelativePath=".\src\Flood.cpp">
-			</File>
-			<File
-				RelativePath=".\src\Flood.H">
-			</File>
-			<File
-				RelativePath=".\src\PeerConnection.cpp">
-			</File>
-			<File
-				RelativePath=".\src\PeerConnection.H">
-			</File>
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
 				RelativePath=".\src\stdafx.cpp">
 				<FileConfiguration
@@ -144,13 +140,13 @@
 				RelativePath=".\src\stdafx.H">
 			</File>
 			<File
-				RelativePath=".\src\Tracker.cpp">
-			</File>
-			<File
-				RelativePath=".\src\Tracker.H">
-			</File>
-			<File
-				RelativePath=".\src\Types.H">
+				RelativePath=".\src\test_tracker.cpp">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						GeneratePreprocessedFile="0"/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>

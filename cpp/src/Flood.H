@@ -41,7 +41,7 @@ namespace libBitFlood
 
   typedef std::vector< FloodFile > V_FloodFile;
 
-  typedef std::vector< XmlRpcClient* > V_XmlRpcClientPtr;
+  typedef std::vector< class XmlRpcClient* > V_XmlRpcClientPtr;
   
   class Flood
   {
@@ -51,7 +51,7 @@ namespace libBitFlood
     Error::ErrorCode UpdatePeerList( void );
 
     FloodFile m_floodfile;
-    V_XmlRpcClientPtr m_trackers;
+    V_XmlRpcClientPtr m_trackerConnections;
   };
 
   typedef std::vector< Flood > V_Flood;

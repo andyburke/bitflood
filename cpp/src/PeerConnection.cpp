@@ -1,5 +1,5 @@
 #include "stdafx.H"
-#include "Peer.H"
+#include "PeerConnection.H"
 
 namespace libBitFlood
 {
