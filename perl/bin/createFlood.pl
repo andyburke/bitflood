@@ -2,7 +2,7 @@ use strict;
 
 use Getopt::Long;
 
-use BitFlood::Encoder;
+use BitFlood::FloodFile;
 
 my $floodFile;
 my $weightingFunction;
