@@ -29,7 +29,7 @@ public class Encoder
     }
     catch ( Exception e )
     {
-      Logger.LogError( "Failed to encode (" + new String( bytes, length ) + ") : " + e );
+      Logger.LogError( "Failed to encode (" + new String( bytes ) + ") : " + e );
     }
  
     sha1Encoder.reset();
