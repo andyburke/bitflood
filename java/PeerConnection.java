@@ -16,34 +16,17 @@ import java.util.*;
 public class PeerConnection
 {
   private Hashtable         messageHandlers = null;
-
   private SocketChannel     socketChannel   = null;
-
   private Selector          socketSelector  = null;
-
   private InetSocketAddress socketAddress   = null;
-
-  private int               BUFFER_SIZE     = 256 * 1024 * 2;                    // 2
-                                                                                 // times
-                                                                                 // the
-                                                                                 // normal
-                                                                                 // chunk
-                                                                                 // size
-
+  private int               BUFFER_SIZE     = 256 * 1024 * 2; // 2 times thenormal chunk size
   private ByteBuffer        readBuffer      = ByteBuffer.allocate( BUFFER_SIZE );
-
   private int               readIndex       = 0;
-
   private ByteBuffer        writeBuffer     = ByteBuffer.allocate( BUFFER_SIZE );
-
   public Peer               parentPeer      = null;
-
   public boolean            connected       = false;
-
   public boolean            disconnected    = false;
-
   public String             hostname        = "";
-
   public int                port            = 0;
 
   public PeerConnection()
@@ -56,13 +39,12 @@ public class PeerConnection
     port = remotePort;
     try
     {
-      socketAddress = new InetSocketAddress( InetAddress.getByName( hostname ),
-          port );
+      socketAddress = new InetSocketAddress( InetAddress.getByName( hostname ), port );
     }
     catch ( Exception e )
     {
-      System.out.println( "Error getting address for remote host (" + hostname
-          + ":" + port + "): " + e );
+      System.out.println( "Error getting address for remote host (" + hostname + ":" + port + "): "
+          + e );
       disconnected = true;
       return;
     }
@@ -73,8 +55,7 @@ public class PeerConnection
   {
     if ( incomingSocketConnection == null )
     {
-      System.out
-          .println( "Tried to create a PeerConnection with a null socket?" );
+      System.out.println( "Tried to create a PeerConnection with a null socket?" );
       disconnected = true;
       return;
     }
@@ -88,9 +69,7 @@ public class PeerConnection
     }
     catch ( Exception e )
     {
-      System.out
-          .println( "Error setting incoming connection to be non-blocking: "
-              + e );
+      System.out.println( "Error setting incoming connection to be non-blocking: " + e );
     }
 
     connected = true;
@@ -113,8 +92,7 @@ public class PeerConnection
     }
     catch ( Exception e )
     {
-      System.out.println( "Error registering sockets on incoming connection: "
-          + e );
+      System.out.println( "Error registering sockets on incoming connection: " + e );
       disconnected = true;
       return false;
     }

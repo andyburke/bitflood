@@ -41,8 +41,7 @@ public class ClientTest
 
     try
     {
-      java.net.InetAddress localMachine = java.net.InetAddress
-          .getByName( localIP );
+      java.net.InetAddress localMachine = java.net.InetAddress.getByName( localIP );
       localIP = localMachine.getHostAddress();
     }
     catch ( java.net.UnknownHostException uhe )

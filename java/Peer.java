@@ -14,15 +14,10 @@ import java.net.*;
 public class Peer
 {
   private Vector              pendingpeers         = null;
-
   private Hashtable           floods               = null;
-
   private ServerSocketChannel listenSocketChannel  = null;
-
   private Selector            listenSocketSelector = null;
-
   public String               hostname             = "";
-
   public int                  port                 = 0;
 
   public Peer()
@@ -106,9 +101,7 @@ public class Peer
           }
           catch ( Exception e )
           {
-            System.out
-                .println( "Error accepting connection from listenSocketChannel: "
-                    + e );
+            System.out.println( "Error accepting connection from listenSocketChannel: " + e );
           }
 
           if ( incomingSocket != null )
@@ -170,8 +163,7 @@ public class Peer
 
     try
     {
-      listenSocketChannel.register( listenSocketSelector,
-          SelectionKey.OP_ACCEPT );
+      listenSocketChannel.register( listenSocketSelector, SelectionKey.OP_ACCEPT );
     }
     catch ( Exception e )
     {

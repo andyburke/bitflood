@@ -11,11 +11,17 @@ import java.util.*;
  */
 public class Flood
 {
+  private Vector    trackers          = null;
   private Vector    peers             = null;
-
   private FloodFile floodFile         = null;
-
   private Date      lastTrackerUpdate = null;
+
+  public class TrackerInfo
+  {
+    public String host;
+    public int    port;
+    public String id;
+  }
 
   public Flood()
   {
@@ -45,8 +51,7 @@ public class Flood
     }
 
     Date now = new Date();
-    if ( lastTrackerUpdate == null
-        || ( now.getTime() - lastTrackerUpdate.getTime() >= 20 ) )
+    if ( lastTrackerUpdate == null || ( now.getTime() - lastTrackerUpdate.getTime() >= 20 ) )
     {
       UpdateTrackers();
       lastTrackerUpdate = new Date();
@@ -57,6 +62,11 @@ public class Flood
   {
     if ( floodFile != null )
     {
+      for ( int trackerindex = 0; trackerindex < floodFile.trackers.length; ++trackerindex )
+      {
+        String trackerurl = floodFile.trackers[trackerindex];
+
+      }
     }
   }
 }

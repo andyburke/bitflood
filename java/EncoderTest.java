@@ -60,8 +60,7 @@ public class EncoderTest
         {
           int newSize = 2 * filesToAdd.length;
           String[] tempFilesToAdd = new String[newSize];
-          System
-              .arraycopy( filesToAdd, 0, tempFilesToAdd, 0, filesToAdd.length );
+          System.arraycopy( filesToAdd, 0, tempFilesToAdd, 0, filesToAdd.length );
           filesToAdd = tempFilesToAdd;
         }
         filesToAdd[numFilesToAdd++] = argv[i];

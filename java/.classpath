@@ -4,5 +4,5 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="sdk/xerces/xerces-2_6_2/xml-apis.jar"/>
 	<classpathentry kind="lib" path="sdk/xerces/xerces-2_6_2/xercesImpl.jar"/>
-	<classpathentry kind="output" path=""/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -71,13 +71,9 @@ public class FloodFile
   }
 
   public String[]       trackers;
-
   public TargetFile[]   files;
-
   public int            chunkSize;
-
   public String         filePath;
-
   public String         contentHash;
 
   // for doing the sha1's of our chunks
@@ -215,8 +211,7 @@ public class FloodFile
       }
       TargetFile file = files[fileIndex];
       System.out.println( "  name: " + file.name );
-      System.out.println( "    size: " + file.size + " chunks:"
-          + file.chunks.length );
+      System.out.println( "    size: " + file.size + " chunks:" + file.chunks.length );
     }
 
     System.out.println( "Trackers:" );
@@ -283,21 +278,19 @@ public class FloodFile
 
       Element fileNode = document.createElement( "File" );
       fileNode.setAttribute( "name", files[fileIndex].name ); // FIXME: have to
-                                                              // cleanse the
-                                                              // filename to
-                                                              // spec (unix)
+      // cleanse the
+      // filename to
+      // spec (unix)
       fileNode.setAttribute( "size", Long.toString( files[fileIndex].size ) );
       fileInfo.appendChild( fileNode );
 
       for ( int chunkIndex = 0; chunkIndex < files[fileIndex].chunks.length; chunkIndex++ )
       {
         Element chunkNode = document.createElement( "Chunk" );
-        chunkNode.setAttribute( "index", Long
-            .toString( files[fileIndex].chunks[chunkIndex].index ) );
-        chunkNode.setAttribute( "hash",
-            files[fileIndex].chunks[chunkIndex].hash );
-        chunkNode.setAttribute( "size", Long
-            .toString( files[fileIndex].chunks[chunkIndex].size ) );
+        chunkNode
+            .setAttribute( "index", Long.toString( files[fileIndex].chunks[chunkIndex].index ) );
+        chunkNode.setAttribute( "hash", files[fileIndex].chunks[chunkIndex].hash );
+        chunkNode.setAttribute( "size", Long.toString( files[fileIndex].chunks[chunkIndex].size ) );
         chunkNode.setAttribute( "weight", Long
             .toString( files[fileIndex].chunks[chunkIndex].weight ) );
         fileNode.appendChild( chunkNode );
@@ -349,7 +342,7 @@ public class FloodFile
     try
     {
       parser.setFeature( "http://xml.org/sax/features/validation", false ); // don't
-                                                                            // validate
+      // validate
     }
     catch ( Exception e )
     {
@@ -392,12 +385,9 @@ public class FloodFile
                 Element chunk = (Element) chunkList.item( chunkIndex );
                 Chunk tempChunk = new Chunk();
 
-                tempChunk.index = Integer.parseInt( chunk
-                    .getAttribute( "index" ) );
-                tempChunk.weight = Integer.parseInt( chunk
-                    .getAttribute( "weight" ) );
-                tempChunk.size = Integer
-                    .parseInt( chunk.getAttribute( "size" ) );
+                tempChunk.index = Integer.parseInt( chunk.getAttribute( "index" ) );
+                tempChunk.weight = Integer.parseInt( chunk.getAttribute( "weight" ) );
+                tempChunk.size = Integer.parseInt( chunk.getAttribute( "size" ) );
                 tempChunk.hash = chunk.getAttribute( "hash" );
 
                 if ( tempChunk.index >= targetFile.chunks.length )
@@ -506,8 +496,8 @@ public class FloodFile
     }
 
     String absDirPath = dirToAdd.getAbsolutePath() + '/'; // change this to be
-                                                          // the abs path for
-                                                          // cleanup later on
+    // the abs path for
+    // cleanup later on
     absDirPath = absDirPath.replace( '\\', '/' );
 
     String[] childFiles = new String[32];
@@ -522,9 +512,8 @@ public class FloodFile
       }
 
       // FIXME i'm do a lot of shit on this one line...
-      if ( !AddFile( childFiles[childIndex], childFiles[childIndex]
-          .replaceFirst( absDirPath, absDirPath.substring( absDirPath
-              .lastIndexOf( '/' ) ) ) ) )
+      if ( !AddFile( childFiles[childIndex], childFiles[childIndex].replaceFirst( absDirPath,
+          absDirPath.substring( absDirPath.lastIndexOf( '/' ) ) ) ) )
       {
         return false;
       }
@@ -583,8 +572,7 @@ public class FloodFile
     files[filesIndex] = new TargetFile();
     files[filesIndex].name = targetPath;
     files[filesIndex].size = fileToAdd.length();
-    Long numChunks = new Long( ( fileToAdd.length() + ( chunkSize - 1 ) )
-        / chunkSize ); //rounding
+    Long numChunks = new Long( ( fileToAdd.length() + ( chunkSize - 1 ) ) / chunkSize ); //rounding
     files[filesIndex].chunks = new Chunk[numChunks.intValue()];
 
     InputStream inputFileStream = null;
@@ -610,7 +598,7 @@ public class FloodFile
       {
         bytesRead = inputFileStream.read( chunkData, 0, chunkSize );
         offset += bytesRead; // FIXME this shouldn't be necessary, we should
-                             // just detect the end of the stream
+        // just detect the end of the stream
       }
       catch ( IOException e )
       {
@@ -630,8 +618,7 @@ public class FloodFile
       digest = sha1Encoder.digest();
 
       // NOTE: base64 encoded sha1s are always 27 chars
-      String chunkHash = Base64.encodeToString( digest, false ).substring( 0,
-          27 );
+      String chunkHash = Base64.encodeToString( digest, false ).substring( 0, 27 );
 
       Chunk chunk = new Chunk();
       chunk.hash = chunkHash;
@@ -687,8 +674,7 @@ public class FloodFile
         System.out.println( "Hashing on: " + content );
         sha1Encoder.reset();
         sha1Encoder.update( content.getBytes() );
-        contentHash = Base64.encodeToString( sha1Encoder.digest(), false )
-            .substring( 0, 27 );
+        contentHash = Base64.encodeToString( sha1Encoder.digest(), false ).substring( 0, 27 );
       }
     }
   }
