@@ -66,11 +66,15 @@ public class Flood
           PeerConnection peer = InqPeer( tracker.id );
           if ( peer == null )
           {
-            peer = new PeerConnection( tracker.host, tracker.port, tracker.id );
+            peer = new PeerConnection( this, tracker.host, tracker.port, tracker.id );
             peers.add( peer );
           }
           
           // send a "requestpeerlist" method
+          {
+            String out = XMLEnvelopeProcessor.encode( "RequestPeerList", new Vector() );
+            peer.writeBuffer.put( (out.replaceAll("\n", "") + "\n").getBytes() );
+          }
         }
       }
     }

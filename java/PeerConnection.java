@@ -4,7 +4,6 @@
  */
 
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.channels.*;
 import java.net.*;
 import java.util.*;
@@ -15,30 +14,32 @@ import java.util.*;
  */
 public class PeerConnection
 {
-  private Hashtable         messageHandlers = null;
-  private SocketChannel     socketChannel   = null;
-  private Selector          socketSelector  = null;
-  private int               BUFFER_SIZE     = 256 * 1024 * 2; // 2 times thenormal chunk size
-  private ByteBuffer        readBuffer      = ByteBuffer.allocate( BUFFER_SIZE );
-  private int               readIndex       = 0;
-  private ByteBuffer        writeBuffer     = ByteBuffer.allocate( BUFFER_SIZE );
-  public Peer               parentPeer      = null;
-  public boolean            connected       = false;
-  public boolean            disconnected    = false;
-  public String             hostname        = "";
-  public int                port            = 0;
-  public String             id              = "";
+  private Hashtable     messageHandlers = null;
+  private SocketChannel socketChannel   = null;
+  private Selector      socketSelector  = null;
+  private int           BUFFER_SIZE     = 256 * 1024 * 2;                    // 2 times thenormal chunk size
+  private ByteBuffer     readBuffer      = ByteBuffer.allocate( BUFFER_SIZE );
+  private int           readIndex       = 0;
+  public ByteBuffer    writeBuffer     = ByteBuffer.allocate( BUFFER_SIZE );
+  public Peer           parentPeer      = null;
+  public boolean        connected       = false;
+  public boolean        disconnected    = false;
+  public String         hostname        = "";
+  public int            port            = 0;
+  public String         id              = "";
+  public Flood          flood           = null;
 
   public PeerConnection()
   {
   }
 
-  public PeerConnection(String remoteHost, int remotePort, String remoteId )
+  public PeerConnection(Flood theFlood, String remoteHost, int remotePort, String remoteId)
   {
+    flood = theFlood;
     hostname = remoteHost;
     port = remotePort;
     id = remoteId;
-    
+
     try
     {
       socketSelector = Selector.open();
@@ -54,6 +55,22 @@ public class PeerConnection
       return;
     }
 
+    // register ourselves w/ the peer
+    {
+      Vector args = new Vector();
+      args.add( flood.Id() );
+      args.add( flood.localPeer.id );
+      args.add( new Integer( flood.localPeer.port ) );
+
+      String out = XMLEnvelopeProcessor.encode( "RegisterWithPeer", args );
+      writeBuffer.put( (out.replaceAll("\n", "") + "\n").getBytes() );
+    }
+
+    // request some chunks
+    {
+      String out = XMLEnvelopeProcessor.encode( "RequestChunkMaps", new Vector() );
+      writeBuffer.put( (out.replaceAll("\n", "") + "\n").getBytes() );
+    }
   }
 
   public PeerConnection(SocketChannel incomingSocketConnection)
@@ -79,26 +96,6 @@ public class PeerConnection
       disconnected = true;
       System.out.println( "Error setting incoming connection to be non-blocking: " + e );
     }
-  }
-
-  private boolean InitializeBufferedIO()
-  {
-    if ( !connected )
-    {
-      return false;
-    }
-
-    try
-    {
-    }
-    catch ( Exception e )
-    {
-      System.out.println( "Error registering sockets on incoming connection: " + e );
-      disconnected = true;
-      return false;
-    }
-
-    return true;
   }
 
   public void LoopOnce()
@@ -133,7 +130,6 @@ public class PeerConnection
           try
           {
             sChannel.finishConnect();
-            writeBuffer.put( new String("Bitches").getBytes() );
             connected = true;
           }
           catch ( Exception e )
@@ -186,7 +182,7 @@ public class PeerConnection
       // flip and write the buffer
       writeBuffer.flip();
       int bytesWritten = socketChannel.write( writeBuffer );
-      
+
       // compact the buffer
       writeBuffer.compact();
     }
@@ -215,12 +211,9 @@ public class PeerConnection
         readBuffer.position( diff );
         readIndex = 0;
 
-        System.out.print( "Got message: '" );
-        for ( int i = 0; i < message.length; i++ )
-        {
-          System.out.print( (char) message[i] );
-        }
-        System.out.println( "'" );
+        Vector args = new Vector();
+        StringBuffer methodName = new StringBuffer();
+        XMLEnvelopeProcessor.decode( new String( message ), methodName, args );
       }
     }
 
