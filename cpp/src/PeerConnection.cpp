@@ -155,18 +155,23 @@ namespace libBitFlood
   }
 
 
-  Error::ErrorCode PeerConnection::NotifyHaveChunk( const std::string& i_floodhash )
+  Error::ErrorCode PeerConnection::NotifyHaveChunk( const std::string& i_floodhash,
+                                                    const std::string& i_filename,
+                                                    U32                i_chunkindex )
   {
     XmlRpcValue args;
     args[0] = i_floodhash;
+    args[1] = i_filename;
+    args[2] = (int)i_chunkindex;
+
     _SendMessage( PeerConnectionMessages::NotifyHaveChunk, args );
 
     return Error::NO_ERROR_LBF;
   }
 
   Error::ErrorCode PeerConnection::RequestChunk( const std::string& i_floodhash,
-    const std::string& i_filename,
-    U32                i_chunkindex )
+                                                 const std::string& i_filename,
+                                                 U32                i_chunkindex )
   {
     XmlRpcValue args;
     args[0] = i_floodhash;
@@ -242,6 +247,9 @@ namespace libBitFlood
           }
           free( data );
         }
+        
+        if ( fileptr != NULL )
+          fclose( fileptr );
       }
     }
 
@@ -511,6 +519,20 @@ namespace libBitFlood
   Error::ErrorCode _HandleNotifyHaveChunk( PeerConnection& i_receiver, XmlRpcValue& i_args )
   {
     std::string& floodId = i_args[0];
+    std::string& filename = i_args[1];
+    U32 chunkindex = (int)i_args[2];
+ 
+    PeerConnection::M_StrToStrToStr::iterator floodchunkmap = i_receiver.m_chunkMaps.find( floodId );
+    if ( floodchunkmap != i_receiver.m_chunkMaps.end() )
+    {
+      PeerConnection::M_StrToStr::iterator filechunkmap = (*floodchunkmap).second.find( filename );
+      if( filechunkmap != (*floodchunkmap).second.end() )
+      {
+        std::string& chunkmap = (*filechunkmap).second;
+        chunkmap[ chunkindex ] = '1';
+      }
+    }
+
     return Error::NO_ERROR_LBF;
   }
 
@@ -528,6 +550,98 @@ namespace libBitFlood
   Error::ErrorCode _HandleSendChunk( PeerConnection& i_receiver, XmlRpcValue& i_args )
   {
     std::string& floodId = i_args[0];
+    std::string& filename = i_args[1];
+    U32 chunkindex = (int)i_args[2];
+    XmlRpcValue::BinaryData& data = i_args[3];
+
+    // get the appropriate flood from the client
+    Flood* theflood = NULL;
+    i_receiver.m_client->InqFlood( floodId, theflood );
+    if ( theflood == NULL )
+    {
+    }
+    else
+    {
+      FloodFile::File* thefile = NULL;
+      U32 thefile_index;
+      for ( thefile_index = 0; thefile_index < theflood->m_floodfile.m_files.size(); ++thefile_index )
+      {
+        if ( theflood->m_floodfile.m_files[ thefile_index ].m_name.compare( filename ) == 0 )
+        {
+          thefile = &theflood->m_floodfile.m_files[ thefile_index ];
+          break;
+        }
+      }
+
+      if ( thefile == NULL )
+      {
+      }
+      else
+      {
+        const FloodFile::Chunk& thechunk = thefile->m_chunks[ chunkindex ];
+        U32 chunkoffset = theflood->m_runtimefiles[ thefile_index ].m_chunkoffsets[ chunkindex ];
+        
+        U32 data_size = data.size();
+        
+        if ( thechunk.m_size == data_size )
+        {
+          U32 data_index;
+          byte* data_ptr = (byte*)malloc( data_size );
+          for ( data_index = 0; data_index < data_size; ++data_index )
+          {
+            data_ptr[data_index] = data[data_index];
+          }
+
+          using namespace CryptoPP;
+          SHA sha;
+          HashFilter shaFilter(sha);
+          std::auto_ptr<ChannelSwitch> channelSwitch(new ChannelSwitch);
+          channelSwitch->AddDefaultRoute(shaFilter);
+
+          StringSource( data_ptr, data_size, true, channelSwitch.release() );
+          std::stringstream out;
+          Base64Encoder encoder( new FileSink( out ), false );
+          shaFilter.TransferTo( encoder );
+          
+          if( thechunk.m_hash.compare( out.str() ) == 0 )
+          {
+            FILE* fileptr = fopen( filename.c_str(), "wb" );
+            if ( fileptr != NULL && fseek( fileptr, chunkoffset, SEEK_SET ) == 0 )
+            {
+              if ( fwrite( data_ptr, 1, data_size, fileptr ) != data_size )
+              {
+              }
+              
+              Flood::P_ChunkKey chunkkey( thefile_index, chunkindex );
+              theflood->m_runtimefiles[ thefile_index ].m_chunkmap[ chunkindex ] = '1';
+
+              Flood::V_ChunkKey::iterator chunkiter = theflood->m_chunkstodownload.begin();
+              Flood::V_ChunkKey::iterator chunkend  = theflood->m_chunkstodownload.end();
+
+              for ( ; chunkiter != chunkend; ++chunkiter )
+              {
+                if ( (*chunkiter) == chunkkey )
+                {
+                  theflood->m_chunkstodownload.erase( chunkiter );
+                  break;
+                }
+              }
+
+              theflood->m_chunksDownloading.erase( chunkkey );
+
+              i_receiver.NotifyHaveChunk( floodId, filename, chunkindex );
+            }
+            
+            if ( fileptr != NULL )
+              fclose( fileptr );
+          }
+
+          free( data_ptr );
+        }
+      }
+    }
+
+
     return Error::NO_ERROR_LBF;
   }
 };

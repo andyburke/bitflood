@@ -150,22 +150,6 @@ namespace libBitFlood
     MemBufInputSource src( (const XMLByte*)i_xml.data(), i_xml.length(), "input" );
     src.setEncoding( L"ASCII" );
 
-    // hash the incoming XML
-    {
-      using namespace CryptoPP;
-      SHA sha;
-      HashFilter shaFilter(sha);
-      std::auto_ptr<ChannelSwitch> channelSwitch(new ChannelSwitch);
-      channelSwitch->AddDefaultRoute(shaFilter);
-
-      StringSource( (const byte*)i_xml.data(), i_xml.length(), true, channelSwitch.release() );
-      std::stringstream out;
-      Base64Encoder encoder( new FileSink( out ), false );
-      shaFilter.TransferTo( encoder );
-
-      m_contentHash = out.str();
-    }
-
     //
     //  Parse the XML file, catching any XML exceptions that might propogate
     //  out of it.
@@ -288,6 +272,9 @@ namespace libBitFlood
       }
     }
 
+    // compute our content hash
+    ComputeHash( m_contentHash );
+
     //
     //  Delete the parser itself.
     //
@@ -296,8 +283,51 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
+  // our sorting function
+  bool SortFilesAlphabetically ( const FloodFile::File& i_rhs, const FloodFile::File& i_lhs )
+  {
+    return i_rhs.m_name.compare( i_lhs.m_name ) < 0;
+  }
+
   Error::ErrorCode FloodFile::ComputeHash( std::string& o_hash )
   {
+    V_File sortedfiles = m_files;
+    std::sort( sortedfiles.begin(), sortedfiles.end(), SortFilesAlphabetically );
+    
+    std::stringstream tohash;
+
+    V_File::const_iterator fileiter = sortedfiles.begin();
+    V_File::const_iterator fileend  = sortedfiles.end();
+    
+    for ( ; fileiter != fileend; ++fileiter )
+    {
+      tohash << (*fileiter).m_name;
+
+      V_Chunk::const_iterator chunkiter = (*fileiter).m_chunks.begin();
+      V_Chunk::const_iterator chunkend  = (*fileiter).m_chunks.end();
+      
+      for ( ; chunkiter != chunkend; ++chunkiter )
+      {
+        tohash << (*chunkiter).m_hash;
+      }
+    }
+
+    // hash 
+    std::string tohash_str = tohash.str();
+    using namespace CryptoPP;
+    SHA sha;
+    HashFilter shaFilter(sha);
+    std::auto_ptr<ChannelSwitch> channelSwitch(new ChannelSwitch);
+    channelSwitch->AddDefaultRoute(shaFilter);
+    
+    StringSource( (const byte*)tohash_str.data(), tohash_str.length(), true, channelSwitch.release() );
+    std::stringstream out;
+    Base64Encoder encoder( new FileSink( out ), false );
+    shaFilter.TransferTo( encoder );
+
+    o_hash = out.str();
+
+      
     return Error::NO_ERROR_LBF;
   }
 

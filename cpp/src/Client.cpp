@@ -117,7 +117,7 @@ namespace libBitFlood
               if( filechunkmap != (*floodchunkmap).second.end() )
               {
                 const std::string& chunkmap = (*filechunkmap).second;
-                if ( chunkmap[ thechunkkey.second ] == '0' )
+                if ( chunkmap[ thechunkkey.second ] == '1' )
                 {
                   foundchunk = true;
                   todownload_from  = thepeer;
@@ -274,7 +274,7 @@ namespace libBitFlood
       (*peeriter)->LoopOnce();
 
       // reap defunct peer connections
-      if ( (*peeriter)->m_disconnected )
+      if ( false )//(*peeriter)->m_disconnected )
       {
         m_peers.erase( peeriter );
       }
