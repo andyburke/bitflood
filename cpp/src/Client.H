@@ -16,6 +16,7 @@ namespace libBitFlood
       U32         m_localPort;
     };
 
+  public:
     Setup               m_setup;
     V_Flood             m_floods;
     std::string         m_id;

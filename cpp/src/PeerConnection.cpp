@@ -4,6 +4,13 @@
 #include "Flood.H"
 #include "Client.H"
 
+#include <sha.h>
+#include <hex.h>
+#include <channels.h>
+#include <files.h>
+#include <sstream>
+#include <base64.h>
+
 namespace libBitFlood
 {
   namespace PeerConnectionMessages
@@ -95,8 +102,8 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode PeerConnection::Register( const std::string i_floodhash,
-    const std::string i_clientid )
+  Error::ErrorCode PeerConnection::Register( const std::string& i_floodhash,
+    const std::string& i_clientid )
   {
     XmlRpcValue args;
     args[0] = i_floodhash;
@@ -106,7 +113,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode PeerConnection::RequestChunkMaps( const std::string i_floodhash )
+  Error::ErrorCode PeerConnection::RequestChunkMaps( const std::string& i_floodhash )
   {
     XmlRpcValue args;
     args[0] = i_floodhash;
@@ -115,7 +122,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode PeerConnection::SendChunkMaps( const std::string i_floodhash )
+  Error::ErrorCode PeerConnection::SendChunkMaps( const std::string& i_floodhash )
   {
     // get the appropriate flood from the client
     Flood* theflood = NULL;
@@ -148,7 +155,7 @@ namespace libBitFlood
   }
 
 
-  Error::ErrorCode PeerConnection::NotifyHaveChunk( const std::string i_floodhash )
+  Error::ErrorCode PeerConnection::NotifyHaveChunk( const std::string& i_floodhash )
   {
     XmlRpcValue args;
     args[0] = i_floodhash;
@@ -157,20 +164,86 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode PeerConnection::RequestChunk( const std::string i_floodhash )
+  Error::ErrorCode PeerConnection::RequestChunk( const std::string& i_floodhash,
+    const std::string& i_filename,
+    U32                i_chunkindex )
   {
     XmlRpcValue args;
     args[0] = i_floodhash;
+    args[1] = i_filename;
+    args[2] = (int)i_chunkindex;
+
     _SendMessage( PeerConnectionMessages::RequestChunk, args );
 
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode PeerConnection::SendChunk( const std::string i_floodhash )
+  Error::ErrorCode PeerConnection::SendChunk( const std::string& i_floodhash,
+    const std::string& i_filename,
+    U32                i_chunkindex )
   {
     XmlRpcValue args;
     args[0] = i_floodhash;
-    _SendMessage( PeerConnectionMessages::SendChunk, args );
+    args[1] = i_filename;
+    args[2] = (int)i_chunkindex;
+
+    // read in the appropriate chunk data and send it across the wire
+
+    // get the appropriate flood from the client
+    Flood* theflood = NULL;
+    m_client->InqFlood( i_floodhash, theflood );
+    if ( theflood == NULL )
+    {
+    }
+    else
+    {
+      FloodFile::File* thefile = NULL;
+      U32 thefile_index;
+      for ( thefile_index = 0; thefile_index < theflood->m_floodfile.m_files.size(); ++thefile_index )
+      {
+        if ( theflood->m_floodfile.m_files[ thefile_index ].m_name.compare( i_filename ) == 0 )
+        {
+          thefile = &theflood->m_floodfile.m_files[ thefile_index ];
+          break;
+        }
+      }
+
+      if ( thefile == NULL )
+      {
+      }
+      else
+      {
+        const FloodFile::Chunk& thechunk = thefile->m_chunks[ i_chunkindex ];
+        U32 chunkoffset = theflood->m_runtimefiles[ thefile_index ].m_chunkoffsets[ i_chunkindex ];
+
+        FILE* fileptr = fopen( i_filename.c_str(), "rb" );
+        if ( fileptr != NULL && fseek( fileptr, chunkoffset, SEEK_SET ) == 0 )
+        {
+          byte* data = (byte*)malloc( thechunk.m_size );
+          if ( fread( data, 1, thechunk.m_size, fileptr ) == thechunk.m_size )
+          {
+            using namespace CryptoPP;
+            SHA sha;
+            HashFilter shaFilter(sha);
+            std::auto_ptr<ChannelSwitch> channelSwitch(new ChannelSwitch);
+            channelSwitch->AddDefaultRoute(shaFilter);
+
+            StringSource( data, thechunk.m_size, true, channelSwitch.release() );
+            std::stringstream out;
+            Base64Encoder encoder( new FileSink( out ), false );
+            shaFilter.TransferTo( encoder );
+
+            if( thechunk.m_hash.compare( out.str() ) == 0 )
+            {
+              args[3] = XmlRpcValue( data, thechunk.m_size );
+
+              _SendMessage( PeerConnectionMessages::SendChunk, args );
+            }
+          }
+          free( data );
+        }
+      }
+    }
 
     return Error::NO_ERROR_LBF;
   }
@@ -405,7 +478,9 @@ namespace libBitFlood
 
   Error::ErrorCode _HandleRequestChunkMaps( PeerConnection& i_receiver, XmlRpcValue& i_args )
   {
-    i_receiver.SendChunkMaps( i_args[0] );
+    std::string& floodId = i_args[0];
+
+    i_receiver.SendChunkMaps( floodId );
 
     return Error::NO_ERROR_LBF;
   }
@@ -432,16 +507,24 @@ namespace libBitFlood
 
     return Error::NO_ERROR_LBF;
   }
+
   Error::ErrorCode _HandleNotifyHaveChunk( PeerConnection& i_receiver, XmlRpcValue& i_args )
   {
     std::string& floodId = i_args[0];
     return Error::NO_ERROR_LBF;
   }
+
   Error::ErrorCode _HandleRequestChunk( PeerConnection& i_receiver, XmlRpcValue& i_args )
   {
     std::string& floodId = i_args[0];
+    std::string& filename = i_args[1];
+    U32 chunkindex = (int)i_args[2];
+
+    i_receiver.SendChunk( floodId, filename, chunkindex );
+
     return Error::NO_ERROR_LBF;
   }
+
   Error::ErrorCode _HandleSendChunk( PeerConnection& i_receiver, XmlRpcValue& i_args )
   {
     std::string& floodId = i_args[0];

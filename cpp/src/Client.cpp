@@ -79,11 +79,64 @@ namespace libBitFlood
 
   Error::ErrorCode Client::GetChunks( void )
   {
-    V_Flood::const_iterator flooditer = m_floods.begin();
-    V_Flood::const_iterator floodend  = m_floods.end();
+    bool foundchunk = false;
+    PeerConnection*    todownload_from = NULL;
+    Flood*             todownload_flood = NULL;
+    Flood::P_ChunkKey* todownload_key = NULL;
+
+    // figure out what chunk to get from which peer and ask for it
+    V_Flood::iterator flooditer = m_floods.begin();
+    V_Flood::iterator floodend  = m_floods.end();
 
     for ( ; flooditer != floodend; ++flooditer )
     {
+      Flood& theflood = (*flooditer);
+
+      Flood::V_ChunkKey::iterator chunkiter = theflood.m_chunkstodownload.begin();
+      Flood::V_ChunkKey::iterator chunkend  = theflood.m_chunkstodownload.end();
+
+      for ( ; chunkiter != chunkend; ++chunkiter )
+      {
+        Flood::P_ChunkKey& thechunkkey = (*chunkiter);
+        if ( theflood.m_chunksDownloading.find( thechunkkey ) == theflood.m_chunksDownloading.end() )
+        {
+          const FloodFile::File& thefile = theflood.m_floodfile.m_files[ thechunkkey.first ];
+          const FloodFile::Chunk& thechunk = thefile.m_chunks[ thechunkkey.second ];
+
+          V_PeerConnectionPtr::iterator peeriter = m_peers.begin();
+          V_PeerConnectionPtr::iterator peerend  = m_peers.end();
+
+          for ( ; peeriter != peerend; ++peeriter )
+          {
+            PeerConnection* thepeer = (*peeriter);
+
+            PeerConnection::M_StrToStrToStr::iterator floodchunkmap = thepeer->m_chunkMaps.find( theflood.m_floodfile.m_contentHash );
+            if ( floodchunkmap != thepeer->m_chunkMaps.end() )
+            {
+              PeerConnection::M_StrToStr::iterator filechunkmap = (*floodchunkmap).second.find( thefile.m_name );
+              if( filechunkmap != (*floodchunkmap).second.end() )
+              {
+                const std::string& chunkmap = (*filechunkmap).second;
+                if ( chunkmap[ thechunkkey.second ] == '0' )
+                {
+                  foundchunk = true;
+                  todownload_from  = thepeer;
+                  todownload_flood = &theflood;
+                  todownload_key   = &thechunkkey;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if ( foundchunk )
+    {
+      todownload_from->RequestChunk( todownload_flood->m_floodfile.m_contentHash, 
+				     todownload_flood->m_floodfile.m_files[ todownload_key->first ].m_name,
+				     todownload_key->second );
+      todownload_flood->m_chunksDownloading.insert( *todownload_key );
     }
 
     return Error::NO_ERROR_LBF;

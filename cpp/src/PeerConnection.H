@@ -4,6 +4,7 @@
 #include <Winsock2.h>
 #include <XmlRpc.h>
 #include <XmlRpcServerConnection.h>
+#include "Flood.H"
 
 using namespace XmlRpc;
 
@@ -65,13 +66,17 @@ namespace libBitFlood
     Error::ErrorCode LoopOnce( void );
 
     // messages
-    Error::ErrorCode Register( const std::string i_floodhash,
-      const std::string i_clientid );
-    Error::ErrorCode RequestChunkMaps( const std::string i_floodhash );
-    Error::ErrorCode SendChunkMaps( const std::string i_floodhash );
-    Error::ErrorCode NotifyHaveChunk( const std::string i_floodhash );
-    Error::ErrorCode RequestChunk( const std::string i_floodhash );
-    Error::ErrorCode SendChunk( const std::string i_floodhash );
+    Error::ErrorCode Register( const std::string& i_floodhash,
+			       const std::string& i_clientid );
+    Error::ErrorCode RequestChunkMaps( const std::string& i_floodhash );
+    Error::ErrorCode SendChunkMaps( const std::string& i_floodhash );
+    Error::ErrorCode NotifyHaveChunk( const std::string& i_floodhash );
+    Error::ErrorCode RequestChunk( const std::string& i_floodhash,
+				   const std::string& i_filename,
+				   U32                i_chunkindex );
+    Error::ErrorCode SendChunk( const std::string& i_floodhash,
+				const std::string& i_filename,
+				U32                i_chunkindex );
 
 
     // member variables

@@ -61,6 +61,7 @@ namespace libBitFlood
     };
 
     typedef std::pair< U32, U32 > P_ChunkKey;
+    typedef std::set< P_ChunkKey > S_ChunkKey;
     typedef std::vector< P_ChunkKey > V_ChunkKey;
     typedef std::vector< RuntimeFile > V_RuntimeFile;
     
@@ -69,6 +70,7 @@ namespace libBitFlood
     V_RuntimeFile     m_runtimefiles;
     U32               m_totalbytes;
     V_ChunkKey        m_chunkstodownload;
+    S_ChunkKey        m_chunksDownloading;
 
   protected:
     Error::ErrorCode _SetupFilesAndChunks( void );
