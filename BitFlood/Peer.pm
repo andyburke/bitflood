@@ -35,6 +35,7 @@ __PACKAGE__->mk_accessors(qw(
                              chunkMaps
                              registered
 			     socket
+                             connectStartTime
                              disconnected
                              client
                              readBuffer
@@ -107,6 +108,7 @@ sub Connect {
       $self->disconnected(1);
       return 0;
     }
+    $self->connectStartTime(time());
 
     # set non-blocking
     $self->socket->blocking(0);
@@ -126,29 +128,29 @@ sub Connect {
 
   return 1 if ($self->socket->connected);
 
-  if (!$self->socket->configure({
-                                 PeerAddr => $self->host,
-                                 PeerPort => $self->port,
-                                 Proto    => 'tcp',
-                                }))
-    {
+  $self->socket->configure({
+                            PeerAddr => $self->host,
+                            PeerPort => $self->port,
+                            Proto    => 'tcp',
+                            Blocking => 0,
+                           });
 
-    if ($!{EINPROGRESS}) {
-      # non-blocking connection is still trying to connect
-      if (time > $self->connectionTime + CONNECTION_TIMEOUT) {
-        Debug("connection timed out");
-        $self->disconnected(1);
-      }
-      return 0;
-    } else {
-      # some other error, signaling the connect actually failed
-      Debug("failed to connect: $!");
+  if ($!{EINPROGRESS}) {
+    # non-blocking connection is still trying to connect
+    if (time > $self->connectStartTime + CONNECTION_TIMEOUT) {
+      Debug("connection timed out");
       $self->disconnected(1);
-      return 0;
     }
-
+    return 0;
+  } elsif ($!) {
+    # some other error, signaling the connect actually failed
+    Debug("failed to connect: $!");
+    $self->disconnected(1);
+    return 0;
   } else {
+    # connection succeeded
 
+    Debug("\$!: $! (" . ($!+0) . ")");
     Debug("socket connected successfully");
 
     # FIXME figure out why this is needed here as well as above
