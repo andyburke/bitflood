@@ -3,5 +3,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="SWT_CONTAINER"/>
+	<classpathentry kind="lib" path="sdk/JMF-2.1.1e/lib/jmf.jar"/>
+	<classpathentry kind="src" path="/BitFlood-java"/>
+	<classpathentry kind="lib" path="/home/burke/workspace/BitFlood.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
