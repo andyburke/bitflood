@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 
   ClientSPtr tracker( new Client() );
   tracker->Initialize( setup );
-  Tracker::AddTrackerHandlers( tracker );
+  TrackerMessageHandler::AddTrackerHandlers( tracker );
   while( !quit )
   {
     tracker->LoopOnce();

@@ -5,62 +5,62 @@
 
 namespace libBitFlood
 {
-  namespace Tracker
-  {
-    // define our message names
-    namespace Messages
-    {
-      const char RegisterWithTracker[]   = "RegisterWithTracker";
-      const char DisconnectFromTracker[] = "DisconnectFromTracker";
-      const char RequestPeerList[]       = "RequestPeerList";
-    };
+  // define our message names
+  const char TrackerMessageHandler::RegisterWithTracker[]   = "RegisterWithTracker";
+  const char TrackerMessageHandler::DisconnectFromTracker[] = "DisconnectFromTracker";
+  const char TrackerMessageHandler::RequestPeerList[]       = "RequestPeerList";
 
-    // forward declare the handlers
-    Error::ErrorCode _HandleRegisterWithTracker( const PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
-    Error::ErrorCode _HandleDisconnectFromTracker( const PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
-    Error::ErrorCode _HandleRequestPeerList( const PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
-  }
-
-  Error::ErrorCode Tracker::AddTrackerHandlers( ClientSPtr& i_client )
+  /*static*/ 
+  Error::ErrorCode TrackerMessageHandler::AddTrackerHandlers( ClientSPtr& i_client )
   {
-    using namespace Messages;
-    i_client->AddMessageHandler( RegisterWithTracker,   _HandleRegisterWithTracker );
-    i_client->AddMessageHandler( DisconnectFromTracker, _HandleDisconnectFromTracker );
-    i_client->AddMessageHandler( RequestPeerList,       _HandleRequestPeerList );
+    i_client->AddMessageHandler( Client::MessageHandlerSPtr( new TrackerMessageHandler() ) );
     return Error::NO_ERROR_LBF;
   }
 
-
-  /*static*/ Error::ErrorCode Tracker::State::GetTrackerState( StateSPtr& o_trackerstate )
+  Error::ErrorCode TrackerMessageHandler::QueryAPI( V_String& o_supportedmessages )
   {
-    static StateSPtr s_trackerstate;
-    if ( s_trackerstate.Get() == NULL )
+    o_supportedmessages.push_back( RegisterWithTracker );
+    o_supportedmessages.push_back( DisconnectFromTracker );
+    o_supportedmessages.push_back( RequestPeerList );
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode TrackerMessageHandler::HandleMessage( const std::string& i_message, 
+							 const PeerConnectionSPtr& i_receiver,
+							 XmlRpcValue& i_args )
+  {
+    Error::ErrorCode ret = Error::UNKNOWN_ERROR_LBF;
+    if( i_message.compare( RegisterWithTracker ) == 0 )
     {
-      s_trackerstate = StateSPtr( new State() );
+      ret = _HandleRegisterWithTracker( i_receiver, i_args );
     }
-    o_trackerstate = s_trackerstate;
-    return Error::NO_ERROR_LBF;
+    else if( i_message.compare( DisconnectFromTracker ) == 0 )
+    {
+      ret = _HandleDisconnectFromTracker( i_receiver, i_args );
+    }
+    else if( i_message.compare( RequestPeerList ) == 0 )
+    {
+      ret = _HandleRequestPeerList( i_receiver, i_args );
+    }
+
+    return ret;
   }
 
-
-  Error::ErrorCode Tracker::_HandleRegisterWithTracker( const PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
+  Error::ErrorCode TrackerMessageHandler::_HandleRegisterWithTracker( const PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
   {
-    StateSPtr tracker;
-    State::GetTrackerState( tracker );
-
     std::string filehash = i_args[1];
 
-    State::PeerInfo p;
+    PeerInfo p;
     p.m_id = i_args[0];
     p.m_ip = i_args[2];
     p.m_port = (int)i_args[3];
     time( &p.m_timestamp );
-    State::M_StrToPeerInfo::iterator iter = tracker->m_peerinfo.find( filehash );
-    if ( iter != tracker->m_peerinfo.end() )
+    M_StrToPeerInfo::iterator iter = m_peerinfo.find( filehash );
+    if ( iter != m_peerinfo.end() )
     {
       bool found = false;
-      State::V_PeerInfo::iterator peeriter = (*iter).second.begin();
-      State::V_PeerInfo::iterator peerend  = (*iter).second.end();
+      V_PeerInfo::iterator peeriter = (*iter).second.begin();
+      V_PeerInfo::iterator peerend  = (*iter).second.end();
       for ( ; peeriter != peerend; ++peeriter )
       {
         if ( (*peeriter).m_id.compare( p.m_id ) == 0 )
@@ -78,28 +78,25 @@ namespace libBitFlood
     }
     else
     {
-      State::V_PeerInfo tmp;
+      V_PeerInfo tmp;
       tmp.push_back( p );
 
-      tracker->m_peerinfo[ filehash ] = tmp;
+      m_peerinfo[ filehash ] = tmp;
     }
 
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode Tracker::_HandleDisconnectFromTracker( const PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
+  Error::ErrorCode TrackerMessageHandler::_HandleDisconnectFromTracker( const PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
   {
-    StateSPtr tracker;
-    State::GetTrackerState( tracker );
-
     std::string clientid = i_args[0];
     std::string filehash = i_args[1];
 
-    State::M_StrToPeerInfo::iterator iter = tracker->m_peerinfo.find( filehash );
-    if ( iter != tracker->m_peerinfo.end() )
+    M_StrToPeerInfo::iterator iter = m_peerinfo.find( filehash );
+    if ( iter != m_peerinfo.end() )
     {
-      State::V_PeerInfo::iterator peeriter = (*iter).second.begin();
-      State::V_PeerInfo::iterator peerend  = (*iter).second.end();
+      V_PeerInfo::iterator peeriter = (*iter).second.begin();
+      V_PeerInfo::iterator peerend  = (*iter).second.end();
       for ( ; peeriter != peerend; ++peeriter )
       {
         if ( (*peeriter).m_id.compare( clientid ) == 0 )
@@ -113,20 +110,17 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode Tracker::_HandleRequestPeerList( const PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
+  Error::ErrorCode TrackerMessageHandler::_HandleRequestPeerList( const PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
   {
     XmlRpcValue result;
-    StateSPtr tracker;
-    State::GetTrackerState( tracker );
-
     std::string filehash = i_args[0];
 
-    State::M_StrToPeerInfo::iterator iter = tracker->m_peerinfo.find( filehash );
-    if ( iter != tracker->m_peerinfo.end() )
+    M_StrToPeerInfo::iterator iter = m_peerinfo.find( filehash );
+    if ( iter != m_peerinfo.end() )
     {
       U32 index = 0;
-      State::V_PeerInfo::iterator peeriter = (*iter).second.begin();
-      State::V_PeerInfo::iterator peerend  = (*iter).second.end();
+      V_PeerInfo::iterator peeriter = (*iter).second.begin();
+      V_PeerInfo::iterator peerend  = (*iter).second.end();
       for ( ; peeriter != peerend; ++peeriter, ++index )
       {
         std::stringstream out;

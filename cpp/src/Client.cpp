@@ -6,6 +6,24 @@
 
 namespace libBitFlood
 {
+  // define our message names
+  const char Client::BasicMessageHandler::RegisterWithPeer[] = "RegisterWithPeer";
+  const char Client::BasicMessageHandler::AcknowledgePeer[] = "AcknowledgePeer";
+
+  Error::ErrorCode Client::BasicMessageHandler::QueryAPI( V_String& o_supportedmessages )
+  {
+    o_supportedmessages.push_back( RegisterWithPeer );
+    o_supportedmessages.push_back( AcknowledgePeer );
+    return Error::NO_ERROR_LBF;
+  }
+
+  Error::ErrorCode Client::BasicMessageHandler::HandleMessage( const std::string& i_message, 
+							       const PeerConnectionSPtr& i_receiver,
+							       XmlRpcValue& i_args )
+  {
+    return Error::NO_ERROR_LBF;
+  }
+
   Error::ErrorCode Client::Initialize( const Setup& i_setup )
   {
     // cache the setup
@@ -21,6 +39,9 @@ namespace libBitFlood
 
     // Open a listen socket
     _OpenListenSocket();
+
+    // setup some basic message handlers
+    AddMessageHandler( MessageHandlerSPtr( new BasicMessageHandler() ) );
 
     return Error::NO_ERROR_LBF;
   }
@@ -164,9 +185,20 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
   
-  Error::ErrorCode Client::AddMessageHandler( const std::string& i_methodName, MessageHandler i_handler )
+  Error::ErrorCode Client::AddMessageHandler( MessageHandlerSPtr& i_handler )
   {
-    m_messageHandlers[ i_methodName ] = i_handler;
+    V_String messages;
+    i_handler->QueryAPI( messages );
+    
+    V_String::const_iterator iter = messages.begin();
+    V_String::const_iterator end  = messages.end();
+
+    for( ; iter != end; ++iter )
+    {
+      const std::string& message = *iter;
+      m_messagehandlers[ message ].push_back( i_handler );
+    }
+
     return Error::NO_ERROR_LBF;
   }
 

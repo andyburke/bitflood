@@ -11,22 +11,46 @@ namespace libBitFlood
   class Client : public ReferenceCountBase
   {
   public:
+    class MessageHandler : public ReferenceCountBase
+    {
+    public:
+      virtual Error::ErrorCode QueryAPI( V_String& o_supportedmessages ) = 0;
+      virtual Error::ErrorCode HandleMessage( const std::string& i_message, 
+					      const PeerConnectionSPtr& i_receiver,
+					      XmlRpcValue& i_args ) = 0;
+    };
+    typedef ReferenceCountTemplate< MessageHandler > MessageHandlerSPtr;
+
+
+    class BasicMessageHandler : public MessageHandler
+    {
+    public:
+      // define our message names
+      static const char RegisterWithPeer[];
+      static const char AcknowledgePeer[];
+
+      Error::ErrorCode QueryAPI( V_String& o_supportedmessages );
+      Error::ErrorCode HandleMessage( const std::string& i_message, 
+				      const PeerConnectionSPtr& i_receiver,
+				      XmlRpcValue& i_args );
+    };
+
     struct Setup
     {
       std::string m_localIP;
       U32         m_localPort;
     };
 
-    typedef Error::ErrorCode (*MessageHandler)( const PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
-    typedef std::map< std::string, MessageHandler > M_StrToMessageHandler;
+    typedef std::vector< MessageHandlerSPtr > V_MessageHandlerSPtr;
+    typedef std::map< std::string, V_MessageHandlerSPtr > M_StrToV_MessageHandlerSPtr;
 
   public:
-    Setup                 m_setup;
-    V_FloodSPtr           m_floods;
-    std::string           m_id;
-    V_PeerConnectionSPtr  m_peers;
-    SocketSPtr            m_listensocket;
-    M_StrToMessageHandler m_messageHandlers;
+    Setup                       m_setup;
+    V_FloodSPtr                 m_floods;
+    std::string                 m_id;
+    V_PeerConnectionSPtr        m_peers;
+    SocketSPtr                  m_listensocket;
+    M_StrToV_MessageHandlerSPtr m_messagehandlers;
 
   public:
     Error::ErrorCode Initialize( const Setup& i_setup );
@@ -37,7 +61,7 @@ namespace libBitFlood
     Error::ErrorCode LoopOnce( void );
     Error::ErrorCode Disconnect( void );
 
-    Error::ErrorCode AddMessageHandler( const std::string& i_methodName, MessageHandler i_handler );
+    Error::ErrorCode AddMessageHandler( MessageHandlerSPtr& i_handler );
 
   public:
     Error::ErrorCode InqFlood( const std::string& i_floodid, FloodSPtr& o_flood );
