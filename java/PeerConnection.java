@@ -95,6 +95,7 @@ public class PeerConnection
     try
     {
       hostname = socketChannel.socket().getInetAddress().getHostAddress();
+      port = socketChannel.socket().getPort();
       
       socketSelector = Selector.open();
       socketChannel.configureBlocking( false );
