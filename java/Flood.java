@@ -11,11 +11,11 @@ import java.util.*;
  */
 public class Flood
 {
-  public  Peer      localPeer         = null;
-  private Vector    peers             = new Vector();
+  public Peer       localPeer         = null;
+  public Vector     peers             = new Vector();
   private FloodFile floodFile         = null;
   private Date      lastTrackerUpdate = null;
-
+ 
   public Flood()
   {
   }
@@ -24,7 +24,7 @@ public class Flood
   {
     localPeer = peer;
     floodFile = new FloodFile( floodFilename );
-    floodFile.Read();
+    floodFile.Read();  
   }
 
   public String Id()
@@ -34,18 +34,30 @@ public class Flood
 
   public void LoopOnce()
   {
-    if ( peers != null )
+    // clone the peers Vector and then process them
     {
-      Enumeration peeriter = peers.elements();
-      for ( ; peeriter.hasMoreElements(); )
+      Vector peersClone = (Vector)peers.clone();
+      Iterator peeriter = peersClone.iterator();
+      for ( ; peeriter.hasNext(); )
       {
-        PeerConnection peer = (PeerConnection) peeriter.nextElement();
+        PeerConnection peer = (PeerConnection) peeriter.next();
         peer.LoopOnce();
       }
     }
 
+    // reap disconnected peers
+    Iterator peeriter = peers.iterator();
+    for ( ; peeriter.hasNext(); )
+    {
+      PeerConnection peer = (PeerConnection) peeriter.next();
+      if ( peer.disconnected )
+      {
+        System.out.println( "Reaping " + peer.id );
+        peeriter.remove();
+      }
+    }
     Date now = new Date();
-    if ( lastTrackerUpdate == null || ( now.getTime() - lastTrackerUpdate.getTime() >= 20 ) )
+    if ( lastTrackerUpdate == null || ( now.getTime() - lastTrackerUpdate.getTime() >= 2000000 ) )
     {
       UpdateTrackers();
       lastTrackerUpdate = new Date();
@@ -56,37 +68,34 @@ public class Flood
   {
     if ( floodFile != null && floodFile.trackers != null )
     {
-      Enumeration trackeriter = floodFile.trackers.elements();
-      for ( ; trackeriter.hasMoreElements(); )
+      Iterator trackeriter = floodFile.trackers.iterator();
+      for ( ; trackeriter.hasNext(); )
       {
-        FloodFile.TrackerInfo tracker = (FloodFile.TrackerInfo) trackeriter.nextElement();
-        
+        FloodFile.TrackerInfo tracker = (FloodFile.TrackerInfo) trackeriter.next();
+
         if ( !tracker.id.contentEquals( localPeer.id ) )
         {
-          PeerConnection peer = InqPeer( tracker.id );
+          PeerConnection peer = FindPeer( tracker.id );
           if ( peer == null )
           {
             peer = new PeerConnection( this, tracker.host, tracker.port, tracker.id );
             peers.add( peer );
           }
-          
+
           // send a "requestpeerlist" method
-          {
-            String out = XMLEnvelopeProcessor.encode( "RequestPeerList", new Vector() );
-            peer.writeBuffer.put( (out.replaceAll("\n", "") + "\n").getBytes() );
-          }
+          peer.SendMethod( "RequestPeerList", new Vector() );
         }
       }
     }
   }
-  
-  public PeerConnection InqPeer( final String peerId )
+
+  public PeerConnection FindPeer( final String peerId )
   {
     PeerConnection retVal = null;
-    Enumeration peeriter = peers.elements();
-    for ( ; peeriter.hasMoreElements(); )
+    Iterator peeriter = peers.iterator();
+    for ( ; peeriter.hasNext(); )
     {
-      PeerConnection peer = (PeerConnection) peeriter.nextElement();
+      PeerConnection peer = (PeerConnection) peeriter.next();
       if ( peer.id.contentEquals( peerId ) )
       {
         retVal = peer;
@@ -94,5 +103,5 @@ public class Flood
       }
     }
     return retVal;
-  }
+  }  
 }

@@ -46,11 +46,13 @@ public class TrackerTest
     }
     catch ( java.net.UnknownHostException uhe )
     {
-      //handle exception
+      System.out.println( "Could not resolve: " + localIP + ": " + uhe );
+      System.exit( 0 );
     }
 
     if ( floodFilename.length() == 0 )
     {
+      
       Usage();
     }
 

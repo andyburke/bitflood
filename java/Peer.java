@@ -13,13 +13,14 @@ import java.net.*;
  */
 public class Peer
 {
-  private Vector              pendingpeers         = null;
-  private Hashtable           floods               = null;
+  public Vector               pendingPeers         = new Vector();
+  private Hashtable           floods               = new Hashtable();
   private ServerSocketChannel listenSocketChannel  = null;
   private Selector            listenSocketSelector = null;
   public String               hostname             = "";
   public int                  port                 = 0;
   public String               id                   = "";
+  public Vector               methodHandlers       = new Vector();
 
   public Peer()
   {
@@ -29,14 +30,14 @@ public class Peer
   {
     hostname = localHost;
     port = localPort;
-    
-    String idString = hostname + ":" + port;
+
+    String idString = hostname + port;
     id = Encoder.SHA1Base64Encode( idString );
-    
+
     SetupListenSocket();
 
-    pendingpeers = new Vector();
-    floods = new Hashtable();
+    methodHandlers.add( new RegisterMethodHandler() );
+    methodHandlers.add( new SendPeerListMethodHandler() );
   }
 
   public boolean JoinFlood( String floodFilename )
@@ -63,13 +64,29 @@ public class Peer
       }
     }
 
-    if ( pendingpeers != null )
+    if ( pendingPeers != null )
     {
-      Enumeration peeriter = pendingpeers.elements();
-      for ( ; peeriter.hasMoreElements(); )
+      // clone the pendingPeers Vector and then process them
       {
-        PeerConnection peer = (PeerConnection) peeriter.nextElement();
-        peer.LoopOnce();
+        Vector ppClone = (Vector) pendingPeers.clone();
+        Iterator peeriter = ppClone.iterator();
+        for ( ; peeriter.hasNext(); )
+        {
+          PeerConnection peer = (PeerConnection) peeriter.next();
+          peer.LoopOnce();
+        }
+      }
+
+      // reap disconnected peers
+      Iterator peeriter = pendingPeers.iterator();
+      for ( ; peeriter.hasNext(); )
+      {
+        PeerConnection peer = (PeerConnection) peeriter.next();
+        if ( peer.disconnected )
+        {
+          System.out.println( "Reaping " + peer.id + " (pending)" );
+          peeriter.remove();
+        }
       }
     }
 
@@ -111,8 +128,8 @@ public class Peer
 
           if ( incomingSocket != null )
           {
-            PeerConnection incomingPeer = new PeerConnection( incomingSocket );
-            pendingpeers.add( incomingPeer );
+            PeerConnection incomingPeer = new PeerConnection( this, incomingSocket );
+            pendingPeers.add( incomingPeer );
           }
         }
       }
@@ -173,6 +190,43 @@ public class Peer
     catch ( Exception e )
     {
       System.out.println( "Error registering listen socket selector: " + e );
+    }
+  }
+
+  public Flood FindFlood( final String floodId )
+  {
+    Flood retVal = null;
+    Collection floodsToProcess = floods.values();
+    Iterator flooditer = floodsToProcess.iterator();
+    for ( ; flooditer.hasNext(); )
+    {
+      Flood flood = (Flood) flooditer.next();
+      if ( flood.Id().contentEquals( floodId ) )
+      {
+        retVal = flood;
+        break;
+      }
+    }
+    return retVal;
+  }
+
+  public void HandleMethod( PeerConnection receiver, final String methodName, final Vector parameters )
+  {
+    Iterator handleriter = methodHandlers.iterator();
+    for ( ; handleriter.hasNext(); )
+    {
+      MethodHandler handler = (MethodHandler) handleriter.next();
+      if ( handler.getMethodName().contentEquals( methodName ) )
+      {
+        try
+        {
+          handler.HandleMethod( receiver, parameters );
+        }
+        catch ( Exception e )
+        {
+          System.out.println( "Failed to execute method: " + methodName + ": " + e );
+        }
+      }
     }
   }
 }

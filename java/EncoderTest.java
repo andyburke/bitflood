@@ -2,7 +2,7 @@
  * Created on Nov 15, 2004
  *
  */
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -71,10 +71,10 @@ public class EncoderTest
     System.out.println( "flood filename: " + floodFilename );
     System.out.println( "weighting function: " + weightingFunction );
    
-    Enumeration trackeriter = trackers.elements();
-    for ( ; trackeriter.hasMoreElements(); )
+    Iterator trackeriter = trackers.iterator();
+    for ( ; trackeriter.hasNext(); )
     {
-      String tracker = (String)trackeriter.nextElement();
+      String tracker = (String)trackeriter.next();
       System.out.println( "adding tracker: " + tracker );
       if ( !floodFile.AddTracker( tracker ) )
       {
@@ -83,10 +83,10 @@ public class EncoderTest
       }
     }
     
-    Enumeration fileiter = filesToAdd.elements();
-    for ( ; fileiter.hasMoreElements(); )
+    Iterator fileiter = filesToAdd.iterator();
+    for ( ; fileiter.hasNext(); )
     {
-      String file = (String)fileiter.nextElement();
+      String file = (String)fileiter.next();
       System.out.println( "adding file: " + file );
       if ( !floodFile.Add( file ) )
       {

@@ -10,9 +10,7 @@ import org.w3c.dom.*;
 
 import sdk.Base64.Base64;
 
-import java.io.IOException;
 import java.io.StringWriter;
-import java.security.MessageDigest;
 import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -39,7 +37,6 @@ public class XMLEnvelopeProcessor
       e.printStackTrace();
       System.exit( 0 );
     }
-
   }
 
   public XMLEnvelopeProcessor()
@@ -58,13 +55,13 @@ public class XMLEnvelopeProcessor
 
     Element params = doc.createElement( "params" );
 
-    Enumeration argIter = arguments.elements();
-    while ( argIter.hasMoreElements() )
+    Iterator argIter = arguments.iterator();
+    while ( argIter.hasNext() )
     {
       Element param = doc.createElement( "param" );
       Element value = doc.createElement( "value" );
 
-      encodeArg( doc, value, argIter.nextElement() );
+      encodeArg( doc, value, argIter.next() );
       param.appendChild( value );
       params.appendChild( param );
     }
@@ -141,10 +138,10 @@ public class XMLEnvelopeProcessor
       Element data = doc.createElement( "data" );
       array.appendChild( data );
 
-      Enumeration tmpIter = tmp.elements();
-      while ( tmpIter.hasMoreElements() )
+      Iterator tmpIter = tmp.iterator();
+      while ( tmpIter.hasNext() )
       {
-        Object element = tmpIter.nextElement();
+        Object element = tmpIter.next();
         Element value = doc.createElement( "value" );
         encodeArg( doc, value, element );
         data.appendChild( value );
@@ -176,6 +173,11 @@ public class XMLEnvelopeProcessor
       methodName.append( methodNameList.item( 0 ).getFirstChild().getNodeValue() );
         
       NodeList paramsNodeList = doc.getElementsByTagName( "params" );
+      if ( paramsNodeList.getLength() == 0 )
+      {
+        return;
+      }
+      
       if ( paramsNodeList.getLength() != 1 )
       {
         throw new Exception( "Invalid XML-RPC");
@@ -217,6 +219,7 @@ public class XMLEnvelopeProcessor
       }
       
       typeNode = typeNode.getFirstChild();
+      typeNodeName = typeNode.getNodeName();
     }
     
     if ( typeNodeName.contentEquals("#text") )

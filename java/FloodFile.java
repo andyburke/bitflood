@@ -170,19 +170,19 @@ public class FloodFile
     System.out.println( "# Trackers : " + trackers.size() );
 
     System.out.println( "Files:" );
-    Enumeration fileiter = files.elements();
-    for ( ; fileiter.hasMoreElements(); )
+    Iterator fileiter = files.iterator();
+    for ( ; fileiter.hasNext(); )
     {
-      TargetFile file = (TargetFile) fileiter.nextElement();
+      TargetFile file = (TargetFile) fileiter.next();
       System.out.println( "  name: " + file.name );
       System.out.println( "    size: " + file.size + " chunks:" + file.chunks.size() );
     }
 
     System.out.println( "Trackers:" );
-    Enumeration trackeriter = trackers.elements();
-    for ( ; trackeriter.hasMoreElements(); )
+    Iterator trackeriter = trackers.iterator();
+    for ( ; trackeriter.hasNext(); )
     {
-      TrackerInfo tracker = (TrackerInfo) trackeriter.nextElement();
+      TrackerInfo tracker = (TrackerInfo) trackeriter.next();
       System.out.println( "  address: " + tracker.host + ":" + tracker.port );
     }
   }
@@ -218,30 +218,30 @@ public class FloodFile
     root.appendChild( fileInfo );
 
     // add any tracker nodes
-    Enumeration trackeriter = trackers.elements();
-    for ( ; trackeriter.hasMoreElements(); )
+    Iterator trackeriter = trackers.iterator();
+    for ( ; trackeriter.hasNext(); )
     {
-      TrackerInfo tracker = (TrackerInfo) trackeriter.nextElement();
+      TrackerInfo tracker = (TrackerInfo) trackeriter.next();
       item = document.createElement( "Tracker" );
       item.setAttribute( "host", tracker.host );
       item.setAttribute( "port", Integer.toString( tracker.port) );
       root.appendChild( item );
     }
 
-    Enumeration fileiter = files.elements();
-    for ( ; fileiter.hasMoreElements(); )
+    Iterator fileiter = files.iterator();
+    for ( ; fileiter.hasNext(); )
     {
-      TargetFile file = (TargetFile) fileiter.nextElement();
+      TargetFile file = (TargetFile) fileiter.next();
 
       Element fileNode = document.createElement( "File" );
       fileNode.setAttribute( "name", file.name ); // FIXME: have to cleanse the filename to spec (unix)
       fileNode.setAttribute( "size", Long.toString( file.size ) );
       fileInfo.appendChild( fileNode );
 
-      Enumeration chunkiter = file.chunks.elements();
-      for ( ; chunkiter.hasMoreElements(); )
+      Iterator chunkiter = file.chunks.iterator();
+      for ( ; chunkiter.hasNext(); )
       {
-        Chunk chunk = (Chunk) chunkiter.nextElement();
+        Chunk chunk = (Chunk) chunkiter.next();
 
         Element chunkNode = document.createElement( "Chunk" );
         chunkNode.setAttribute( "index", Long.toString( chunk.index ) );
@@ -366,6 +366,17 @@ public class FloodFile
           tempTracker.host = tracker.getAttribute( "host" );
           tempTracker.port = Integer.parseInt( tracker.getAttribute( "port" ) );
 
+          try
+          {
+            java.net.InetAddress localMachine = java.net.InetAddress.getByName( tempTracker.host );
+            tempTracker.host = localMachine.getHostAddress();
+          }
+          catch ( java.net.UnknownHostException uhe )
+          {
+            System.out.println( "Could not resolve: " + tempTracker.host + ": " + uhe );
+          }
+
+          
           String idstring = tempTracker.host + tempTracker.port;
           tempTracker.id = Encoder.SHA1Base64Encode( idstring );
           
@@ -560,17 +571,17 @@ public class FloodFile
 
         java.util.Collections.sort( files );
 
-        Enumeration fileiter = files.elements();
-        for ( ; fileiter.hasMoreElements(); )
+        Iterator fileiter = files.iterator();
+        for ( ; fileiter.hasNext(); )
         {
-          TargetFile file = (TargetFile) fileiter.nextElement();
+          TargetFile file = (TargetFile) fileiter.next();
           content = content + file.name;
           
           java.util.Collections.sort( file.chunks );
-          Enumeration chunkiter = file.chunks.elements();
-          for ( ; chunkiter.hasMoreElements(); )
+          Iterator chunkiter = file.chunks.iterator();
+          for ( ; chunkiter.hasNext(); )
           {
-            Chunk chunk = (Chunk) chunkiter.nextElement();
+            Chunk chunk = (Chunk) chunkiter.next();
             content = content + chunk.hash;
           }
         }

@@ -18,14 +18,15 @@ public class PeerConnection
   private SocketChannel socketChannel   = null;
   private Selector      socketSelector  = null;
   private int           BUFFER_SIZE     = 256 * 1024 * 2;                    // 2 times thenormal chunk size
-  private ByteBuffer     readBuffer      = ByteBuffer.allocate( BUFFER_SIZE );
+  private ByteBuffer    readBuffer      = ByteBuffer.allocate( BUFFER_SIZE );
   private int           readIndex       = 0;
-  public ByteBuffer    writeBuffer     = ByteBuffer.allocate( BUFFER_SIZE );
-  public Peer           parentPeer      = null;
+  private ByteBuffer    writeBuffer     = ByteBuffer.allocate( BUFFER_SIZE );
+  public Peer           localPeer       = null;
   public boolean        connected       = false;
   public boolean        disconnected    = false;
   public String         hostname        = "";
   public int            port            = 0;
+  public int            listenPort      = 0;
   public String         id              = "";
   public Flood          flood           = null;
 
@@ -36,6 +37,7 @@ public class PeerConnection
   public PeerConnection(Flood theFlood, String remoteHost, int remotePort, String remoteId)
   {
     flood = theFlood;
+    localPeer = flood.localPeer;
     hostname = remoteHost;
     port = remotePort;
     id = remoteId;
@@ -62,19 +64,17 @@ public class PeerConnection
       args.add( flood.localPeer.id );
       args.add( new Integer( flood.localPeer.port ) );
 
-      String out = XMLEnvelopeProcessor.encode( "RegisterWithPeer", args );
-      writeBuffer.put( (out.replaceAll("\n", "") + "\n").getBytes() );
+      SendMethod( "Register", args );
     }
 
     // request some chunks
-    {
-      String out = XMLEnvelopeProcessor.encode( "RequestChunkMaps", new Vector() );
-      writeBuffer.put( (out.replaceAll("\n", "") + "\n").getBytes() );
-    }
+    SendMethod( "RequestChunkMaps", new Vector() );
   }
 
-  public PeerConnection(SocketChannel incomingSocketConnection)
+  public PeerConnection(Peer peer, SocketChannel incomingSocketConnection)
   {
+    localPeer = peer;
+
     if ( incomingSocketConnection == null )
     {
       System.out.println( "Tried to create a PeerConnection with a null socket?" );
@@ -214,10 +214,19 @@ public class PeerConnection
         Vector args = new Vector();
         StringBuffer methodName = new StringBuffer();
         XMLEnvelopeProcessor.decode( new String( message ), methodName, args );
+        System.out.println( localPeer.id + " <- " + id + " (" + methodName + ")" );
+        localPeer.HandleMethod( this, methodName.toString(), args );
       }
     }
 
     return true;
   }
 
+  public void SendMethod( final String methodName, final Vector parameters )
+  {
+    String out = XMLEnvelopeProcessor.encode( methodName, parameters );
+    System.out.println( localPeer.id + " -> " + id + " (" + methodName + ")" );
+    
+    writeBuffer.put( ( out.replaceAll( "\n", "" ) + "\n" ).getBytes() );
+  }
 }
