@@ -38,6 +38,7 @@ __PACKAGE__->mk_accessors(qw(
 			     socket
                              connectStartTime
                              disconnected
+                             connectCompleted
                              client
                              readBuffer
                              writeBuffer
@@ -130,7 +131,30 @@ sub Connect {
     }
   }
 
-  return 1 if ($self->socket->connected);
+  if ($self->socket->connected) {
+
+    if (!$self->connectCompleted) {
+      $self->connectCompleted(1);
+
+      Debug("\$!: $! (" . ($!+0) . ")");
+      Debug("socket connected");
+
+      # FIXME figure out why this is needed here as well as above
+      # set non-blocking
+      $self->socket->blocking(0);
+      if ($^O eq 'MSWin32') {
+        if (!$self->socket->ioctl(FIONBIO, pack("L", 1))) {
+          Debug("error setting nonblocking: " . ($!));
+          die;
+        }
+      }
+
+      $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
+      $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
+    }
+
+    return 1;
+  }
 
   my $socket_args = {
                      PeerAddr => $self->host,
@@ -141,42 +165,29 @@ sub Connect {
   $self->socket->configure($socket_args);
 
   if (!$self->socket->connected) {
-    if ($!{EINPROGRESS}) {
+    if ($!{ENOTCONN}) {
+      # force "error slippage" to get the real error (credit DJB)
+      $self->socket->sysread(undef, 1);
+    }
+
+    if ($!{EINPROGRESS} or $!{EAGAIN}) {
       # non-blocking connection is still trying to connect
       if (time > $self->connectStartTime + CONNECTION_TIMEOUT) {
-        Debug("connection timed out");
+        Debug("connection timed out: " . $self->id);
         $self->disconnected(1);
       }
-      return 0;
     } else {
       # some other error, signaling the connect actually failed
       Debug("failed to connect: $!");
       $self->disconnected(1);
-      return 0;
     }
-  } else {
-    # connection succeeded
-
-    Debug("\$!: $! (" . ($!+0) . ")");
-    Debug("socket connected successfully");
-
-    # FIXME figure out why this is needed here as well as above
-    # set non-blocking
-    $self->socket->blocking(0);
-    if ($^O eq 'MSWin32') {
-      if (!$self->socket->ioctl(FIONBIO, pack("L", 1))) {
-        Debug("error setting nonblocking: " . ($!));
-        die;
-      }
-    }
-
-    $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
-    $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
-
-    return 1;
-
   }
+  # note: if connected is true here, just return 0 anyway.  we'll do
+  # the finalization stuff the next time around.  this is required to
+  # support some systems (linux?) with weird configure()/connected()
+  # dynamics.
 
+  return 0;
 }
 
 sub GetChunk {
