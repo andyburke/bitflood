@@ -165,12 +165,13 @@ sub UpdatePeerList {
     Debug("Requesting peers from tracker " . $tracker->request->uri->host . ":" . $tracker->request->uri->port, 'net', 5);
     my $peerListRef = $tracker->simple_request('RequestPeers', $flood->contentHash);
     if($peerListRef) {
+      Debug("Got back a peerlist", 'net', 5);
       foreach my $peer (@{$peerListRef}) {
 	my ($peerId, $peerHost, $peerPort) = split(':', $peer);
         if ($peerId ne $self->id) { # FIXME skip self (not robusto)
 	  my ($peer) = grep { $_->id eq $peerId } @{$self->peers};	  
 	  if(!$peer) {
-	    Debug("new peer: $peerId ($peerHost:$peerPort)", 10);
+	    Debug("New peer: $peerId ($peerHost:$peerPort)", 'net', 10);
 	    $peer = BitFlood::Peer->new({
 					 client => $self,
 					 host   => $peerHost,
@@ -183,10 +184,13 @@ sub UpdatePeerList {
 	      die("unexpected failure in Peer creation");
 	    }
 	    push(@{$self->peers}, $peer);
+	  } else {
+	    Debug("Already aware of peer: " . $peer->host . ':' . $peer->port, 'net', 10);
 	  }
 	  #Debug("content hash: ".$flood->contentHash);
 	  #Debug($peer->registered);
 	  if (!$peer->registered->{$flood->contentHash}) {
+	    Debug("Registering peer (" . $peer->host . ':' . $peer->port . ") for flood: " . $flood->contentHash, 'net', 10);
 	    # FIXME refactor into a method in Peer?
 	    $peer->floods->{$flood->contentHash} = $flood;
 	    $peer->SendMessage('Register', $flood, $self->id);
@@ -195,6 +199,8 @@ sub UpdatePeerList {
 	  }
 	}
       }
+    } else {
+      Debug("Did not receive a peerlist from the tracker", 'net', 10);
     }
   }
 }

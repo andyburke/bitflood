@@ -128,7 +128,7 @@ sub Connect {
 					Blocking => 0,
 				       ));
     if (!$self->socket) {
-      Debug("socket creation failed", 'net');
+      Debug("Socket creation failed ($!)", 'net');
       $self->disconnected(1);
       Debug("<<<", 10);
       return undef;
