@@ -17,12 +17,16 @@ namespace libBitFlood
       U32         m_localPort;
     };
 
+    typedef Error::ErrorCode (*MessageHandler)( const PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
+    typedef std::map< std::string, MessageHandler > M_StrToMessageHandler;
+
   public:
-    Setup                m_setup;
-    V_FloodSPtr          m_floods;
-    std::string          m_id;
-    V_PeerConnectionSPtr m_peers;
-    SocketSPtr           m_listensocket;
+    Setup                 m_setup;
+    V_FloodSPtr           m_floods;
+    std::string           m_id;
+    V_PeerConnectionSPtr  m_peers;
+    SocketSPtr            m_listensocket;
+    M_StrToMessageHandler m_messageHandlers;
 
   public:
     Error::ErrorCode Initialize( const Setup& i_setup );
@@ -32,6 +36,8 @@ namespace libBitFlood
     Error::ErrorCode GetChunks( void );
     Error::ErrorCode LoopOnce( void );
     Error::ErrorCode Disconnect( void );
+
+    Error::ErrorCode AddMessageHandler( const std::string& i_methodName, MessageHandler i_handler );
 
   public:
     Error::ErrorCode InqFlood( const std::string& i_floodid, FloodSPtr& o_flood );

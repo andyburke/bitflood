@@ -4,6 +4,7 @@
 #include "stdafx.h"
 
 #include <WINSOCK2.H>
+#include <Client.H>
 #include <Tracker.H>
 #include <XmlRpc.H>
 #include <sstream>
@@ -28,22 +29,29 @@ int main(int argc, char* argv[])
   signal( SIGTERM,  HandleSignal );
   signal( SIGABRT,  HandleSignal );
 
-  //XmlRpc::setVerbosity(5);
+  // startup winsock
+  WSADATA wsaData;
+  WSAStartup( MAKEWORD( 2, 2 ), &wsaData );
 
-  U32 localPort = 10101;
+  //XmlRpc::setVerbosity(5);
+ 
+  Client::Setup setup;
+  hostent* localHost = gethostbyname("");
+  setup.m_localIP = inet_ntoa (*(struct in_addr *)*localHost->h_addr_list);
+  setup.m_localPort = 10101;
   if ( argc == 2 )
   {
     std::stringstream convert;
     convert << argv[1];
-    convert >> localPort;
+    convert >> setup.m_localPort;
   }
 
-  Tracker t;
-  t.Initialize( localPort );
-
+  ClientSPtr tracker( new Client() );
+  tracker->Initialize( setup );
+  Tracker::AddTrackerHandlers( tracker );
   while( !quit )
   {
-    t.Run( 0 );
+    tracker->LoopOnce();
     Sleep( 100 );
   }
 }

@@ -163,6 +163,12 @@ namespace libBitFlood
 
     return Error::NO_ERROR_LBF;
   }
+  
+  Error::ErrorCode Client::AddMessageHandler( const std::string& i_methodName, MessageHandler i_handler )
+  {
+    m_messageHandlers[ i_methodName ] = i_handler;
+    return Error::NO_ERROR_LBF;
+  }
 
   Error::ErrorCode Client::InqFlood( const std::string& i_floodid, FloodSPtr& o_flood )
   {
