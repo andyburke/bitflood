@@ -7,6 +7,7 @@ use base qw(Class::Accessor);
 use Digest::SHA1  qw(sha1 sha1_hex sha1_base64);
 use XML::Simple;
 use File::Find;
+use Time::Piece;
 
 use BitFlood::Utils;
 
@@ -41,10 +42,12 @@ sub encode {
          LocalFilename($filename)) if(-d LocalFilename($filename));
   }
 
+  my $startTime = time();
   print "Encoding " . scalar(@filenames) . " files:\n";
   foreach my $filename (sort @filenames) {
     $self->_EncodeFile($filename);
   }
+  print "Total Time: " . (time() - $startTime) . "s\n";
 
   return XMLout(
                 {
@@ -70,7 +73,7 @@ sub _EncodeFile {
   open(INFILE, $localFilename);
   
   $| = 1;
-  printf("%6.2f%% %s\r", 0, $cleanFilename);
+  printf("%6.2f%% %11.3f MB | %s\r", 0, 0, $cleanFilename);
 
   my $totalSize = -s INFILE;
   my $buffer;
@@ -82,10 +85,10 @@ sub _EncodeFile {
                                                                size => $readLength,
                                                              });
     $bytesRead += length($buffer);
-    printf("%6.2f%\r", 100*$bytesRead/$totalSize);
+    printf("%6.2f%% %11.3f\r", 100*$bytesRead/$totalSize, $bytesRead/1048576);
   }
   $self->data->{Files}->{$cleanFilename}->{Size} = $bytesRead;
-  print "\n";
+  print "100.00%\n";
 
   close(INFILE);
 
