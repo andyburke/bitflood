@@ -70,7 +70,7 @@ sub new {
   $self->port(10101) if(!defined($self->port));
 
   if ($self->socket) {
-    Debug("Incoming peer connection: " . $self->host . ":" . $self->port, 'net');
+    Debug("Incoming peer connection: " . $self->host . ":" . $self->port, 'net', 10);
 
     # FIXME: windows assness
     if($^O eq 'MSWin32') {
@@ -99,7 +99,7 @@ sub SendMessage {
   Debug(">>>", 10);
 
   unshift(@methodArgs, $flood->contentHash);
-  Debug("method $methodName (" . scalar(@methodArgs) . " args) -> " . $self->host . ':' . $self->port, 'net', 5);
+  Debug("method $methodName (" . scalar(@methodArgs) . " args) -> " . $self->host . ':' . $self->port, 'net', 20);
   my $request = RPC::XML::request->new($methodName, @methodArgs);
   $self->writeBuffer($self->writeBuffer . $request->as_string . "\n");
 
@@ -119,7 +119,7 @@ sub Connect {
 
   if (!$self->socket) {
 
-    Debug("connecting out: " . $self->id . "(" . $self->host . ":" . $self->port . ")", 'net');
+    Debug("connecting out: " . $self->id . "(" . $self->host . ":" . $self->port . ")", 'net', 10);
 
     $self->socket(IO::Socket::INET->new(
 					Proto    => 'tcp',
@@ -128,10 +128,10 @@ sub Connect {
 					Blocking => 0,
 				       ));
     if (!$self->socket) {
-      Debug("socket creation failed");
+      Debug("socket creation failed", 'net');
       $self->disconnected(1);
       Debug("<<<", 10);
-      return 0;
+      return undef;
     }
 
     $self->connectStartTime(time());
@@ -140,12 +140,12 @@ sub Connect {
 
   my $select = IO::Select->new($self->socket);
   my $connected = $select->can_write(0);
-  Debug("checking for completed connection (" . $self->host . "): $connected [error: $! (" . ($!+0) . ")]", 'net', 25);
+  Debug("checking for completed connection (" . $self->host . "): $connected [error: $! (" . ($!+0) . ")]", 'net', 30);
 
   if ($connected) {
 
     $self->connectCompleted(1);
-    Debug("socket connected", 'net');
+    Debug("socket connected", 'net', 10);
 
     $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
     $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
@@ -158,17 +158,17 @@ sub Connect {
     if ($!{EINPROGRESS} or $!{EWOULDBLOCK}) {
       # non-blocking connection is still trying to connect
       if (time > $self->connectStartTime + CONNECTION_TIMEOUT) {
-	Debug("connection timed out: " . $self->host . ':' . $self->port, 'net');
+	Debug("connection timed out: " . $self->host . ':' . $self->port, 'net', 10);
 	$self->disconnected(1);
       }
     } elsif($!) {
       # some other error, signaling the connect actually failed
-      Debug("failed to connect (" . $self->host . ':' . $self->port . "): $!", 'net');
+      Debug("failed to connect (" . $self->host . ':' . $self->port . "): $!", 'net', 10);
       $self->disconnected(1);
     }
 
     Debug("<<<", 10);
-    return 0;
+    return undef;
 
   }
 
@@ -203,19 +203,19 @@ sub HandleRegister {
   my $peerId = shift;
 
   if (!length($peerId)) {
-    Debug("invalid peer ID");
+    Debug("invalid peer ID", 'net');
     $self->disconnected(1);
     return;
   }
 
   if (1 < grep { $_->id eq $peerId} @{$self->client->peers}) {
-    Debug("disconnecting duplicate peer");
+    Debug("disconnecting duplicate peer", 'net');
     $self->disconnected(1);
     return;
   }
 
   if ($self->floods->{$flood->contentHash}) {
-    Debug("duplicate Register message from $peerId for " . $flood->contentHash);
+    Debug("duplicate Register message from $peerId for " . $flood->contentHash, 'net');
     return;
   }
 
@@ -266,7 +266,7 @@ sub HandleRequestChunk {
   Debug(">>>", 10);
   my $file = $flood->Files->{$filename};
   if (!$file->{chunkMap}->bit_test($index)) {
-    Debug("don't have chunk: ".substr($filename,-20)."#$index", 10);
+    Debug("don't have chunk: ".substr($filename,-20)."#$index", 'net');
     return;
   }
 
@@ -278,7 +278,7 @@ sub HandleRequestChunk {
 
   my $chunk = $file->{Chunk}[$index];
   if (!$chunk) {
-    Debug("out-of-range chunk index: $filename#$index");
+    Debug("out-of-range chunk index: $filename#$index", 'net');
     return;
   }
 
@@ -314,13 +314,13 @@ sub HandleSendChunk {
 
   my $file = $flood->Files->{$filename};
   if (!$file) {
-    Debug("unknown file: $filename");
+    Debug("unknown file: $filename", 'net');
     return;
   }
 
   my $chunk = $file->{Chunk}->[$index];
   if (!$chunk) {
-    Debug("out-of-range chunk index: $filename#$index");
+    Debug("out-of-range chunk index: $filename#$index", 'net');
     return;
   }
   
@@ -372,7 +372,7 @@ sub HandleSendChunk {
     }
 
   } else {
-    Debug("bad chunk data");
+    Debug("bad chunk data", 'net');
   }
   
   delete $chunk->{downloading};
@@ -399,13 +399,13 @@ sub HandleNotifyHaveChunk {
   Debug(">>>", 10);
   my $file = $flood->Files->{$filename};
   if (!$file) {
-    Debug("unrecognized filename");
+    Debug("unrecognized filename". 'net');
     Debug("<<<", 10);
     return;
   }
-  Debug($self->id ." (".$self->host.":".$self->port."): ".substr($filename,-20)."#".$index, 7);
+  Debug("peer " . $self->id ." (".$self->host.":".$self->port.") has ".substr($filename,-20)."#".$index, 'net', 40);
   $self->chunkMaps->{$flood->contentHash}{$filename}->Bit_On($index);
-  Debug("chunkmap now: " . $self->chunkMaps->{$flood->contentHash}{$filename}->to_ASCII, 7);
+  Debug("chunkmap now: " . $self->chunkMaps->{$flood->contentHash}{$filename}->to_ASCII, 10);
 
   Debug("<<<", 10);
 }
@@ -418,15 +418,14 @@ sub DispatchRequests {
 
   my $request = RPC::XML::Parser->new()->parse($requestXml);
   if (!ref($request)) {
-    Debug("invalid XML");
-    Debug($requestXml, 5);
+    Debug("invalid XML: $requestXml", 'net');
     Debug("<<<", 10);
     return;
   }
 
   my $methodName = 'Handle' . $request->{name};
   if (my $methodRef = $self->can($methodName)) {
-    Debug("dispatching to $methodName", 5);
+    Debug("dispatching to $methodName", 'net', 20);
     my @requestArgs = map { $_->value } @{$request->{args}};
     my $floodHash = shift(@requestArgs);
     my $flood;
@@ -436,10 +435,10 @@ sub DispatchRequests {
       $flood = $self->floods->{$floodHash};
     }
     if (!$flood) {
-      Debug("unknown flood hash: $floodHash");
+      Debug("unknown flood hash: $floodHash", 'net');
       if($request->{name} eq 'Register') { # NOTE special case!
 	if(!%{$self->floods}) {
-	  Debug("  disconnecting peer (no valid floods)");
+	  Debug("  disconnecting peer (no valid floods)", 'net');
 	  $self->disconnected(1);
 	}
       }
@@ -448,7 +447,7 @@ sub DispatchRequests {
     }
     $methodRef->($self, $flood, @requestArgs);
   } else {
-    Debug("Invalid RPC request method: $request->{name}");
+    Debug("Invalid RPC request method: $request->{name}", 'net');
   }
 
   Debug("<<<", 10);
@@ -485,7 +484,7 @@ sub ReadOnce {
   }
 
   if ($self->disconnected) {
-    Debug("previously disconnected");
+    Debug("previously disconnected", 'net', 10);
     Debug("<<<", 10);
     return;
   }
@@ -495,11 +494,11 @@ sub ReadOnce {
   Debug("readBuffer address after read: " . \$self->readBuffer, 50);
 
   if ($result == -1) {
-    Debug("Would block...", 50);
+    Debug("Would block...", 'net', 30);
     Debug("<<<", 10);
     return;
   } elsif($result == 0) {
-    Debug("read error, disconnecting peer: " . $self->id);
+    Debug("read error, disconnecting peer: " . $self->id, 'net');
     $self->disconnected(1);
     Debug("<<<", 10);
     return;
@@ -526,7 +525,7 @@ sub WriteOnce {
   }
 
   if ($self->disconnected) {
-    Debug("previously disconnected");
+    Debug("previously disconnected", 'net', 10);
     Debug("<<<", 10);
     return;
   }
@@ -534,10 +533,10 @@ sub WriteOnce {
   my $result = $self->bufferedWriter->Write();
 
   if ($result == -1) {
-    Debug("Would block...", 50);
+    Debug("Would block...", 'net', 30);
     return;
   } elsif($result == 0) {
-    Debug("write error, disconnecting peer: " . $self->id);
+    Debug("write error, disconnecting peer: " . $self->id, 'net');
     $self->disconnected(1);
     return;
   }

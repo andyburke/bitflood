@@ -38,7 +38,7 @@ __PACKAGE__->mk_accessors(qw(id socket port
 
 $| = 1; # FIXME buh?
 
-$SIG{PIPE} = sub { Debug("SIGPIPE: remote end closed suddenly during a read/write") };
+$SIG{PIPE} = sub { Debug("SIGPIPE: remote end closed suddenly during a read/write", 'net' };
 
 sub new {
   my $class = shift;
@@ -61,7 +61,7 @@ sub new {
 
   $self->chunkPrioritizerClass('BitFlood::ChunkPrioritizer::Weighted');
 
-  Debug("Laoding chunk prioritizer...", 20);
+  Debug("Loading chunk prioritizer...", 20);
   eval "require " . $self->chunkPrioritizerClass;
   if ($@) {
     die "Couldn't load ChunkPrioritizer class " . $self->chunkPrioritizerClass . " : $@";
@@ -69,17 +69,17 @@ sub new {
   $self->chunkPrioritizer($self->chunkPrioritizerClass->new);
   
   
-  Debug("Finished creating client object...");
+  Debug("Finished creating client object");
   return $self;
 }
 
 sub OpenListenSocket {
   my $self = shift;
 
-  Debug("Creating listen socket for client object", 'net', 50);
   my @portList = $self->port ?
       ($self->port) : (DEFAULT_LISTEN_PORT .. DEFAULT_LISTEN_PORT + 10);
   foreach my $port (@portList) {
+    Debug("trying port $port", 'net', 5);
     $self->port($port);
     $self->socket(IO::Socket::INET->new(
 					Listen    => 5,
@@ -92,9 +92,9 @@ sub OpenListenSocket {
   die("Could not start listening!") if(!$self->socket);
 
   if ($self->port != $portList[0]) {
-    Debug("probed port number: " . $self->port);
+    Debug("probed port number: " . $self->port, 'net', 5);
   }
-  print "Started listening on " . $self->localIp . "(external) :" . $self->port . "\n";
+  Debug("listening on " . $self->localIp . "(external) :" . $self->port, 'net', 5);
 
 }
 
@@ -143,6 +143,7 @@ sub Register {
 
   foreach my $flood (values %{$self->floods}) {
     foreach my $tracker (@{$flood->trackers}) {
+      Debug("Registering with tracker " . $tracker->request->uri->host . ":" . $tracker->request->uri->port, 'net', 5);
       $tracker->simple_request
 	(
 	 'Register',
@@ -161,6 +162,7 @@ sub UpdatePeerList {
 
   foreach my $flood (values %{$self->floods}) {
     my $tracker = $flood->trackers->[int(rand(@{$flood->trackers}))]; #FIXME random ok?
+    Debug("Requesting peers from tracker " . $tracker->request->uri->host . ":" . $tracker->request->uri->port, 'net', 5);
     my $peerListRef = $tracker->simple_request('RequestPeers', $flood->contentHash);
     if($peerListRef) {
       foreach my $peer (@{$peerListRef}) {
@@ -205,7 +207,7 @@ sub Disconnect {
 
   foreach my $flood (values %{$self->floods}) {
     foreach my $tracker (@{$flood->trackers}) {
-      Debug("Sending disconnect request to tracker", 'net');
+      Debug("Disconnecting from tracker " . $tracker->request->uri->host . ":" . $tracker->request->uri->port, 'net', 5);
       $tracker->simple_request
 	(
 	 'Disconnect',
