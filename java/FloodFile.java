@@ -1,3 +1,4 @@
+import java.util.*;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,19 +31,35 @@ import sdk.Base64.Base64;
  */
 public class FloodFile 
 {
-  public class Chunk 
+  public class Chunk implements Comparable
   {
     public String hash;
     public int    index;
     public int    size;
     public int    weight;
+    
+    public int compareTo(Object anotherChunk) throws ClassCastException {
+      if (!(anotherChunk instanceof Chunk))
+      {
+        throw new ClassCastException("A Chunk object expected.");
+      }
+      return this.index - ((Chunk)anotherChunk).index;
+    }    
   }
 
-  public class TargetFile 
+  public class TargetFile implements Comparable
   {
     public String  name;
     public long    size;
     public Chunk[] chunks;
+    
+    public int compareTo(Object anotherTargetFile) throws ClassCastException {
+      if (!(anotherTargetFile instanceof TargetFile))
+      {
+        throw new ClassCastException("A Person object expected.");
+      }
+      return this.name.compareTo(((TargetFile)anotherTargetFile).name);
+    }
   }
 
   public String[]       trackers;
@@ -173,8 +190,9 @@ public class FloodFile
       return;
     }
   	
-    System.out.println("# Files   : " + files.length);
-    System.out.println("# Trackers: " + trackers.length);
+    System.out.println("ContentHash: " + contentHash);
+    System.out.println("# Files    : " + files.length);
+    System.out.println("# Trackers : " + trackers.length);
   	
     System.out.println("Files:");
     for(int fileIndex = 0; fileIndex < files.length; fileIndex++)
@@ -393,6 +411,10 @@ public class FloodFile
         {
           System.out.println("No trackers in flood file?");
         }
+
+        //compute our content hash
+        ComputeContentHash();
+    	}
       }
     } catch (Exception e) {
       System.out.println("Error: " + e);
@@ -607,6 +629,32 @@ public class FloodFile
     return true;
   }
   	
+  private void ComputeContentHash()
+  {
+  	if(contentHash == null)
+  	{
+  		// calculate the content hash
+  		if(files != null)
+  		{
+  			String content = "";
+  			
+  			Arrays.sort(files);
+
+  			for(int fileIndex = 0; fileIndex < files.length; fileIndex++)
+  			{
+  				content = content + files[fileIndex].name;
+  				for(int chunkIndex = 0; chunkIndex < files[fileIndex].chunks.length; chunkIndex++)
+  				{
+  					content = content + files[fileIndex].chunks[chunkIndex].hash;
+  				}
+  			}
+  			System.out.println("Hashing on: " + content);
+  			sha1Encoder.reset();
+  			sha1Encoder.update(content.getBytes());
+  			contentHash = Base64.encodeToString(sha1Encoder.digest(), false).substring(0, 27);
+  		}
+  	}
+  }
   
   private boolean RecursiveFilenameFind(String root, String[] result) 
   {
