@@ -12,7 +12,7 @@ import java.util.Iterator;
  */
 public class SendPeerListMethodHandler implements MethodHandler
 {
-  final static String methodName = "RequestChunk";
+  final static String methodName = "SendPeerList";
   public String getMethodName()
   {
     return methodName;
