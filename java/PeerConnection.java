@@ -18,7 +18,6 @@ public class PeerConnection
   private Hashtable         messageHandlers = null;
   private SocketChannel     socketChannel   = null;
   private Selector          socketSelector  = null;
-  private InetSocketAddress socketAddress   = null;
   private int               BUFFER_SIZE     = 256 * 1024 * 2; // 2 times thenormal chunk size
   private ByteBuffer        readBuffer      = ByteBuffer.allocate( BUFFER_SIZE );
   private int               readIndex       = 0;
@@ -28,23 +27,29 @@ public class PeerConnection
   public boolean            disconnected    = false;
   public String             hostname        = "";
   public int                port            = 0;
+  public String             id              = "";
 
   public PeerConnection()
   {
   }
 
-  public PeerConnection(String remoteHost, int remotePort)
+  public PeerConnection(String remoteHost, int remotePort, String remoteId )
   {
     hostname = remoteHost;
     port = remotePort;
+    id = remoteId;
+    
     try
     {
-      socketAddress = new InetSocketAddress( InetAddress.getByName( hostname ), port );
+      socketSelector = Selector.open();
+      socketChannel = SocketChannel.open();
+      socketChannel.configureBlocking( false );
+      socketChannel.register( socketSelector, socketChannel.validOps() );
+      socketChannel.connect( new InetSocketAddress( InetAddress.getByName( hostname ), port ) );
     }
     catch ( Exception e )
     {
-      System.out.println( "Error getting address for remote host (" + hostname + ":" + port + "): "
-          + e );
+      System.out.println( "Error connecting to (" + hostname + ":" + port + "): " + e );
       disconnected = true;
       return;
     }
@@ -66,16 +71,13 @@ public class PeerConnection
     {
       socketSelector = Selector.open();
       socketChannel.configureBlocking( false );
+      socketChannel.register( socketSelector, socketChannel.validOps() );
+      connected = true;
     }
     catch ( Exception e )
     {
-      System.out.println( "Error setting incoming connection to be non-blocking: " + e );
-    }
-
-    connected = true;
-    if ( !InitializeBufferedIO() )
-    {
       disconnected = true;
+      System.out.println( "Error setting incoming connection to be non-blocking: " + e );
     }
   }
 
@@ -88,7 +90,6 @@ public class PeerConnection
 
     try
     {
-      socketChannel.register( socketSelector, socketChannel.validOps() );
     }
     catch ( Exception e )
     {
@@ -111,6 +112,7 @@ public class PeerConnection
       catch ( Exception e )
       {
         System.out.println( "Error selecing from socketSelector: " + e );
+        disconnected = true;
       }
 
       // Get list of selection keys with pending events
@@ -126,16 +128,18 @@ public class PeerConnection
         // 
         if ( selKey.isConnectable() )
         {
-          System.out.println( "Connecting" );
           SocketChannel sChannel = (SocketChannel) selKey.channel();
 
           try
           {
             sChannel.finishConnect();
+            writeBuffer.put( new String("Bitches").getBytes() );
+            connected = true;
           }
           catch ( Exception e )
           {
             System.out.println( "Error connecting? " + e );
+            disconnected = true;
           }
         }
 
@@ -179,7 +183,12 @@ public class PeerConnection
   {
     try
     {
+      // flip and write the buffer
+      writeBuffer.flip();
       int bytesWritten = socketChannel.write( writeBuffer );
+      
+      // compact the buffer
+      writeBuffer.compact();
     }
     catch ( Exception e )
     {

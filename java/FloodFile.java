@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.security.MessageDigest;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,8 +17,6 @@ import org.apache.xerces.parsers.DOMParser;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.*;
-
-import sdk.Base64.Base64;
 
 /*
  * Created on Nov 12, 2004
@@ -78,54 +75,23 @@ public class FloodFile
   public String         filePath;
   public String         contentHash;
 
-  // for doing the sha1's of our chunks
-  private MessageDigest sha1Encoder = null;
-
   public FloodFile(String filePath)
   {
     this.filePath = filePath;
     this.chunkSize = 256 * 1024; // default to 256K
-
-    try
-    {
-      sha1Encoder = MessageDigest.getInstance( "SHA-1" );
-    }
-    catch ( Exception e )
-    {
-      System.out.println( e.toString() );
-    }
-
   }
 
   public FloodFile(String filePath, int chunkSize)
   {
     this.filePath = filePath;
     this.chunkSize = chunkSize;
-
-    try
-    {
-      sha1Encoder = MessageDigest.getInstance( "SHA-1" );
-    }
-    catch ( Exception e )
-    {
-      System.out.println( e.toString() );
-    }
-
   }
 
   public FloodFile(String filePath, int chunkSize, String[] trackers)
   {
     this.filePath = filePath;
     this.chunkSize = chunkSize;
-    
-    try
-    {
-      sha1Encoder = MessageDigest.getInstance( "SHA-1" );
-    }
-    catch ( Exception e )
-    {
-      System.out.println( e.toString() );
-    }
+   
   }
 
   public boolean Read()
@@ -367,7 +333,7 @@ public class FloodFile
             NodeList chunkList = file.getElementsByTagName( "Chunk" );
             if ( chunkList.getLength() > 0 )
             {
-              targetFile.chunks.ensureCapacity( chunkList.getLength() );
+              targetFile.chunks.setSize( chunkList.getLength() );
 
               for ( int chunkIndex = 0; chunkIndex < chunkList.getLength(); chunkIndex++ )
               {
@@ -401,12 +367,7 @@ public class FloodFile
           tempTracker.port = Integer.parseInt( tracker.getAttribute( "port" ) );
 
           String idstring = tempTracker.host + tempTracker.port;
-          
-          sha1Encoder.reset();
-          sha1Encoder.update( idstring.getBytes() );
-
-          // NOTE: base64 encoded sha1s are always 27 chars
-          tempTracker.id = Base64.encodeToString( sha1Encoder.digest(), false ).substring( 0, 27 );
+          tempTracker.id = Encoder.SHA1Base64Encode( idstring );
           
           trackers.set( trackerIndex, tempTracker );
         }
@@ -566,17 +527,8 @@ public class FloodFile
         break;
       }
 
-      byte[] digest = null;
-
-      sha1Encoder.reset();
-      sha1Encoder.update( chunkData, 0, bytesRead );
-      digest = sha1Encoder.digest();
-
-      // NOTE: base64 encoded sha1s are always 27 chars
-      String chunkHash = Base64.encodeToString( digest, false ).substring( 0, 27 );
-
       Chunk chunk = new Chunk();
-      chunk.hash = chunkHash;
+      chunk.hash = Encoder.SHA1Base64Encode( chunkData , bytesRead );
       chunk.index = chunkIndex;
       chunk.size = bytesRead;
       chunk.weight = weight;
@@ -624,9 +576,7 @@ public class FloodFile
         }
         
         System.out.println( "Hashing on: " + content );
-        sha1Encoder.reset();
-        sha1Encoder.update( content.getBytes() );
-        contentHash = Base64.encodeToString( sha1Encoder.digest(), false ).substring( 0, 27 );
+        contentHash = Encoder.SHA1Base64Encode( content );
       }
     }
   }

@@ -19,6 +19,7 @@ public class Peer
   private Selector            listenSocketSelector = null;
   public String               hostname             = "";
   public int                  port                 = 0;
+  public String               id                   = "";
 
   public Peer()
   {
@@ -28,6 +29,10 @@ public class Peer
   {
     hostname = localHost;
     port = localPort;
+    
+    String idString = hostname + ":" + port;
+    id = Encoder.SHA1Base64Encode( idString );
+    
     SetupListenSocket();
 
     pendingpeers = new Vector();
@@ -36,7 +41,7 @@ public class Peer
 
   public boolean JoinFlood( String floodFilename )
   {
-    Flood floodToJoin = new Flood( floodFilename );
+    Flood floodToJoin = new Flood( this, floodFilename );
     if ( floodToJoin.Id() != null )
     {
       floods.put( floodToJoin.Id(), floodToJoin );
