@@ -6,9 +6,9 @@ use base qw(Class::Accessor);
 
 use Digest::SHA1  qw(sha1 sha1_hex sha1_base64);
 use XML::Simple;
-use File::Spec;
-use File::Spec::Unix;
 use File::Find;
+
+use BitFlood::Utils;
 
 sub new {
   my $class = shift;
@@ -22,7 +22,7 @@ sub new {
   $self->data({});
   $self->data->{Tracker} = $args{tracker};
   $self->filename($args{filename});
-  $self->chunkSize($args{chunkSize} || 1024); # default to 1024
+  $self->chunkSize($args{chunkSize} || 16384); # default to 1024
   $self->weightingFunction($args{weightingFunction});
 
   return $self;
@@ -31,43 +31,33 @@ sub new {
 sub encode {
   my $self = shift;
 
-  if(!ref($self->filename)) # just a string
-  {
-    $self->_EncodeFile($self->filename) if(-f $self->_LocalFilename($self->filename)); # regular file
+  $self->filename([$self->filename]) if(!ref($self->filename)); # just a string, make it into an array
+  
+  foreach my $filename (@{$self->filename}) {
+    $self->_EncodeFile($filename) if(-f LocalFilename($filename)); # regular file
     find({ wanted => sub { $self->_EncodeFile($File::Find::name); },
-           no_chdir => 1},
-         $self->_LocalFilename($self->filename)) if(-d $self->_LocalFilename($self->filename));
-  }
-  elsif(ref($self->filename) eq 'ARRAY') # a list of files...
-  {
-    foreach my $filename (@{$self->filename}) {
-      $self->_EncodeFile($filename) if(-f $self->_LocalFilename($filename)); # regular file
-      find({ wanted => sub { $self->_EncodeFile($File::Find::name); },
-             no_chdir => 1 },
-           $self->_LocalFilename($filename)) if(-d $self->_LocalFilename($filename));
-    }
-  }
-  else
-  {
-    die "Unknown filename specification!";
+           no_chdir => 1 },
+         LocalFilename($filename)) if(-d LocalFilename($filename));
   }
 
-   print XMLout(
+  return XMLout(
                 {
                   FileInfo => { File => [$self->data->{Files}]},
                   Tracker => $self->data->{Tracker},
                 },
                 RootName => 'BitFlood',
-               );
 
-
+                );
+  
 }
+
+## FIXME: this can't end up being done in memory...
 
 sub _EncodeFile {
   my $self = shift;
   my $filename = shift;
-  my $cleanFilename = $self->_CleanFilename($filename);
-  my $localFilename = $self->_LocalFilename($filename);
+  my $cleanFilename = CleanFilename($filename);
+  my $localFilename = LocalFilename($filename);
 
   return if(-d $localFilename);
 
@@ -99,22 +89,6 @@ sub _EncodeFile {
     }
   }
   
-}
-
-sub _CleanFilename {
-  my $self = shift;
- 
-  my ($volume, $dirs, $filename) = File::Spec->splitpath(shift, 1);
-  my @directories = File::Spec->splitdir($dirs);
-  return File::Spec::Unix->catpath($volume, @directories, $filename);
-}
-
-sub _LocalFilename {
-  my $self = shift;
-
-  my ($volume, $dirs, $filename) = File::Spec->splitpath(shift, 1);
-  my @directories = File::Spec->splitdir($dirs);
-  return File::Spec->catpath($volume, @directories, $filename);
 }
 
  
