@@ -18,13 +18,11 @@ my $mainWindowDef;
 BEGIN {
 #  my ($volume, $directories) = File::Spec->splitpath($0);
 #  my @dirs = File::Spec->splitdir($directories);
-#  pop(@dirs) while(@dirs && !-e File::Spec->catfile($volume, @dirs, 'inc', 'lib', 'BitFlood'));
 #  pop(@dirs) while(@dirs && !-e File::Spec->catfile($volume, @dirs, 'BitFlood'));
-#  push(@INC, File::Spec->catfile($volume, @dirs, 'inc', 'lib'));
 #  push(@INC, File::Spec->catfile($volume, @dirs));
-#  $mainWindowDef = File::Spec->catfile($volume, @dirs, 'inc', 'guiClient.gld');
 #  $mainWindowDef = File::Spec->catfile($volume, @dirs, 'guiClient', 'guiClient.gld');
-#  print "dirs: @dirs\n";
+
+
   foreach my $incDir (@INC) {
     if(-e File::Spec->catfile($incDir, 'guiClient.gld')) {
       $mainWindowDef = File::Spec->catfile($incDir, 'guiClient.gld');
