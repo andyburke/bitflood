@@ -108,6 +108,7 @@ sub InitializeFiles {
   foreach my $file (values %{$self->Files}) {
     if(!-f $file->{localFilename})   # file doesn't exist, initialize it to 0
     {
+      print "Initializing target file: $file->{name}\n";
       my $path = GetLocalPathFromFilename($file->{localFilename});
       mkpath($path) if length($path);
       my $outfile = IO::File->new($file->{localFilename}, 'w');
@@ -121,16 +122,20 @@ sub InitializeFiles {
     {
       my $outfile = IO::File->new($file->{localFilename}, 'r');
       my $buffer;
+      my $totalChunks = scalar(@{$file->{Chunk}});
+      my $validChunkCount = 0;
       foreach my $chunk (@{$file->{Chunk}}) {
+	printf("Checking: $file->{name} [%6.2f%%]\r", 100 * $chunk->{index} / $totalChunks);
         $outfile->read($buffer, $chunk->{size});
         my $hash = sha1_base64($buffer);
         if($hash eq $chunk->{hash}) {
+	  $validChunkCount++;
           $file->{chunkMap}->Bit_On($chunk->{index});
         }
       }
       $outfile->close;
+      printf("Checking: $file->{name} [%6.2f%%] [%d/%d chunks OK]\n", 100, $validChunkCount, $totalChunks);
     }
-    print "$file->{name} [", $file->{chunkMap}->to_ASCII, "] \n";
   }
 
 }
