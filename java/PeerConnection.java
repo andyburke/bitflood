@@ -64,11 +64,11 @@ public class PeerConnection
       args.add( flood.localPeer.id );
       args.add( new Integer( flood.localPeer.port ) );
 
-      SendMethod( "Register", args );
+      SendMethod( RegisterMethodHandler.methodName, args );
     }
 
     // request some chunks
-    SendMethod( "RequestChunkMaps", new Vector() );
+    SendMethod( RequestChunkMapsMethodHandler.methodName, new Vector() );
   }
 
   public PeerConnection(Peer peer, SocketChannel incomingSocketConnection)

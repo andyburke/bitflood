@@ -20,7 +20,7 @@ public class Peer
   public String               hostname             = "";
   public int                  port                 = 0;
   public String               id                   = "";
-  public Vector               methodHandlers       = new Vector();
+  private Hashtable           methodHandlers       = new Hashtable();
 
   public Peer()
   {
@@ -36,8 +36,9 @@ public class Peer
 
     SetupListenSocket();
 
-    methodHandlers.add( new RegisterMethodHandler() );
-    methodHandlers.add( new SendPeerListMethodHandler() );
+    AddMethodHandler( new RegisterMethodHandler() );
+    AddMethodHandler( new RegisterMethodHandler() );
+    AddMethodHandler( new SendPeerListMethodHandler() );
   }
 
   public boolean JoinFlood( String floodFilename )
@@ -195,38 +196,45 @@ public class Peer
 
   public Flood FindFlood( final String floodId )
   {
-    Flood retVal = null;
-    Collection floodsToProcess = floods.values();
-    Iterator flooditer = floodsToProcess.iterator();
-    for ( ; flooditer.hasNext(); )
-    {
-      Flood flood = (Flood) flooditer.next();
-      if ( flood.Id().contentEquals( floodId ) )
-      {
-        retVal = flood;
-        break;
-      }
-    }
-    return retVal;
+    return (Flood) floods.get( floodId );
   }
 
   public void HandleMethod( PeerConnection receiver, final String methodName, final Vector parameters )
   {
-    Iterator handleriter = methodHandlers.iterator();
-    for ( ; handleriter.hasNext(); )
+    MethodHandler handler = (MethodHandler) methodHandlers.get( methodName );
+    if ( handler != null )
     {
-      MethodHandler handler = (MethodHandler) handleriter.next();
-      if ( handler.getMethodName().contentEquals( methodName ) )
+      try
       {
-        try
-        {
-          handler.HandleMethod( receiver, parameters );
-        }
-        catch ( Exception e )
-        {
-          System.out.println( "Failed to execute method: " + methodName + ": " + e );
-        }
+        handler.HandleMethod( receiver, parameters );
+      }
+      catch ( Exception e )
+      {
+        System.out.println( "Failed to execute method: " + methodName + ": " + e );
       }
     }
+  }
+
+  public void ActAsTracker()
+  {
+    AddMethodHandler( new RequestPeerListMethodHandler() );
+  }
+
+  public void ActAsSeed()
+  {
+    AddMethodHandler( new RequestChunkMapsMethodHandler() );
+    AddMethodHandler( new RequestChunkMethodHandler() );
+  }
+
+  public void ActAsLeech()
+  {
+    AddMethodHandler( new SendChunkMapsMethodHandler() );
+    AddMethodHandler( new SendChunkMethodHandler() );
+    AddMethodHandler( new NotifyHaveChunkMethodHandler() );
+  }
+  
+  protected void AddMethodHandler( MethodHandler handler )
+  {
+    methodHandlers.put( handler.getMethodName(), new RequestPeerListMethodHandler() );
   }
 }

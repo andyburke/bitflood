@@ -12,9 +12,10 @@ import java.util.Iterator;
  */
 public class RequestPeerListMethodHandler implements MethodHandler
 {
+  final static String methodName = "RequestPeerList";
   public String getMethodName()
   {
-    return "RequestPeerList";
+    return methodName;
   }
   
   public void HandleMethod( PeerConnection receiver, final Vector parameters ) throws Exception

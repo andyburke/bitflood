@@ -11,9 +11,10 @@ import java.util.Vector;
  */
 public class RegisterMethodHandler implements MethodHandler
 {
+  final static String methodName = "Register";
   public String getMethodName()
   {
-    return "Register";
+    return methodName;
   }
   
   public void HandleMethod( PeerConnection receiver, final Vector parameters ) throws Exception

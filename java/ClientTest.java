@@ -59,6 +59,8 @@ public class ClientTest
     System.out.println( "flood port    : " + localPort );
 
     Peer client = new Peer( localIP, localPort );
+    client.ActAsSeed();
+    client.ActAsLeech();
     client.JoinFlood( floodFilename );
 
     boolean quit = false;

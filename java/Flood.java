@@ -82,8 +82,8 @@ public class Flood
             peers.add( peer );
           }
 
-          // send a "requestpeerlist" method
-          peer.SendMethod( "RequestPeerList", new Vector() );
+          // Request the tracker's peer list
+          peer.SendMethod( RequestPeerListMethodHandler.methodName, new Vector() );
         }
       }
     }
