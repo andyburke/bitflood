@@ -328,7 +328,7 @@ sub HandleSendChunk {
 	 substr($file->{name}, -30),
 	 $chunk->{index}+1,
 	 $self->host,
-	 ($flood->downloadBytes / 1024) / ((time() - $flood->startTime) + 1),
+	 ($flood->sessionDownloadBytes / 1024) / ((time() - $flood->sessionStartTime) + 1),
 	);
 
   if(sha1_base64($chunkData) eq $chunk->{hash}) {
