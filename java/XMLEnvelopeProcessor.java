@@ -46,7 +46,7 @@ public class XMLEnvelopeProcessor
   public static String encode( String methodName, Vector arguments )
   {
     Document doc = docBuilder.newDocument();
-    
+
     Element methodCallElement = doc.createElement( "methodCall" );
 
     Element methodNameElement = doc.createElement( "methodName" );
@@ -126,8 +126,8 @@ public class XMLEnvelopeProcessor
     }
     else if ( arg instanceof byte[] )
     {
-      Element base64 = doc.createElement( "base64");
-      base64.appendChild( doc.createTextNode( Base64.encodeToString( (byte[]) arg, false)));
+      Element base64 = doc.createElement( "base64" );
+      base64.appendChild( doc.createTextNode( Base64.encodeToString( (byte[]) arg, false ) ) );
       node.appendChild( base64 );
     }
     else if ( arg instanceof Vector )
@@ -146,7 +146,7 @@ public class XMLEnvelopeProcessor
         encodeArg( doc, value, element );
         data.appendChild( value );
       }
-      
+
       node.appendChild( array );
     }
     else
@@ -155,7 +155,7 @@ public class XMLEnvelopeProcessor
       System.out.println( "Unknown type encountered!" );
     }
   }
-  
+
   public static void decode( final String xmlToDecode, StringBuffer methodName, Vector arguments )
   {
     try
@@ -167,31 +167,31 @@ public class XMLEnvelopeProcessor
       NodeList methodNameList = doc.getElementsByTagName( "methodName" );
       if ( methodNameList.getLength() != 1 )
       {
-        throw new Exception( "Invalid XML-RPC");
+        throw new Exception( "Invalid XML-RPC" );
       }
-    
+
       methodName.append( methodNameList.item( 0 ).getFirstChild().getNodeValue() );
-        
+
       NodeList paramsNodeList = doc.getElementsByTagName( "params" );
       if ( paramsNodeList.getLength() == 0 )
       {
         return;
       }
-      
+
       if ( paramsNodeList.getLength() != 1 )
       {
-        throw new Exception( "Invalid XML-RPC");
+        throw new Exception( "Invalid XML-RPC" );
       }
-      
-      NodeList paramNodeList = paramsNodeList.item(0).getChildNodes();
+
+      NodeList paramNodeList = paramsNodeList.item( 0 ).getChildNodes();
       for ( int paramIndex = 0; paramIndex < paramNodeList.getLength(); paramIndex++ )
       {
         Node param = paramNodeList.item( paramIndex );
-        if ( !param.getNodeName().contentEquals( "param" ) || ( param.getChildNodes().getLength() != 1 ) )
+        if ( param.getNodeName().compareTo( "param" ) != 0 || ( param.getChildNodes().getLength() != 1 ) )
         {
-          throw new Exception( "Invalid XML-RPC");
+          throw new Exception( "Invalid XML-RPC" );
         }
-        
+
         Node valueNode = param.getFirstChild();
         arguments.add( decodeArg( valueNode ) );
       }
@@ -201,75 +201,75 @@ public class XMLEnvelopeProcessor
       System.out.println( "Error: " + e );
     }
   }
-  
+
   private static Object decodeArg( Node param ) throws Exception
   {
-    if ( !param.getNodeName().contentEquals( "value") || param.getChildNodes().getLength() != 1 )
+    if ( param.getNodeName().compareTo( "value" ) != 0 || param.getChildNodes().getLength() != 1 )
     {
-      throw new Exception( "Invalid XML-RPC");
+      throw new Exception( "Invalid XML-RPC" );
     }
-    
+
     Node typeNode = param.getFirstChild();
     String typeNodeName = typeNode.getNodeName();
-    if ( typeNodeName.contentEquals("string") )
+    if ( typeNodeName.compareTo( "string" ) == 0 )
     {
       if ( typeNode.getChildNodes().getLength() != 1 )
       {
-        throw new Exception( "Invalid XML-RPC");
+        throw new Exception( "Invalid XML-RPC" );
       }
-      
+
       typeNode = typeNode.getFirstChild();
       typeNodeName = typeNode.getNodeName();
     }
-    
-    if ( typeNodeName.contentEquals("#text") )
+
+    if ( typeNodeName.compareTo( "#text" ) == 0 )
     {
       // poor man's xml escaping...
       String tmp = typeNode.getNodeValue();
       tmp.replaceAll( ">", "&gt;" );
       tmp.replaceAll( "<", "&lt;" );
       tmp.replaceAll( "&", "&amp;" );
-      
+
       return tmp;
     }
-    else if ( typeNodeName.contentEquals("int") || typeNodeName.contentEquals("int") )
+    else if ( typeNodeName.compareTo( "int" ) == 0 || typeNodeName.compareTo( "i4" ) == 0 )
     {
       if ( typeNode.getChildNodes().getLength() != 1 )
       {
-        throw new Exception( "Invalid XML-RPC");
+        throw new Exception( "Invalid XML-RPC" );
       }
-      
+
       Node intNode = typeNode.getFirstChild();
       return new Integer( intNode.getNodeValue() );
     }
-    else if ( typeNodeName.contentEquals("array") )
+    else if ( typeNodeName.compareTo( "array" ) == 0 )
     {
-      Node dataNode = typeNode.getFirstChild(); 
-      if ( typeNode.getChildNodes().getLength() != 1 || !dataNode.getNodeName().contentEquals( "data" ) )
+      Node dataNode = typeNode.getFirstChild();
+      if ( typeNode.getChildNodes().getLength() != 1 || dataNode.getNodeName().compareTo( "data" ) != 0 )
       {
-        throw new Exception( "Invalid XML-RPC");
+        throw new Exception( "Invalid XML-RPC" );
       }
-      
+
       Vector objects = new Vector();
       NodeList arrayNodeList = dataNode.getChildNodes();
       for ( int arrayIndex = 0; arrayIndex < arrayNodeList.getLength(); arrayIndex++ )
       {
         objects.add( decodeArg( arrayNodeList.item( arrayIndex ) ) );
       }
-      
+
       return objects;
     }
-    else if ( typeNodeName.contentEquals("base64") )
+    else if ( typeNodeName.compareTo( "base64" ) == 0 )
     {
       if ( typeNode.getChildNodes().getLength() != 1 )
       {
-        throw new Exception( "Invalid XML-RPC");
+        throw new Exception( "Invalid XML-RPC" );
       }
-      
+
       Node base64Node = typeNode.getFirstChild();
       return Base64.decode( base64Node.getNodeValue() );
     }
-    else 
+    else
     {
       throw new Exception( "Unsupported XML-RPC type: " + typeNodeName );
     }

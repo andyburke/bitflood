@@ -19,10 +19,10 @@ import java.io.BufferedInputStream;
  */
 public class Flood
 {
-  public Peer       localPeer         = null;
-  public Vector     peers             = new Vector();
+  public Peer      localPeer         = null;
+  public Vector    peers             = new Vector();
   public FloodFile floodFile         = null;
-  private Date      lastTrackerUpdate = null;
+  private Date     lastTrackerUpdate = null;
 
   // runtime flood data
   public class RuntimeTargetFile
@@ -105,7 +105,7 @@ public class Flood
       {
         FloodFile.TrackerInfo tracker = (FloodFile.TrackerInfo) trackeriter.next();
 
-        if ( !tracker.id.contentEquals( localPeer.id ) )
+        if ( tracker.id.compareTo( localPeer.id ) != 0 )
         {
           PeerConnection peer = FindPeer( tracker.id );
           if ( peer == null )
@@ -128,7 +128,7 @@ public class Flood
     for ( ; peeriter.hasNext(); )
     {
       PeerConnection peer = (PeerConnection) peeriter.next();
-      if ( peer.id.contentEquals( peerId ) )
+      if ( peer.id.compareTo( peerId ) == 0 )
       {
         retVal = peer;
         break;
@@ -151,8 +151,8 @@ public class Flood
         runtimeFileData[fileIndex] = rtf;
 
         // track some stats
-        totalBytes += file.size; 
-        
+        totalBytes += file.size;
+
         int numChunks = file.chunks.size();
         rtf.chunkIndicies = new Hashtable( numChunks );
         rtf.chunkOffsets = new int[numChunks];
@@ -196,10 +196,10 @@ public class Flood
               if ( inputFileStream.read( chunkData ) == chunk.size )
               {
                 String existingHash = Encoder.SHA1Base64Encode( chunkData, chunk.size );
-                if ( existingHash.contentEquals( chunk.hash ) )
+                if ( existingHash.compareTo( chunk.hash ) == 0 )
                 {
                   rtf.chunkMap[chunk.index] = '1';
-                  
+
                   // how many bytes did we start with
                   bytesAtStartup += chunk.size;
                 }
@@ -208,14 +208,14 @@ public class Flood
               else
               {
               }
-              
+
               inputFileStream.reset();
             }
             catch ( IOException e )
             {
             }
           }
-          
+
           nextOffset += chunk.size;
         }
 
@@ -231,7 +231,7 @@ public class Flood
         }
       }
     }
-    
+
     // how many bytes are we currently missing
     bytesMissing = totalBytes - bytesAtStartup;
   }

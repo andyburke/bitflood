@@ -231,7 +231,7 @@ public class Peer
     AddMethodHandler( new SendChunkMethodHandler() );
     AddMethodHandler( new NotifyHaveChunkMethodHandler() );
   }
-  
+
   protected void AddMethodHandler( MethodHandler handler )
   {
     methodHandlers.put( handler.getMethodName(), new RequestPeerListMethodHandler() );

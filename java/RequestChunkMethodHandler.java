@@ -43,7 +43,7 @@ public class RequestChunkMethodHandler implements MethodHandler
     for ( fileIndex = 0; fileiter.hasNext(); ++fileIndex )
     {
       FloodFile.TargetFile file = (FloodFile.TargetFile) fileiter.next();
-      if ( file.name.contentEquals( fileName ) )
+      if ( file.name.compareTo( fileName ) == 0 )
       {
         targetFile = file;
         break;
@@ -95,11 +95,11 @@ public class RequestChunkMethodHandler implements MethodHandler
     }
 
     String testHash = Encoder.SHA1Base64Encode( chunkData, targetChunk.size );
-    if ( !testHash.contentEquals( targetChunk.hash ) )
+    if ( testHash.compareTo( targetChunk.hash ) != 0 )
     {
       throw new Exception( "file data is not correct!" );
     }
-    
+
     scParams.add( chunkData );
     receiver.SendMethod( SendChunkMethodHandler.methodName, scParams );
   }
