@@ -49,6 +49,7 @@ foreach my $filename (@ARGV) {
 my $lastUpdateTime = 0;
 my $lastGUIUpdateTime = 0;
 while(1) {
+#  print "looping... ";
   if(time() - $lastGUIUpdateTime >= 1) {
     UpdateDisplay();
     $lastGUIUpdateTime = time();
@@ -64,8 +65,10 @@ while(1) {
 
   $client->GetChunks();
   $client->LoopOnce();
-
-  sleep(1);
+  
+#  print "sleeping ... ";
+  usleep(1000);
+#  print "done\n";
 }
 
 sub mainWindow_Resize {
@@ -113,18 +116,19 @@ sub UpdateDisplay {
       }
     }
 
+    my $complete = $flood->downloadBytes == $flood->totalBytes;
     $mainWindow->floods_FloodsListView->InsertItem(-text => [
 							     $flood->filename,
 							     ReadableSize($flood->totalBytes),
 							     ReadableSize($flood->downloadBytes),
-							     $flood->totalBytes ? sprintf("%3.2f%%", 100 * $flood->downloadBytes / $flood->totalBytes) : '0%',
-							     ReadableTimeDelta(time() - $flood->startTime),
-							     ReadableTimeDelta(($flood->totalBytes - $flood->downloadBytes) / ($flood->downloadBytes / (time() - $flood->startTime) + 1) + 1),
-							     sprintf("%s/s", ReadableSize(($flood->downloadBytes) / ((time() - $flood->startTime) + 1))),
+							     $flood->totalBytes > 0 ? sprintf("%3.2f%%", 100 * $flood->downloadBytes / $flood->totalBytes) : '0%',
+							     !$complete ? ReadableTimeDelta(time() - $flood->startTime) : 'done',
+							     (!$complete and ($flood->downloadBytes > 0) and (time() - $flood->startTime > 0)) ? ReadableTimeDelta(($flood->totalBytes - $flood->downloadBytes) / ($flood->downloadBytes / (time() - $flood->startTime))) : 'unknown',
+							     (!$complete and time() - $flood->startTime > 0) ? sprintf("%s/s", ReadableSize($flood->downloadBytes / (time() - $flood->startTime))) : '0.0 K/s',
 							     $seeds, # FIXME: find complete peers
 							     $peers - $seeds, # FIXME: find incomplete peers
 							     'n/a',
-							     'n/a',
+							     $complete ? 'complete' : 'incomplete',
 							    ]);
   }
 }
