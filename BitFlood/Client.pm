@@ -241,13 +241,14 @@ sub UpdatePeerList {
   foreach my $flood (values %{$self->floods}) {
     my $tracker = $flood->trackers->[int(rand(@{$flood->trackers}))]; #FIXME random ok?
     $flood->peers([]);
-
-    foreach my $peerAddress (@{$tracker->simple_request('RequestPeers', $flood->contentHash)}) {
-      if ($peerAddress ne 'http://'.inet_ntoa(scalar gethostbyname(hostname())).':'.$self->port.'/RPCSERV') { # FIXME skip self (not robusto)
-	push(@{$flood->peers}, RPC::XML::Client->new($peerAddress));
+    my $peerListRef = $tracker->simple_request('RequestPeers', $flood->contentHash);
+    if($peerListRef) {
+      foreach my $peerAddress (@{$peerListRef}) {
+        if ($peerAddress ne 'http://'.inet_ntoa(scalar gethostbyname(hostname())).':'.$self->port.'/RPCSERV') { # FIXME skip self (not robusto)
+	  push(@{$flood->peers}, RPC::XML::Client->new($peerAddress));
+        }
       }
     }
-
   }
 }
 
