@@ -23,6 +23,10 @@ our $debugLineNumbers = $ENV{BITFLOOD_DEBUG_LINENUMBERS};
 our $debugPid         = $ENV{BITFLOOD_DEBUG_PID};
 
 OpenChannel(''); # default channel
+foreach my $channel (split(',', $ENV{BITFLOOD_DEBUG_CHANNELS})) {
+  OpenChannel($channel);
+}
+
 # FIXME this sucks, move it somewhere else?
 AddLogger('', 'Stdout')
   unless $ENV{BITFLOOD_DEBUG_QUIET};
@@ -36,17 +40,19 @@ AddLogger('', 'Jabber',
           serverPort => 5222,
           username   => 'bftest',
           password   => 'bftest',
-          resource   => 'logger',
-          infoString => hostname() || 'unknown')
+          resource   => hostname() . '_' . inet_ntoa(scalar gethostbyname(hostname())))
   if $ENV{BITFLOOD_DEBUG_JABBER};
 
-foreach my $channel (split(',', $ENV{BITFLOOD_DEBUG_CHANNELS})) {
-  OpenChannel($channel);
+AddLogger('trace', 'Stdout');
+
+AddLogger('perf', 'File', 'perf.log');
+
+if ($ENV{BITFLOOD_DEBUG_NET_FILE}) {
+  AddLogger('net', 'File', 'net.log', append => 0);
+} else {
+  AddLogger('net', 'Stdout');
 }
 
-AddLogger('trace', 'Stdout');
-AddLogger('net', 'Stdout');
-AddLogger('perf', 'File', 'perf.log');
 
 
 sub OpenChannel {

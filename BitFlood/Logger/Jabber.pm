@@ -3,7 +3,7 @@ package BitFlood::Logger::Jabber;
 use strict;
 use base qw(BitFlood::Logger);
 __PACKAGE__->mk_accessors(qw(
-  client connected infoString
+  client connected
   recipient serverHost serverPort username password resource
 ));
 
@@ -11,7 +11,7 @@ use Net::Jabber qw(Client);
 
 
 # args: recipient, serverHost, serverPort,
-#       username, password, resource, infoString
+#       username, password, resource
 sub new {
   my $class = shift;
   my %args = @_;
@@ -40,12 +40,8 @@ sub commit {
 
   $self->connected or return;
 
-  my $body;
-  $body .= '[' . $self->infoString . '] ' if defined $self->infoString;
-  $body .= $string;
-
   my $im = Net::Jabber::Message->new();
-  $im->SetMessage(body => $body, type => "chat");
+  $im->SetMessage(body => $string, type => "chat");
   $im->SetTo($self->recipient);
 
   $self->client->Send($im);
