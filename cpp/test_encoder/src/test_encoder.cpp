@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 
+#include <Flood.H>
 #include <Encoder.H>
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
@@ -11,34 +12,51 @@ XERCES_CPP_NAMESPACE_USE
 
 using namespace libBitFlood;
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
-  // Initialize the XML4C2 system.
-  try
+  if ( argc != 4 )
   {
-    XMLPlatformUtils::Initialize();
-  }
-
-  catch(const XMLException& toCatch)
-  {
-    char *pMsg = XMLString::transcode(toCatch.getMessage());
-    XERCES_STD_QUALIFIER cerr << "Error during Xerces-c Initialization.\n"
-      << "  Exception message:"
-      << pMsg;
-    XMLString::release(&pMsg);
+    std::cerr << "Please use three arguments: the name of the file to encode, the name of the tracker, and the name of the flood file" << std::endl;
     return 1;
   }
+  else
+  {
+    // Initialize the XML4C2 system.
+    try
+    {
+      XMLPlatformUtils::Initialize();
+    }
 
+    catch(const XMLException& toCatch)
+    {
+      char *pMsg = XMLString::transcode(toCatch.getMessage());
+      XERCES_STD_QUALIFIER cerr << "Error during Xerces-c Initialization.\n"
+				<< "  Exception message:"
+				<< pMsg;
+      XMLString::release(&pMsg);
+      return 1;
+    }
 
-  Encoder::ToEncode e;
-  e.m_files.push_back( "c:\\test.mp3" );
-  e.m_chunksize = 262144;
+    Encoder::ToEncode e;
+    e.m_files.push_back( argv[1] );
+    e.m_chunksize = 262144;
+    e.m_tracker = argv[2];
   
+    Flood out;
+    Encoder::EncodeFile( e, out );
 
-  std::string out;
-  Encoder::EncodeFile( e, out );
+    std::wstring txt;
+    out.ToXML( txt );
 
-  XMLPlatformUtils::Terminate();
-  return 0;
+    FILE* outfile = fopen( argv[3], "w" );
+    if ( outfile )
+    {
+      fprintf( outfile, "%ws", txt.c_str() );
+      fclose( outfile );
+    }
+
+    XMLPlatformUtils::Terminate();
+    return 0;
+  }
 }
 
