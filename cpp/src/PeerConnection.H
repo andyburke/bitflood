@@ -71,8 +71,6 @@ namespace libBitFlood
     };
 
   public:
-    typedef Error::ErrorCode (*_MessageHandler)( PeerConnection& i_receiver, XmlRpcValue& i_args );
-    typedef std::map< std::string, _MessageHandler > M_StrToMessageHandler;
     typedef std::map< std::string, std::string > M_StrToStr;
     typedef std::map< std::string, M_StrToStr > M_StrToStrToStr;
 
@@ -83,16 +81,18 @@ namespace libBitFlood
 
 
     Error::ErrorCode InitializeIncoming( const SocketSPtr& i_socket );
-    Error::ErrorCode InitializeOutgoing( const std::string& i_peerId );
+    Error::ErrorCode InitializeOutgoing( FloodSPtr&         i_flood,
+                                         const std::string& i_peerid );
 
     Error::ErrorCode LoopOnce( void );
 
     /// send a message to the peer on the other end of the wire
-    Error::ErrorCode SendMessage( const std::string& i_methodName, const XmlRpcValue& i_args );
+    Error::ErrorCode SendMethod( const std::string& i_methodname, const XmlRpcValue& i_args );
 
     // member variables
   public:
-    PeerSPtr    m_localpeer;
+    Peer*       m_localpeer;
+    Flood*      m_flood;
     SocketSPtr  m_socket;
     std::string m_id;
     bool        m_disconnected;
@@ -104,7 +104,6 @@ namespace libBitFlood
     FakeServer  m_fakeServer;
     Reader      m_reader;
     Writer      m_writer;
-    S_String    m_registeredfloods;
 
   protected:
     Error::ErrorCode _Connect( void );
@@ -112,9 +111,6 @@ namespace libBitFlood
     Error::ErrorCode _WriteOnce( void );
     Error::ErrorCode _ProcessReadBuffer( void );
   };
-
-  typedef ReferenceCountTemplate< class PeerConnection > PeerConnectionSPtr;
-  typedef std::vector< PeerConnectionSPtr > V_PeerConnectionSPtr;
 };
 
 #endif; // _LBF_PEER_CONNECTION_H_

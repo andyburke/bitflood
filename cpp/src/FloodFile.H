@@ -3,7 +3,7 @@
 
 namespace libBitFlood
 {
-  class FloodFile
+  class FloodFile : public ReferenceCountBase
   {
   public:
     struct Chunk

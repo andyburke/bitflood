@@ -16,12 +16,12 @@ namespace libBitFlood
   typedef ReferenceCountTemplate< class Flood >          FloodSPtr;
   typedef ReferenceCountTemplate< class FloodFile >      FloodFileSPtr;
   typedef ReferenceCountTemplate< class PeerConnection > PeerConnectionSPtr;
-  typedef ReferenceCountTemplate< class PeerPlugin >     PeerPluginSPtr;
+  typedef ReferenceCountTemplate< class MethodHandler >  MethodHandlerSPtr;
   typedef ReferenceCountTemplate< class Peer >           PeerSPtr;
 
   typedef std::vector< FloodSPtr >          V_FloodSPtr;
   typedef std::vector< PeerConnectionSPtr > V_PeerConnectionSPtr;
-  typedef std::vector< PeerPluginSPtr >     V_PeerPluginSPtr;
+  typedef std::vector< MethodHandlerSPtr >  V_MethodHandlerSPtr;
 
 }
 

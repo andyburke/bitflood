@@ -15,15 +15,7 @@ namespace libBitFlood
     static const char SendChunk[];
     static const char NotifyHaveChunk[];
 
-    typedef std::map< std::string, std::string > M_StrToStr;
-    typedef std::map< std::string, M_StrToStr > M_StrToStrToStr;
-    typedef std::map< std::string, M_StrToStrToStr > M_StrToStrToStrToStr;
-
-    M_StrToStrToStrToStr m_chunkMaps;
-
   public:
-    Error::ErrorCode GetChunks( PeerSPtr& i_localpeer );
-    Error::ErrorCode QueryMethods( V_String& o_supportedmethods );
     Error::ErrorCode HandleMethod( const std::string&   i_method, 
                                     PeerConnectionSPtr& i_receiver,
                                     XmlRpcValue&        i_args );

@@ -11,94 +11,34 @@
 
 namespace libBitFlood
 {
-  Error::ErrorCode Peer::Initialize( const Setup& i_setup )
+  Error::ErrorCode Peer::Initialize( const std::string& i_host, U32 i_port )
   {
-    // cache the setup
-    m_setup = i_setup;
+    // cache the data
+    m_localhost = i_host;
+    m_localport = i_port;
 
     // compute an ID
     {
       std::stringstream idstrm;
-      idstrm << m_setup.m_localIP << m_setup.m_localPort;
+      idstrm << m_localhost << m_localport;
 
-      Encoder::Base64Encode( (const U8*)idstrm.str().c_str(), idstrm.str().length(), m_id );
+      Encoder::Base64Encode( (const U8*)idstrm.str().c_str(), idstrm.str().length(), m_localid );
     }
 
     // Open a listen socket
     _OpenListenSocket();
 
     // setup some basic method handlers
-    AddMethodHandler( MethodHandlerSPtr( new PeerMethodHandler() ) );
+    AddHandler( MethodHandlerSPtr( new PeerMethodHandler() ) );
 
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode Peer::AddFloodFile( const FloodFile& i_floodfile )
+  Error::ErrorCode Peer::AddFloodFile( FloodFileSPtr& i_floodfile )
   {
     FloodSPtr f( new Flood() );
-    f->Initialize( i_floodfile );
-    m_floods.push_back( f );
-
-    return Error::NO_ERROR_LBF;
-  }
-
-  Error::ErrorCode Peer::UpdateTrackers( void )
-  {
-    V_FloodSPtr::iterator flooditer = m_floods.begin();
-    V_FloodSPtr::iterator floodend  = m_floods.end();
-
-    for ( ; flooditer != floodend; ++flooditer )
-    {
-      FloodSPtr& flood = *flooditer;
-
-      Flood::V_TrackerInfo::const_iterator trackeriter = flood->m_trackerinfos.begin();
-      Flood::V_TrackerInfo::const_iterator trackerend  = flood->m_trackerinfos.end();
-      for ( ; trackeriter != trackerend; ++trackeriter )
-      {
-        const Flood::TrackerInfo& tracker = (*trackeriter);
-        
-        PeerConnectionSPtr peer;
-        InqPeer( tracker.m_id, peer );
-
-        if ( peer.Get() == NULL )
-        {
-          peer = PeerConnectionSPtr( new PeerConnection() );
-          peer->InitializeCommon( PeerSPtr( this ), tracker.m_host, tracker.m_port );
-          peer->InitializeOutgoing( tracker.m_id );
-          m_peers.push_back( peer );
-        }
-
-        // if this peer isn't registered yet
-        if ( peer->m_registeredFloods.find( flood->m_floodfile.m_contentHash ) == peer->m_registeredFloods.end() )
-        {
-          // mark as registered
-          peer->m_registeredFloods.insert( flood->m_floodfile.m_contentHash );
-
-          // register w/ the peer
-          {
-            XmlRpcValue args;
-            args[0] = flood->m_floodfile.m_contentHash;
-            args[1] = m_id;
-            args[2] = (int)m_setup.m_localPort;
-            peer->SendMethod( PeerMethodHandler::RegisterWithPeer, args );
-          }
-
-          // request some chunks
-          {
-            XmlRpcValue args;
-            args[0] = flood->m_floodfile.m_contentHash;
-            peer->SendMethod( ChunkMethodHandler::RequestChunkMaps, args );
-          }
-        }
-
-        // request a peer list
-        {
-          XmlRpcValue args;
-          args[0] = flood->m_floodfile.m_contentHash;
-          peer->SendMethod( TrackerMethodHandler::RequestPeerList, args );
-        }
-      }
-    }
+    f->Initialize( PeerSPtr( this ), i_floodfile );
+    m_registeredfloods.push_back( f );
 
     return Error::NO_ERROR_LBF;
   }
@@ -119,47 +59,31 @@ namespace libBitFlood
         PeerConnectionSPtr peer( new PeerConnection() );
         peer->InitializeCommon( PeerSPtr( this ), host, port );
         peer->InitializeIncoming( incoming );
-        m_peers.push_back( peer );
+        m_pendingpeers.push_back( peer );
       }
     }
 
     return Error::NO_ERROR_LBF;
   }
   
-  Error::ErrorCode Peer::AddMethodHandler( MethodHandlerSPtr& i_handler )
+  Error::ErrorCode Peer::AddHandler( MethodHandlerSPtr& i_handler )
   {
-    V_String methods;
-    i_handler->QueryMethods( methods );
-    
-    V_String::const_iterator iter = methods.begin();
-    V_String::const_iterator end  = methods.end();
-
-    for( ; iter != end; ++iter )
-    {
-      const std::string& method = *iter;
-      m_methodhandlers[ method ].push_back( i_handler );
-    }
-
+    m_methodhandlers.push_back( i_handler );
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode Peer::DispatchMethod( const std::string& i_method, 
-                                            PeerConnectionSPtr& i_receiver, 
-                                            XmlRpcValue& i_args )
+  Error::ErrorCode Peer::HandleMethod( const std::string&  i_method, 
+                                       PeerConnectionSPtr& i_receiver, 
+                                       XmlRpcValue&        i_args )
   {
-    M_StrToV_MethodHandlerSPtr::iterator methoditer = m_methodhandlers.find( i_method );
-    if ( methoditer != m_methodhandlers.end() )
+    V_MethodHandlerSPtr::iterator handleriter = m_methodhandlers.begin();
+    V_MethodHandlerSPtr::iterator handlerend  = m_methodhandlers.end();
+    for ( ; handleriter != handlerend; ++handleriter )
     {
-      V_MethodHandlerSPtr::iterator handleriter = (*methoditer).second.begin();
-      V_MethodHandlerSPtr::iterator handlerend  = (*methoditer).second.end();
-      for ( ; handleriter != handlerend; ++handleriter )
-      {
-        (*handleriter)->HandleMethod( i_method,
-				      i_receiver,
-				      i_args );
-      }
+      (*handleriter)->HandleMethod( i_method,
+                                    i_receiver,
+                                    i_args );
     }
-
 
     return Error::NO_ERROR_LBF;
   }
@@ -169,12 +93,12 @@ namespace libBitFlood
     o_flood = FloodSPtr( NULL );
     if ( !i_floodid.empty() )
     {
-      V_FloodSPtr::iterator flooditer = m_floods.begin();
-      V_FloodSPtr::iterator floodend  = m_floods.end();
+      V_FloodSPtr::iterator flooditer = m_registeredfloods.begin();
+      V_FloodSPtr::iterator floodend  = m_registeredfloods.end();
 
       for ( ; flooditer != floodend; ++flooditer )
       {
-        if ( (*flooditer)->m_floodfile.m_contentHash.compare( i_floodid ) == 0 )
+        if ( (*flooditer)->m_floodfile->m_contentHash.compare( i_floodid ) == 0 )
         {
           o_flood = (*flooditer);
           break;
@@ -185,7 +109,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode Client::_OpenListenSocket( void )
+  Error::ErrorCode Peer::_OpenListenSocket( void )
   {
     bool ok = true;
 
@@ -199,7 +123,7 @@ namespace libBitFlood
     ok = m_listensocket->SetReuse();
 
     // bind to the port
-    ok = m_listensocket->Bind( m_setup.m_localPort );
+    ok = m_listensocket->Bind( m_localport );
 
     // tell the socket to listen
     ok = m_listensocket->Listen( 5 );
@@ -207,13 +131,13 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode Client::_ProcessPeers( void )
+  Error::ErrorCode Peer::_ProcessPeers( void )
   {
     // copy the peer sptr vector, chances are it will change in this loop
-    V_PeerConnectionSPtr peers = m_peers;
+    V_PeerConnectionSPtr pendingpeers = m_pendingpeers;
     
-    V_PeerConnectionSPtr::iterator peeriter = peers.begin();
-    V_PeerConnectionSPtr::iterator peerend  = peers.end();
+    V_PeerConnectionSPtr::iterator peeriter = pendingpeers.begin();
+    V_PeerConnectionSPtr::iterator peerend  = pendingpeers.end();
 
     for ( ; peeriter != peerend; ++peeriter )
     {
@@ -223,8 +147,19 @@ namespace libBitFlood
       // reap defunct peer connections
       if ( (*peeriter)->m_disconnected )
       {
-       // m_peers.erase( peeriter );
       }
+    }
+
+    // process the floods 
+    V_FloodSPtr floods = m_registeredfloods;
+
+    V_FloodSPtr::iterator flooditer = floods.begin();
+    V_FloodSPtr::iterator floodend  = floods.end();
+
+    for ( ; flooditer != floodend; ++flooditer )
+    {
+      // process
+      (*flooditer)->LoopOnce();
     }
 
     return Error::NO_ERROR_LBF;

@@ -4,6 +4,8 @@
 #include "Flood.H"
 #include "Peer.H"
 #include "Encoder.H"
+#include "PeerMethods.H"
+#include "ChunkMethods.H"
 
 #include <sha.h>
 #include <hex.h>
@@ -14,15 +16,16 @@
 
 namespace libBitFlood
 {
-  Error::ErrorCode PeerConnection::InitializeCommon( PeerSPtr& i_localpeer,
+  Error::ErrorCode PeerConnection::InitializeCommon( PeerSPtr&          i_localpeer,
                                                      const std::string& i_peerhost,
                                                      U32                i_peerport )
 
   {
     // cache relevant data (host, port, localpeer)
-    m_localpeer = i_localpeer;
-    m_host      = i_peerHost;
-    m_port      = i_peerPort;
+    m_localpeer = i_localpeer.Get();
+    m_host      = i_peerhost;
+    m_port      = i_peerport;
+    m_flood     = NULL;
 
     return Error::NO_ERROR_LBF;
   }
@@ -52,11 +55,15 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode PeerConnection::InitializeOutgoing( const std::string& i_peerId )
+  Error::ErrorCode PeerConnection::InitializeOutgoing( FloodSPtr&         i_flood,
+                                                       const std::string& i_peerid )
   {
+    // cache the flood pointer
+    m_flood = i_flood.Get();
+
     // cache the data and attempt a connection
     m_socket = SocketSPtr( NULL );
-    m_id     = i_peerId;
+    m_id     = i_peerid;
 
     // 
     m_connected = false;
@@ -64,6 +71,21 @@ namespace libBitFlood
 
     //
     _Connect();
+
+    // register ourselves w/ the peer
+    {
+      XmlRpcValue args;
+      args[0] = m_flood->m_floodfile->m_contentHash;
+      args[1] = m_localpeer->m_localid;
+      args[2] = (int)m_localpeer->m_localport;
+      SendMethod( PeerMethodHandler::RegisterWithPeer, args );
+    }
+
+    // request some chunks
+    {
+      XmlRpcValue args;
+      SendMethod( ChunkMethodHandler::RequestChunkMaps, args );
+    }
 
     return Error::NO_ERROR_LBF;
   }
@@ -84,6 +106,7 @@ namespace libBitFlood
   Error::ErrorCode PeerConnection::SendMethod( const std::string& i_methodName,
                                                 const XmlRpcValue& i_args )
   {
+    printf( "%s -> %s (%s)\n", m_localpeer->m_localid.c_str(), m_id.c_str(), i_methodName.c_str() );
     m_fakeClient.ExternalGenerateRequest( i_methodName.c_str(), i_args );
 
     std::string& request = m_fakeClient.AccessRequest();
@@ -179,9 +202,11 @@ namespace libBitFlood
 
       // parse and dispatch the method
       XmlRpcValue args;
-      std::string methodName = m_fakeServer.ExternalParseRequest( args );
+      std::string methodname = m_fakeServer.ExternalParseRequest( args );
+      
+      printf( "%s <- %s (%s)\n", m_localpeer->m_localid.c_str(), m_id.c_str(), methodname.c_str() );
 
-      m_localpeer->DispatchMethod( methodName, PeerConnectionSPtr( this ), args );
+      m_localpeer->HandleMethod( methodname, PeerConnectionSPtr( this ), args );
     } 
 
     return Error::NO_ERROR_LBF;

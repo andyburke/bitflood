@@ -9,8 +9,6 @@ namespace libBitFlood
   class Flood : public ReferenceCountBase
   {
   public:
-    Error::ErrorCode Initialize( const FloodFile& i_floodfile );
-
     typedef std::map< std::string, U32 > M_StrToU32;
     struct RuntimeFile
     {
@@ -31,15 +29,24 @@ namespace libBitFlood
     typedef std::vector< P_ChunkKey > V_ChunkKey;
     typedef std::vector< RuntimeFile > V_RuntimeFile;
     typedef std::vector< TrackerInfo > V_TrackerInfo;
-    
-    FloodFile            m_floodfile;
+    typedef std::map< std::string, std::string > M_StrToStr;
+    typedef std::map< std::string, M_StrToStr > M_StrToStrToStr;
+
+    Peer*                m_localpeer;
+    FloodFileSPtr        m_floodfile;
     V_TrackerInfo        m_trackerinfos;
     V_RuntimeFile        m_runtimefiles;
     U32                  m_totalbytes;
     V_ChunkKey           m_chunkstodownload;
     S_ChunkKey           m_chunksdownloading;
     V_PeerConnectionSPtr m_peers;
+    time_t               m_lasttrackerupdate;
+    M_StrToStrToStr      m_peerchunkmaps;
 
+    Error::ErrorCode Initialize( PeerSPtr& i_localpeer, FloodFileSPtr& i_floodfile );
+    Error::ErrorCode GetChunks( void );
+    Error::ErrorCode UpdateTrackers( void );
+    Error::ErrorCode LoopOnce( void );
     Error::ErrorCode InqPeer( const std::string& i_peerid, PeerConnectionSPtr& o_peer );
 
   protected:

@@ -14,14 +14,6 @@ namespace libBitFlood
   const char PeerMethodHandler::RegisterWithPeer[] = "RegisterWithPeer";
   const char PeerMethodHandler::AcknowledgePeer[]  = "AcknowledgePeer";
 
-  Error::ErrorCode PeerMethodHandler::QueryMethods( V_String& o_supportedmethods )
-  {
-    o_supportedmethods.push_back( ReceivePeerList );
-    o_supportedmethods.push_back( RegisterWithPeer );
-    o_supportedmethods.push_back( AcknowledgePeer );
-    return Error::NO_ERROR_LBF;
-  }
-
   Error::ErrorCode PeerMethodHandler::HandleMethod( const std::string&  i_method, 
                                               PeerConnectionSPtr& i_receiver,
                                               XmlRpcValue&        i_args )
@@ -45,60 +37,36 @@ namespace libBitFlood
 
   Error::ErrorCode PeerMethodHandler::_HandleReceivePeerList( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
   {
-    const std::string& floodhash = i_args[0];
-    XmlRpcValue& result = i_args[1];
+    XmlRpcValue& result = i_args[0];
     
     U32 index;
     for ( index = 0; index < result.size(); ++index )
     {
       U32 startIndex = 0;
       const std::string& cur_res = result[ index ];
-      std::string peerId   = cur_res.substr( startIndex, 
+      std::string peerid   = cur_res.substr( startIndex, 
                                              cur_res.find( ':', startIndex ) - startIndex );
-      startIndex += peerId.length() + 1;
-      std::string peerHost = cur_res.substr( startIndex, 
+      startIndex += peerid.length() + 1;
+      std::string peerhost = cur_res.substr( startIndex, 
                                              cur_res.find( ':', startIndex ) - startIndex );
-      startIndex += peerHost.length() + 1;
-      U32 peerPort;
+      startIndex += peerhost.length() + 1;
+      U32 peerport;
       std::stringstream peerPort_converter;
       peerPort_converter << cur_res.substr( startIndex, std::string::npos );
-      peerPort_converter >> peerPort;
+      peerPort_converter >> peerport;
       
       // the client doesn't need himself as a peer
-      if( peerId.compare( i_receiver->i_localpeer->m_id ) != 0 )
+      if( peerid.compare( i_receiver->m_flood->m_localpeer->m_localid ) != 0 )
       {
         PeerConnectionSPtr peer;
-        i_receiver->i_localpeer->InqPeer( peerId, peer );
+        i_receiver->m_flood->InqPeer( peerid, peer );
         
         if ( peer.Get() == NULL )
         {
           peer = PeerConnectionSPtr( new PeerConnection() );
-          peer->InitializeCommon( i_receiver->i_localpeer, peerHost, peerPort );
-          peer->InitializeOutgoing( peerId );
-          i_receiver->i_localpeer->m_peers.push_back( peer );
-        }
-        
-        // if this peer isn't registered yet
-        if ( peer->m_registeredFloods.find( floodhash ) == peer->m_registeredFloods.end() )
-        {
-          // mark as registered
-          peer->m_registeredFloods.insert( floodhash );
-          
-          // register w/ the peer
-          {
-            XmlRpcValue args;
-            args[0] = floodhash;
-            args[1] = i_receiver->i_localpeer->m_id;
-            args[2] = (int)i_receiver->i_localpeer->m_setup.m_localPort;
-            peer->SendMessage( RegisterWithPeer, args );
-          }
-
-          // request some chunks
-          {
-            XmlRpcValue args;
-            args[0] = floodhash;
-            peer->SendMessage( ChunkMethodHandler::RequestChunkMaps, args );
-          }
+          peer->InitializeCommon( PeerSPtr( i_receiver->m_localpeer ), peerhost, peerport );
+          peer->InitializeOutgoing( FloodSPtr( i_receiver->m_flood ), peerid );
+          i_receiver->m_flood->m_peers.push_back( peer );
         }
       }          
     }
@@ -108,47 +76,55 @@ namespace libBitFlood
   Error::ErrorCode PeerMethodHandler::_HandleRegisterWithPeer( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
   {
     const std::string& floodhash = i_args[0];
-    const std::string& peerId    = i_args[1];
+    const std::string& peerid    = i_args[1];
     U32 peerlisten               = (int)i_args[2];
 
     // see if the peer is already registered
-    if ( !peerId.empty() )
+    if ( !floodhash.empty() && !peerid.empty() )
     {
-      PeerConnectionSPtr peer;
-      i_receiver->i_localpeer->InqPeer( peerId, peer );
-      if ( peer.Get() != NULL )
-      {
-        // disconnect duplicate peers
-        peer->m_disconnected = true;
-      }
-      else if ( i_receiver->m_registeredFloods.find( floodhash ) != i_receiver->m_registeredFloods.end() )
-      {
-        // strange duplicate registration from a peer for a given flood
-      }
-      else
-      {
-        // cache the peer's ID
-        i_receiver->m_id = peerId;
+      // the receiving connection should not have a flood assigned yet
+      assert( i_receiver->m_flood == NULL );
 
-        // cache the peer's listen port
+      // find the correct flood, add a dummy if none exist
+      FloodSPtr flood;
+      i_receiver->m_localpeer->InqFlood( floodhash, flood );
+      if ( false ) //flood.Get() == NULL )
+      {
+        flood = FloodSPtr( new Flood() );
+        i_receiver->m_localpeer->m_registeredfloods.push_back( flood );
+      }
+
+      // again check that the flood doesn't know about this peer already
+      PeerConnectionSPtr existingpeer;
+      if ( flood.Get() != NULL )
+      {
+        flood->InqPeer( peerid, existingpeer );
+      }
+
+      assert( existingpeer.Get() == NULL );
+
+      // find the pending peer
+      V_PeerConnectionSPtr::iterator peeriter = i_receiver->m_localpeer->m_pendingpeers.begin();
+      V_PeerConnectionSPtr::iterator peerend  = i_receiver->m_localpeer->m_pendingpeers.end();
+      for ( ; peeriter != peerend; ++peeriter )
+      {
+        if ( (*peeriter).Get() == i_receiver.Get() )
+        {
+          break;
+        }
+      }
+
+      // the peer should be in the array of pending peers, and we should be able to remove it
+      assert( peeriter != peerend );
+      i_receiver->m_localpeer->m_pendingpeers.erase( peeriter );
+      
+      // now assign the id and put the peer in the flood
+      if ( flood.Get() != NULL )
+      {
+        i_receiver->m_id         = peerid;
         i_receiver->m_listenport = peerlisten;
-        
-        // mark as registered
-        i_receiver->m_registeredFloods.insert( floodhash );
-
-        // acknowledge the register
-        {
-          XmlRpcValue args;
-          args[0] = floodhash;
-          i_receiver->SendMessage( AcknowledgePeer, args );
-        }
-
-        // request some chunks
-        {
-          XmlRpcValue args;
-          args[0] = floodhash;
-          i_receiver->SendMessage( ChunkMethodHandler::RequestChunkMaps, args );
-        }
+        i_receiver->m_flood      = flood.Get();
+        flood->m_peers.push_back( i_receiver );
       }
     }
 

@@ -14,7 +14,6 @@ namespace libBitFlood
     static const char RegisterWithPeer[];
     static const char AcknowledgePeer[];
     
-    Error::ErrorCode QueryMethods( V_String& o_supportedmethods );
     Error::ErrorCode HandleMethod( const std::string&  i_method, 
                                    PeerConnectionSPtr& i_receiver,
                                    XmlRpcValue&        i_args );

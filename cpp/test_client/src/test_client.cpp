@@ -9,8 +9,8 @@
 #include <signal.h>
 
 #include <Flood.H>
-#include <Client.H>
-#include <ChunkHandler.H>
+#include <Peer.H>
+#include <ChunkMethods.H>
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
 #include <sstream>
@@ -21,7 +21,6 @@ XERCES_CPP_NAMESPACE_USE
 using namespace libBitFlood;
 
 bool quit = false;
-const U32 UPDATE_INTERVAL = 20;
 void ParseFloodFile( const std::string& file, FloodFile& floodfile );
 void HandleSignal( I32 sig );
 
@@ -45,47 +44,33 @@ int main(int argc, char* argv[])
 
   //XmlRpc::setVerbosity(5);
 
-  FloodFile theflood;
-  ParseFloodFile( argv[1], theflood );
+  FloodFileSPtr theflood( new FloodFile() );
+  ParseFloodFile( argv[1], *theflood );
 
-  Client::Setup setup;
-  if ( argc == 3 )
+  std::string host = "";
+  U32 port = 10101;
+  if ( argc > 2 )
   {
-    setup.m_localIP = argv[2];
-  }
-  else
-  {
-    hostent* localHost = gethostbyname("");
-    setup.m_localIP = inet_ntoa (*(struct in_addr *)*localHost->h_addr_list);
+    host = argv[2];
   }
 
-  setup.m_localPort = 10101;
-  if ( argc == 4 )
+  hostent* tmp = gethostbyname( host.c_str() );
+  host = inet_ntoa (*(struct in_addr *)*tmp->h_addr_list);
+
+  if ( argc > 3 )
   {
     std::stringstream convert;
     convert << argv[3];
-    convert >> setup.m_localPort;
+    convert >> port;
   }
 
-  ClientSPtr client( new Client() );
-  client->Initialize( setup );
+  PeerSPtr client( new Peer() );
+  client->Initialize( host, port );
   client->AddFloodFile( theflood );
+  client->AddHandler( MethodHandlerSPtr( new ChunkMethodHandler() ) );
 
-  ChunkMessageHandlerSPtr chunk_handler( new ChunkMessageHandler() );
-  client->AddMessageHandler( (Client::MessageHandlerSPtr&)chunk_handler );
-
-  time_t last_update = 0;
   while( !quit )
   {
-    time_t now;
-    time( &now );
-    if ( now - last_update >= UPDATE_INTERVAL )
-    {
-      client->UpdateTrackers();
-      time( &last_update );
-    }
-
-    chunk_handler->GetChunks( client );
     client->LoopOnce();
     Sleep( 100 );
   }
