@@ -2,7 +2,7 @@ package BitFlood::Logger::Stderr;
 
 use strict;
 
-use base qw(TBE::Logger);
+use base qw(BitFlood::Logger);
 __PACKAGE__->mk_accessors();
 
 sub new {

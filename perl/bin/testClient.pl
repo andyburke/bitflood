@@ -1,6 +1,7 @@
 use strict;
 
 use Getopt::Long;
+use File::Path;
 use Time::HiRes qw(time sleep);
 use BitFlood::Client;
 
@@ -21,8 +22,18 @@ my $c = BitFlood::Client->new(localIp => $localIp);
 
 $SIG{INT} = sub { $c->Disconnect(); exit(0); };
 
-foreach my $floodFile (@ARGV) {
-  $c->AddFloodFile($floodFile);
+foreach my $floodFileDef (@ARGV) {
+  my ($floodFile, $localPath) = split(';', $floodFileDef);
+  if(-e $floodFile) {
+    if(!-d $localPath) {
+      print "Creating directory: $localPath\n";
+      mkpath($localPath);
+    }
+    $c->AddFloodFile($floodFile, $localPath);
+  } else {
+    print "flood: $floodFile does not exist, exiting...\n";
+    exit;
+  }
 }
 
 my $UPDATE_INTERVAL = 20; #seconds

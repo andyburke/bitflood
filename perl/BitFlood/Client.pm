@@ -111,6 +111,8 @@ sub AddFloodFile {
 
   Debug('>>>', 'trace');
 
+  print "filename: $filename\n";
+
   my $flood = BitFlood::Flood->new({filename  => $filename,
                                     localPath => $localPath});
   $self->floods->{$flood->contentHash} = $flood;
