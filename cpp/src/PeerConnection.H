@@ -1,10 +1,12 @@
-#ifndef _LBF_PEER_H_
-#define _LBF_PEER_H_
+#ifndef _LBF_PEER_CONNECTION_H_
+#define _LBF_PEER_CONNECTION_H_
 
-#include <Winsock2.h>
 #include <XmlRpc.h>
 #include <XmlRpcServerConnection.h>
+#include <XmlRpcSocket.h>
+
 #include "Flood.H"
+#include "Socket.H"
 
 using namespace XmlRpc;
 
@@ -12,7 +14,8 @@ namespace libBitFlood
 {
   class Client;
 
-  class PeerConnection
+  typedef ReferenceCountTemplate< class PeerConnection > PeerConnectionSPtr;
+  class PeerConnection : public ReferenceCountBase
   {
   public:
     class FakeClient : public XmlRpcClient
@@ -29,7 +32,7 @@ namespace libBitFlood
     class FakeServer : public XmlRpcServerConnection
     {
     public:
-      FakeServer() : XmlRpcServerConnection( INVALID_SOCKET, NULL ) {}
+      FakeServer() : XmlRpcServerConnection( XmlRpcSocket::socket(), NULL ) {}
       void SetRequest( const std::string& i_request ) { _request = i_request; }
       std::string ExternalParseRequest(XmlRpcValue& i_args) { return parseRequest( i_args); }
     };
@@ -37,13 +40,13 @@ namespace libBitFlood
     struct Reader
     {
       Reader( void ) 
-        : m_socket( INVALID_SOCKET )
+        : m_socket()
         , m_lasttail ( 0 )
         , m_buffersize ( 0 )
       {
       }
 
-      SOCKET      m_socket;
+      SocketSPtr  m_socket;
       std::string m_buffer;
       U32         m_lasttail;
       U32         m_buffersize;
@@ -54,12 +57,12 @@ namespace libBitFlood
     struct Writer
     {
       Writer( void ) 
-        : m_socket( INVALID_SOCKET )
+        : m_socket()
         , m_buffersize ( 0 )
       {
       }
 
-      SOCKET      m_socket;
+      SocketSPtr  m_socket;
       std::string m_buffer;
       U32         m_buffersize;
 
@@ -78,7 +81,7 @@ namespace libBitFlood
                                        U32                i_peerPort );
 
 
-    Error::ErrorCode InitializeIncoming( SOCKET s );
+    Error::ErrorCode InitializeIncoming( const SocketSPtr& i_socket );
     Error::ErrorCode InitializeOutgoing( const std::string& i_peerId );
 
     Error::ErrorCode LoopOnce( void );
@@ -102,7 +105,7 @@ namespace libBitFlood
     // member variables
   public:
     Client*     m_client;
-    SOCKET      m_socket;
+    SocketSPtr  m_socket;
     std::string m_id;
     bool        m_disconnected;
     bool        m_connected;
@@ -130,7 +133,7 @@ namespace libBitFlood
 
   };
 
-  typedef std::vector< PeerConnection* > V_PeerConnectionPtr;
+  typedef std::vector< PeerConnectionSPtr > V_PeerConnectionSPtr;
 };
 
-#endif; // _LBF_PEER_H_
+#endif; // _LBF_PEER_CONNECTION_H_

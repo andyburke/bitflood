@@ -126,6 +126,15 @@
 				RelativePath=".\src\PeerConnection.H">
 			</File>
 			<File
+				RelativePath=".\src\SmartPointer.H">
+			</File>
+			<File
+				RelativePath=".\src\Socket.cpp">
+			</File>
+			<File
+				RelativePath=".\src\Socket.H">
+			</File>
+			<File
 				RelativePath=".\src\stdafx.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">

@@ -9,6 +9,7 @@
 #include <iostream>
 #include <tchar.h>
 #include <Types.H>
+#include <SmartPointer.H>
 #include <Error.H>
 
 // TODO: reference additional headers your program requires here

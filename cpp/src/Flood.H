@@ -44,7 +44,8 @@ namespace libBitFlood
 
   typedef std::vector< class XmlRpcClient* > V_XmlRpcClientPtr;
   
-  class Flood
+  typedef ReferenceCountTemplate< class Flood > FloodSPtr;
+  class Flood : public ReferenceCountBase
   {
   public:
     Error::ErrorCode Initialize( const FloodFile& i_floodfile );
@@ -76,7 +77,7 @@ namespace libBitFlood
     Error::ErrorCode _SetupFilesAndChunks( void );
   };
 
-  typedef std::vector< Flood > V_Flood;
+  typedef std::vector< FloodSPtr > V_FloodSPtr;
 };
 
 #endif; // _LBF_FLOOD_H_

@@ -417,12 +417,12 @@ namespace libBitFlood
           // the client doesn't need himself as a peer
           if( peerId.compare( i_client.m_id ) != 0 )
           {
-            PeerConnection* peer = NULL;
+            PeerConnectionSPtr peer;
             i_client.InqPeer( peerId, peer );
 
-            if ( peer == NULL )
+            if ( peer.Get() == NULL )
             {
-              peer = new PeerConnection();
+              peer = PeerConnectionSPtr( new PeerConnection() );
               peer->InitializeCommon( &i_client, peerHost, peerPort );
               peer->InitializeOutgoing( peerId );
               i_client.m_peers.push_back( peer );
@@ -518,7 +518,7 @@ namespace libBitFlood
         {
           if ( fseek( fileptr, next_offset, SEEK_SET ) == 0 )
           {
-            byte* data = (byte*)malloc( chunk.m_size );
+            U8* data = (U8*)malloc( chunk.m_size );
             if ( fread( data, 1, chunk.m_size, fileptr ) == chunk.m_size )
             {
               std::string test;

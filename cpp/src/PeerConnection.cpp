@@ -49,19 +49,18 @@ namespace libBitFlood
   }
 
 
-  Error::ErrorCode PeerConnection::InitializeIncoming( SOCKET s )
+  Error::ErrorCode PeerConnection::InitializeIncoming( const SocketSPtr& i_socket )
   {
-    bool ok = (s != INVALID_SOCKET);
+    bool ok = ( i_socket.Get() != NULL );
 
     // we have no id
     m_id.clear();
 
     // inherit the socket
-    m_socket = s;
+    m_socket = i_socket;
 
     // make it non blocking
-    U32 flag = 1;
-    ok = ioctlsocket( m_socket, FIONBIO, (u_long*)&flag ) == 0;
+    m_socket->SetNonBlocking();
 
     // mark as connected
     m_connected = true;
@@ -77,7 +76,7 @@ namespace libBitFlood
   Error::ErrorCode PeerConnection::InitializeOutgoing( const std::string& i_peerId )
   {
     // cache the data and attempt a connection
-    m_socket = INVALID_SOCKET;
+    m_socket = SocketSPtr( NULL );
     m_id     = i_peerId;
 
     // 
@@ -126,7 +125,7 @@ namespace libBitFlood
   Error::ErrorCode PeerConnection::SendChunkMaps( const std::string& i_floodhash )
   {
     // get the appropriate flood from the client
-    Flood* theflood = NULL;
+    FloodSPtr theflood;
     m_client->InqFlood( i_floodhash, theflood );
 
     // call SendChunkMap, args are:
@@ -136,7 +135,7 @@ namespace libBitFlood
     args[0] = i_floodhash;
     args[1];
 
-    if ( theflood != NULL )
+    if ( theflood.Get() != NULL )
     {
       U32 argindex = 0;
       U32 fileindex;
@@ -196,9 +195,9 @@ namespace libBitFlood
     // read in the appropriate chunk data and send it across the wire
 
     // get the appropriate flood from the client
-    Flood* theflood = NULL;
+    FloodSPtr theflood;
     m_client->InqFlood( i_floodhash, theflood );
-    if ( theflood == NULL )
+    if ( theflood.Get() == NULL )
     {
     }
     else
@@ -266,65 +265,32 @@ namespace libBitFlood
 
     if ( !m_connected )
     {
-      if ( m_socket == INVALID_SOCKET )
+      if ( m_socket.Get() == NULL )
       {
-        m_socket = ::socket(AF_INET, SOCK_STREAM, 0);
+        SocketSPtr( m_socket );
 
         // make it non-blocking
-        u_long flag = 1;
-        ioctlsocket( m_socket, FIONBIO, &flag);
+        m_socket->SetNonBlocking();
 
-        struct sockaddr_in saddr;
-        memset(&saddr, 0, sizeof(saddr));
-        saddr.sin_family = AF_INET;
-
-        struct hostent *hp = gethostbyname( m_host.c_str() );
-        if (hp != 0) 
-        {
-          saddr.sin_family = hp->h_addrtype;
-          memcpy(&saddr.sin_addr, hp->h_addr, hp->h_length);
-          saddr.sin_port = htons( (U16) m_port);
-
-          //
-          U32 result = ::connect( m_socket, (struct sockaddr*)&saddr, sizeof(saddr));
-          U32 error = WSAGetLastError();
-          int foo = 1;
-        }
+        // attempt a connection
+        m_socket->Connect( m_host, m_port );
       }
 
+      if ( m_socket->CanWrite( 0 ) )
       {
-        fd_set set;
-        FD_ZERO( &set );
-        FD_SET( m_socket, &set );
-        timeval timeout;
-        timeout.tv_sec = timeout.tv_usec = 0;
-        U32 num = ::select( 0, NULL, &set, NULL, &timeout ); 
-        if ( num == 1 )
-        {
-          // mark as connected
-          m_connected = true;
-          m_disconnected = false;
-
-          // setup our reader & writer
-          m_reader.m_socket = m_socket;
-          m_writer.m_socket = m_socket;
-
-          retCode = Error::NO_ERROR_LBF;
-        }
-        else if ( num == SOCKET_ERROR )
-        {
-          retCode = Error::UNKNOWN_ERROR_LBF;
-
-          U32 error = WSAGetLastError();
-          switch ( error )
-          {
-          case WSAEINPROGRESS:
-            break;
-
-          default:
-            break;
-          }
-        }
+        // mark as connected
+        m_connected = true;
+        m_disconnected = false;
+        
+        // setup our reader & writer
+        m_reader.m_socket = m_socket;
+        m_writer.m_socket = m_socket;
+        
+        retCode = Error::NO_ERROR_LBF;
+      }
+      else
+      {
+        retCode = Error::UNKNOWN_ERROR_LBF;
       }
     }
 
@@ -414,23 +380,14 @@ namespace libBitFlood
 
   Error::ErrorCode PeerConnection::Reader::Read( I32& o_bytesRead )
   {
-    // Number of bytes to attempt to read at a time
     const U32 READ_SIZE = 128 * 1024;
-    char readBuf[READ_SIZE];
+    U8 buffer[ READ_SIZE ];
 
-    o_bytesRead = ::recv( m_socket, readBuf, READ_SIZE-1, 0);
-    if ( o_bytesRead > 0) 
+    m_socket->Read( READ_SIZE, buffer, o_bytesRead );
+    if ( o_bytesRead > 0 )
     {
-      readBuf[ o_bytesRead ] = 0;
-      m_buffer.append( readBuf, o_bytesRead );
+      m_buffer.append( (char*)buffer, o_bytesRead );
       m_buffersize += o_bytesRead;
-    } 
-    else if( WSAGetLastError() == WSAEWOULDBLOCK )
-    {
-      o_bytesRead = -1;
-    }
-    else
-    {
     }
 
     return Error::NO_ERROR_LBF;
@@ -438,22 +395,12 @@ namespace libBitFlood
 
   Error::ErrorCode PeerConnection::Writer::Write( I32& o_bytesWritten )
   {
-    if ( m_buffersize > 0 )
+    m_socket->Write( m_buffersize, (const U8*)m_buffer.data(), o_bytesWritten );
+    if ( o_bytesWritten > 0 )
     {
-      o_bytesWritten = ::send( m_socket, m_buffer.data(), m_buffersize, 0 );
-      if ( o_bytesWritten > 0 ) 
-      {
-        m_buffer = m_buffer.substr( o_bytesWritten, m_buffersize );
-        m_buffersize -= o_bytesWritten;
-      } 
-      else if( WSAGetLastError() == WSAEWOULDBLOCK )
-      {
-        o_bytesWritten = -1;
-      }
-      else
-      {
-      }
-    }
+      m_buffer = m_buffer.substr( o_bytesWritten, m_buffersize );
+      m_buffersize -= o_bytesWritten;
+    } 
 
     return Error::NO_ERROR_LBF;
   }
@@ -466,9 +413,9 @@ namespace libBitFlood
     // see if the peer is already registered
     if ( !peerId.empty() )
     {
-      PeerConnection* peer = NULL;
+      PeerConnectionSPtr peer;
       i_receiver.m_client->InqPeer( peerId, peer );
-      if ( peer != NULL )
+      if ( peer.Get() != NULL )
       {
         // disconnect duplicate peers
         peer->m_disconnected = true;
@@ -559,9 +506,9 @@ namespace libBitFlood
     XmlRpcValue::BinaryData& data = i_args[3];
 
     // get the appropriate flood from the client
-    Flood* theflood = NULL;
+    FloodSPtr theflood;
     i_receiver.m_client->InqFlood( floodId, theflood );
-    if ( theflood == NULL )
+    if ( theflood.Get() == NULL )
     {
     }
     else

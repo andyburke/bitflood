@@ -1,13 +1,14 @@
 #ifndef _LBF_CLIENT_H_
 #define _LBF_CLIENT_H_
 
-#include <Winsock2.h>
 #include "Flood.H"
+#include "Socket.H"
 #include "PeerConnection.H"
 
 namespace libBitFlood
 {
-  class Client
+  typedef ReferenceCountTemplate< class Client > ClientSPtr;
+  class Client : public ReferenceCountBase
   {
   public:
     struct Setup
@@ -17,11 +18,11 @@ namespace libBitFlood
     };
 
   public:
-    Setup               m_setup;
-    V_Flood             m_floods;
-    std::string         m_id;
-    V_PeerConnectionPtr m_peers;
-    SOCKET              m_listensocket;
+    Setup                m_setup;
+    V_FloodSPtr          m_floods;
+    std::string          m_id;
+    V_PeerConnectionSPtr m_peers;
+    SocketSPtr           m_listensocket;
 
   public:
     Error::ErrorCode Initialize( const Setup& i_setup );
@@ -33,13 +34,15 @@ namespace libBitFlood
     Error::ErrorCode Disconnect( void );
 
   public:
-    Error::ErrorCode InqFlood( const std::string& i_floodid, Flood*& o_flood );
-    Error::ErrorCode InqPeer( const std::string& i_peerid, PeerConnection*& o_peer );
+    Error::ErrorCode InqFlood( const std::string& i_floodid, FloodSPtr& o_flood );
+    Error::ErrorCode InqPeer( const std::string& i_peerid, PeerConnectionSPtr& o_peer );
 
   protected:
     Error::ErrorCode _OpenListenSocket( void );
     Error::ErrorCode _ProcessPeers( void );
   };
+  
+  typedef std::vector< ClientSPtr > V_ClientSPtr;
 };
 
 #endif; // _LBF_CLIENT_H_

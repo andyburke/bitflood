@@ -8,5 +8,6 @@
 
 #include "Error.H"
 #include "Types.H"
+#include "SmartPointer.H"
 
 #endif _LBF_STDAFX_H_
