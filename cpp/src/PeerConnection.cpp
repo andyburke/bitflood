@@ -381,7 +381,7 @@ namespace libBitFlood
     {
       PeerConnection* peer = NULL;
       i_receiver.m_client->InqPeer( peerId, peer );
-      if ( peer == NULL )
+      if ( peer != NULL )
       {
         // disconnect duplicate peers
         peer->m_disconnected = true;
