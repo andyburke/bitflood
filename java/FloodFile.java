@@ -252,7 +252,7 @@ public class FloodFile
   		
       Element fileNode = document.createElement("File");
       fileNode.setAttribute("name", files[fileIndex].name); // FIXME: have to cleanse the filename to spec (unix)
-      fileNode.setAttribute("Size", Long.toString(files[fileIndex].size));
+      fileNode.setAttribute("size", Long.toString(files[fileIndex].size));
       fileInfo.appendChild(fileNode);
 
       for(int chunkIndex = 0; chunkIndex < files[fileIndex].chunks.length; chunkIndex++)
@@ -336,7 +336,7 @@ public class FloodFile
             Element file = (Element) fileList.item(fileIndex);
             TargetFile targetFile = new TargetFile();
             
-            targetFile.size = Long.parseLong(file.getAttribute("Size"));
+            targetFile.size = Long.parseLong(file.getAttribute("size"));
             targetFile.name = file.getAttribute("name");
             
             NodeList chunkList = file.getElementsByTagName("Chunk");
