@@ -119,7 +119,7 @@ sub InitializeFiles {
   my $self = shift;
 
   foreach my $file (values %{$self->Files}) {
-    $self->totalBytes($self->totalBytes + $file->{size});
+    $self->totalBytes($self->totalBytes + $file->{Size});
     if(!-f $file->{localFilename})   # file doesn't exist, initialize it to 0
     {
       print "Initializing target file: $file->{name}\n";
