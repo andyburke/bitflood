@@ -50,11 +50,8 @@ sub open {
 
   my $fileHandle = IO::File->new($self->filename, 'r');
   defined($fileHandle) or die("Could not open file: " . $self->filename . " ($!)");
-  my $contents = join('', $fileHandle->getlines());
   $self->data(XMLin($contents, ForceArray => [qw(File Tracker Chunk)]));
-  $self->contentHash(sha1_base64($contents));
-  Debug("content hash: ".$self->contentHash, 5);
-  undef $contents;
+
   $fileHandle->close();
 
   # NOTE: this guarantees that our chunks are in order, per target file,
@@ -67,6 +64,23 @@ sub open {
   $self->BuildLocalFilenames();
   $self->InitializeFiles();
   $self->SortNeededChunksByWeight();
+
+  # build the content hash
+  {
+    my $contents = "";
+    foreach my $file ( sort keys %{$self->Files} )
+    {
+      $contents .= $file;
+      foreach my $chunk ( keys %{$self->Files{$file}{Chunk}} )
+      {
+        $contents .= $chunk->{hash};
+      }
+    }
+
+    $self->contentHash(sha1_base64($contents));
+    Debug("content input: ".$contents, 5);
+    Debug("content hash: ".$self->contentHash, 5);
+  }
 
   Debug('<<<', 'trace');
 }
