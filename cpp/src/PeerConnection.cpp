@@ -267,7 +267,7 @@ namespace libBitFlood
     {
       if ( m_socket.Get() == NULL )
       {
-        SocketSPtr( m_socket );
+        Socket::CreateSocket( m_socket );
 
         // make it non-blocking
         m_socket->SetNonBlocking();
