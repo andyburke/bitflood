@@ -42,7 +42,15 @@ sub new {
       my $port = shift;
       
       print "registering: ip: $ip port: $port fh: $filehash\n";
-      push(@{$self->filehashClientList->{$filehash}}, { peer => "http://$ip:$port/RPCSERV", timestamp => time()});
+      my $url = "http://$ip:$port/RPCSERV";
+      my ($peer) = grep { $_->{url} eq $url } @{$self->filehashClientList->{$filehash}};
+      if (!$peer)
+      {
+        print "  -> (new peer)\n";
+        $peer = { url => $url };
+        push(@{$self->filehashClientList->{$filehash}}, $peer);
+      }
+      $peer->{timestamp} = time();
     },
       
   });
@@ -62,7 +70,7 @@ sub new {
 
       if(scalar(@{$self->filehashClientList->{$filehash}}) < $PEER_LIST_LENGTH)
       {
-        @peers = map { $_->{peer} } @{$self->filehashClientList->{$filehash}};
+        @peers = map { $_->{url} } @{$self->filehashClientList->{$filehash}};
       }
       else
       {
