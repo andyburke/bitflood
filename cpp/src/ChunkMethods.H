@@ -1,14 +1,14 @@
-#ifndef _LBF_CHUNK_HANDLER_H_
-#define _LBF_CHUNK_HANDLER_H_
+#ifndef _LBF_CHUNK_METHODS_H_
+#define _LBF_CHUNK_METHODS_H_
 
-#include "Client.H"
+#include "Peer.H"
 
 namespace libBitFlood
 {
-  class ChunkMessageHandler : public Client::MessageHandler
+  class ChunkMethodHandler : public MethodHandler
   {
   public:
-    // define our message names
+    // define our method names
     static const char RequestChunkMaps[];
     static const char SendChunkMaps[];
     static const char RequestChunk[];
@@ -22,11 +22,11 @@ namespace libBitFlood
     M_StrToStrToStrToStr m_chunkMaps;
 
   public:
-    Error::ErrorCode GetChunks( ClientSPtr& i_client );
-    Error::ErrorCode QueryAPI( V_String& o_supportedmessages );
-    Error::ErrorCode HandleMessage( const std::string&        i_message, 
+    Error::ErrorCode GetChunks( PeerSPtr& i_localpeer );
+    Error::ErrorCode QueryMethods( V_String& o_supportedmethods );
+    Error::ErrorCode HandleMethod( const std::string&   i_method, 
                                     PeerConnectionSPtr& i_receiver,
-                                    XmlRpcValue&              i_args );
+                                    XmlRpcValue&        i_args );
   protected:
     // our handlers
     Error::ErrorCode _HandleRequestChunkMaps( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
@@ -36,7 +36,7 @@ namespace libBitFlood
     Error::ErrorCode _HandleNotifyHaveChunk( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
   };
 
-  typedef ReferenceCountTemplate< ChunkMessageHandler > ChunkMessageHandlerSPtr;
+  typedef ReferenceCountTemplate< ChunkMethodHandler > ChunkMethodHandlerSPtr;
 };
 
-#endif; // _LBF_PEER_CONNECTION_H_
+#endif; // _LBF_CHUNK_METHODS_H_

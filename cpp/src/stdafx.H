@@ -10,4 +10,17 @@
 #include "Types.H"
 #include "SmartPointer.H"
 
+// helpful forward declares
+namespace libBitFlood
+{
+  typedef ReferenceCountTemplate< class Flood > FloodSPtr;
+  typedef ReferenceCountTemplate< class PeerConnection > PeerConnectionSPtr;
+  typedef ReferenceCountTemplate< class MethodHandler > MethodHandlerSPtr;
+
+  typedef std::vector< FloodSPtr > V_FloodSPtr;
+  typedef std::vector< PeerConnectionSPtr > V_PeerConnectionSPtr;
+  typedef std::vector< MethodHandlerSPtr > V_MethodHandlerSPtr;
+
+}
+
 #endif _LBF_STDAFX_H_

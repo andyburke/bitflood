@@ -2,7 +2,7 @@
 
 #include "PeerConnection.H"
 #include "Flood.H"
-#include "Client.H"
+#include "Peer.H"
 #include "Encoder.H"
 
 #include <sha.h>
@@ -14,15 +14,15 @@
 
 namespace libBitFlood
 {
-  Error::ErrorCode PeerConnection::InitializeCommon( Client* i_client,
-    const std::string& i_peerHost,
-    U32                i_peerPort )
+  Error::ErrorCode PeerConnection::InitializeCommon( PeerSPtr& i_localpeer,
+                                                     const std::string& i_peerhost,
+                                                     U32                i_peerport )
 
   {
-    // cache relevant data (host, port, client)
-    m_client = i_client;
-    m_host   = i_peerHost;
-    m_port   = i_peerPort;
+    // cache relevant data (host, port, localpeer)
+    m_localpeer = i_localpeer;
+    m_host      = i_peerHost;
+    m_port      = i_peerPort;
 
     return Error::NO_ERROR_LBF;
   }
@@ -81,7 +81,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode PeerConnection::SendMessage( const std::string& i_methodName,
+  Error::ErrorCode PeerConnection::SendMethod( const std::string& i_methodName,
                                                 const XmlRpcValue& i_args )
   {
     m_fakeClient.ExternalGenerateRequest( i_methodName.c_str(), i_args );
@@ -177,11 +177,11 @@ namespace libBitFlood
       m_reader.m_buffersize = m_reader.m_buffersize - ( m_reader.m_lasttail + 1 );
       m_reader.m_lasttail = 0;
 
-      // parse and dispatch the message
+      // parse and dispatch the method
       XmlRpcValue args;
       std::string methodName = m_fakeServer.ExternalParseRequest( args );
 
-      m_client->DispatchMessage( methodName, PeerConnectionSPtr( this ), args );
+      m_localpeer->DispatchMethod( methodName, PeerConnectionSPtr( this ), args );
     } 
 
     return Error::NO_ERROR_LBF;

@@ -1,167 +1,16 @@
 #include "stdafx.H"
 
-#include "Client.H"
+#include "Peer.H"
 #include "Encoder.H"
-#include "Tracker.H"
-#include "ChunkHandler.H"
+#include "TrackerMethods.H"
+#include "ChunkMethods.H"
 
 #include <sstream>
 #include <iostream>
 
 namespace libBitFlood
 {
-  // define our message names
-  const char Client::BasicMessageHandler::ReceivePeerList[]  = "ReceivePeerList";
-  const char Client::BasicMessageHandler::RegisterWithPeer[] = "RegisterWithPeer";
-  const char Client::BasicMessageHandler::AcknowledgePeer[]  = "AcknowledgePeer";
-
-  Error::ErrorCode Client::BasicMessageHandler::QueryAPI( V_String& o_supportedmessages )
-  {
-    o_supportedmessages.push_back( ReceivePeerList );
-    o_supportedmessages.push_back( RegisterWithPeer );
-    o_supportedmessages.push_back( AcknowledgePeer );
-    return Error::NO_ERROR_LBF;
-  }
-
-  Error::ErrorCode Client::BasicMessageHandler::HandleMessage( const std::string&  i_message, 
-							       PeerConnectionSPtr& i_receiver,
-							       XmlRpcValue&        i_args )
-  {
-    Error::ErrorCode ret = Error::UNKNOWN_ERROR_LBF;
-    if( i_message.compare( ReceivePeerList ) == 0 )
-    {
-      ret = _HandleReceivePeerList( i_receiver, i_args );
-    }
-    else if ( i_message.compare( RegisterWithPeer ) == 0 )
-    {
-      ret = _HandleRegisterWithPeer( i_receiver, i_args );
-    }
-    else if ( i_message.compare( AcknowledgePeer ) == 0 )
-    {
-      ret = _HandleAcknowledgePeer( i_receiver, i_args );
-    }
-
-    return ret;
-  }
-
-  Error::ErrorCode Client::BasicMessageHandler::_HandleReceivePeerList( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
-  {
-    const std::string& floodhash = i_args[0];
-    XmlRpcValue& result = i_args[1];
-    
-    U32 index;
-    for ( index = 0; index < result.size(); ++index )
-    {
-      U32 startIndex = 0;
-      const std::string& cur_res = result[ index ];
-      std::string peerId   = cur_res.substr( startIndex, 
-                                             cur_res.find( ':', startIndex ) - startIndex );
-      startIndex += peerId.length() + 1;
-      std::string peerHost = cur_res.substr( startIndex, 
-                                             cur_res.find( ':', startIndex ) - startIndex );
-      startIndex += peerHost.length() + 1;
-      U32 peerPort;
-      std::stringstream peerPort_converter;
-      peerPort_converter << cur_res.substr( startIndex, std::string::npos );
-      peerPort_converter >> peerPort;
-      
-      // the client doesn't need himself as a peer
-      if( peerId.compare( i_receiver->m_client->m_id ) != 0 )
-      {
-        PeerConnectionSPtr peer;
-        i_receiver->m_client->InqPeer( peerId, peer );
-        
-        if ( peer.Get() == NULL )
-        {
-          peer = PeerConnectionSPtr( new PeerConnection() );
-          peer->InitializeCommon( i_receiver->m_client, peerHost, peerPort );
-          peer->InitializeOutgoing( peerId );
-          i_receiver->m_client->m_peers.push_back( peer );
-        }
-        
-        // if this peer isn't registered yet
-        if ( peer->m_registeredFloods.find( floodhash ) == peer->m_registeredFloods.end() )
-        {
-          // mark as registered
-          peer->m_registeredFloods.insert( floodhash );
-          
-          // register w/ the peer
-          {
-            XmlRpcValue args;
-            args[0] = floodhash;
-            args[1] = i_receiver->m_client->m_id;
-            args[2] = (int)i_receiver->m_client->m_setup.m_localPort;
-            peer->SendMessage( RegisterWithPeer, args );
-          }
-
-          // request some chunks
-          {
-            XmlRpcValue args;
-            args[0] = floodhash;
-            peer->SendMessage( ChunkMessageHandler::RequestChunkMaps, args );
-          }
-        }
-      }          
-    }
-    return Error::NO_ERROR_LBF;
-  }
-
-  Error::ErrorCode Client::BasicMessageHandler::_HandleRegisterWithPeer( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
-  {
-    const std::string& floodhash = i_args[0];
-    const std::string& peerId    = i_args[1];
-    U32 peerlisten               = (int)i_args[2];
-
-    // see if the peer is already registered
-    if ( !peerId.empty() )
-    {
-      PeerConnectionSPtr peer;
-      i_receiver->m_client->InqPeer( peerId, peer );
-      if ( peer.Get() != NULL )
-      {
-        // disconnect duplicate peers
-        peer->m_disconnected = true;
-      }
-      else if ( i_receiver->m_registeredFloods.find( floodhash ) != i_receiver->m_registeredFloods.end() )
-      {
-        // strange duplicate registration from a peer for a given flood
-      }
-      else
-      {
-        // cache the peer's ID
-        i_receiver->m_id = peerId;
-
-        // cache the peer's listen port
-        i_receiver->m_listenport = peerlisten;
-        
-        // mark as registered
-        i_receiver->m_registeredFloods.insert( floodhash );
-
-        // acknowledge the register
-        {
-          XmlRpcValue args;
-          args[0] = floodhash;
-          i_receiver->SendMessage( AcknowledgePeer, args );
-        }
-
-        // request some chunks
-        {
-          XmlRpcValue args;
-          args[0] = floodhash;
-          i_receiver->SendMessage( ChunkMessageHandler::RequestChunkMaps, args );
-        }
-      }
-    }
-
-    return Error::NO_ERROR_LBF;
-  }
-
-  Error::ErrorCode Client::BasicMessageHandler::_HandleAcknowledgePeer( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
-  {
-    return Error::NO_ERROR_LBF;
-  }
-
-  Error::ErrorCode Client::Initialize( const Setup& i_setup )
+  Error::ErrorCode Peer::Initialize( const Setup& i_setup )
   {
     // cache the setup
     m_setup = i_setup;
@@ -183,7 +32,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode Client::AddFloodFile( const FloodFile& i_floodfile )
+  Error::ErrorCode Peer::AddFloodFile( const FloodFile& i_floodfile )
   {
     FloodSPtr f( new Flood() );
     f->Initialize( i_floodfile );
@@ -192,7 +41,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode Client::UpdateTrackers( void )
+  Error::ErrorCode Peer::UpdateTrackers( void )
   {
     V_FloodSPtr::iterator flooditer = m_floods.begin();
     V_FloodSPtr::iterator floodend  = m_floods.end();
@@ -230,14 +79,14 @@ namespace libBitFlood
             args[0] = flood->m_floodfile.m_contentHash;
             args[1] = m_id;
             args[2] = (int)m_setup.m_localPort;
-            peer->SendMessage( BasicMessageHandler::RegisterWithPeer, args );
+            peer->SendMessage( PeerMethodHandler::RegisterWithPeer, args );
           }
 
           // request some chunks
           {
             XmlRpcValue args;
             args[0] = flood->m_floodfile.m_contentHash;
-            peer->SendMessage( ChunkMessageHandler::RequestChunkMaps, args );
+            peer->SendMessage( ChunkMethodHandler::RequestChunkMaps, args );
           }
         }
 
@@ -245,7 +94,7 @@ namespace libBitFlood
         {
           XmlRpcValue args;
           args[0] = flood->m_floodfile.m_contentHash;
-          peer->SendMessage( TrackerMessageHandler::RequestPeerList, args );
+          peer->SendMessage( TrackerMethodHandler::RequestPeerList, args );
         }
       }
     }
@@ -253,7 +102,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode Client::LoopOnce( void )
+  Error::ErrorCode Peer::LoopOnce( void )
   {
     _ProcessPeers();
 
@@ -276,7 +125,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
   
-  Error::ErrorCode Client::AddMessageHandler( MessageHandlerSPtr& i_handler )
+  Error::ErrorCode Peer::AddMessageHandler( MessageHandlerSPtr& i_handler )
   {
     V_String messages;
     i_handler->QueryAPI( messages );
@@ -293,7 +142,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode Client::DispatchMessage( const std::string& i_message, 
+  Error::ErrorCode Peer::DispatchMessage( const std::string& i_message, 
                                             PeerConnectionSPtr& i_receiver, 
                                             XmlRpcValue& i_args )
   {
@@ -314,7 +163,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode Client::InqFlood( const std::string& i_floodid, FloodSPtr& o_flood )
+  Error::ErrorCode Peer::InqFlood( const std::string& i_floodid, FloodSPtr& o_flood )
   {
     o_flood = FloodSPtr( NULL );
     if ( !i_floodid.empty() )
@@ -327,27 +176,6 @@ namespace libBitFlood
         if ( (*flooditer)->m_floodfile.m_contentHash.compare( i_floodid ) == 0 )
         {
           o_flood = (*flooditer);
-          break;
-        }
-      }
-    }
-
-    return Error::NO_ERROR_LBF;
-  }
-
-  Error::ErrorCode Client::InqPeer( const std::string& i_peerid, PeerConnectionSPtr& o_peer )
-  {
-    o_peer = PeerConnectionSPtr( NULL );
-    if ( !i_peerid.empty() )
-    {
-      V_PeerConnectionSPtr::iterator peeriter = m_peers.begin();
-      V_PeerConnectionSPtr::iterator peerend  = m_peers.end();
-
-      for ( ; peeriter != peerend; ++peeriter )
-      {
-        if ( (*peeriter)->m_id.compare( i_peerid ) == 0 )
-        {
-          o_peer = (*peeriter);
           break;
         }
       }

@@ -1,20 +1,20 @@
 #include "stdafx.H"
-#include "ChunkHandler.H"
+#include "ChunkMethods.H"
 #include "Encoder.H"
-#include "Client.H"
+#include "Peer.H"
 #include "PeerConnection.H"
 #include "Flood.H"
 
 namespace libBitFlood
 {
-  // define our message names
-  const char ChunkMessageHandler::RequestChunkMaps[] = "RequestChunkMaps";
-  const char ChunkMessageHandler::SendChunkMaps[]    = "SendChunkMaps";
-  const char ChunkMessageHandler::RequestChunk[]     = "RequestChunk";
-  const char ChunkMessageHandler::SendChunk[]        = "SendChunk";
-  const char ChunkMessageHandler::NotifyHaveChunk[]  = "NotifyHaveChunk";
+  // define our method names
+  const char ChunkMethodHandler::RequestChunkMaps[] = "RequestChunkMaps";
+  const char ChunkMethodHandler::SendChunkMaps[]    = "SendChunkMaps";
+  const char ChunkMethodHandler::RequestChunk[]     = "RequestChunk";
+  const char ChunkMethodHandler::SendChunk[]        = "SendChunk";
+  const char ChunkMethodHandler::NotifyHaveChunk[]  = "NotifyHaveChunk";
 
-  Error::ErrorCode ChunkMessageHandler::GetChunks( ClientSPtr& i_client )
+  Error::ErrorCode ChunkMethodHandler::GetChunks( PeerSPtr& i_localpeer )
   {
     bool foundchunk = false;
     PeerConnectionSPtr todownload_from;
@@ -22,8 +22,8 @@ namespace libBitFlood
     Flood::P_ChunkKey* todownload_key = NULL;
 
     // figure out what chunk to get from which peer and ask for it
-    V_FloodSPtr::iterator flooditer = i_client->m_floods.begin();
-    V_FloodSPtr::iterator floodend  = i_client->m_floods.end();
+    V_FloodSPtr::iterator flooditer = i_localpeer->m_floods.begin();
+    V_FloodSPtr::iterator floodend  = i_localpeer->m_floods.end();
 
     for ( ; flooditer != floodend; ++flooditer )
     {
@@ -40,8 +40,8 @@ namespace libBitFlood
           const FloodFile::File& thefile = theflood->m_floodfile.m_files[ thechunkkey.first ];
           const FloodFile::Chunk& thechunk = thefile.m_chunks[ thechunkkey.second ];
 
-          V_PeerConnectionSPtr::iterator peeriter = i_client->m_peers.begin();
-          V_PeerConnectionSPtr::iterator peerend  = i_client->m_peers.end();
+          V_PeerConnectionSPtr::iterator peeriter = i_localpeer->m_peers.begin();
+          V_PeerConnectionSPtr::iterator peerend  = i_localpeer->m_peers.end();
 
           for ( ; peeriter != peerend; ++peeriter )
           {
@@ -78,46 +78,46 @@ namespace libBitFlood
       args[1] = todownload_flood->m_floodfile.m_files[ todownload_key->first ].m_name;
       args[2] = (int)todownload_key->second;
 
-      todownload_from->SendMessage( RequestChunk, args );
+      todownload_from->SendMethod( RequestChunk, args );
       todownload_flood->m_chunksdownloading.insert( *todownload_key );
     }
 
     return Error::NO_ERROR_LBF;
   }
     
-  Error::ErrorCode ChunkMessageHandler::QueryAPI( V_String& o_supportedmessages )
+  Error::ErrorCode ChunkMethodHandler::QueryAPI( V_String& o_supportedmethods )
   {
-    o_supportedmessages.push_back( RequestChunkMaps );
-    o_supportedmessages.push_back( SendChunkMaps );
-    o_supportedmessages.push_back( RequestChunk );
-    o_supportedmessages.push_back( SendChunk );
-    o_supportedmessages.push_back( NotifyHaveChunk );
+    o_supportedmethods.push_back( RequestChunkMaps );
+    o_supportedmethods.push_back( SendChunkMaps );
+    o_supportedmethods.push_back( RequestChunk );
+    o_supportedmethods.push_back( SendChunk );
+    o_supportedmethods.push_back( NotifyHaveChunk );
 
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode ChunkMessageHandler::HandleMessage( const std::string&  i_message, 
+  Error::ErrorCode ChunkMethodHandler::HandleMethod( const std::string&  i_method, 
                                                        PeerConnectionSPtr& i_receiver,
                                                        XmlRpcValue&        i_args )
   {
     Error::ErrorCode ret = Error::UNKNOWN_ERROR_LBF;
-    if( i_message.compare( RequestChunkMaps ) == 0 )
+    if( i_method.compare( RequestChunkMaps ) == 0 )
     {
       ret = _HandleRequestChunkMaps( i_receiver, i_args );
     }
-    else if ( i_message.compare( SendChunkMaps ) == 0 )
+    else if ( i_method.compare( SendChunkMaps ) == 0 )
     {
       ret = _HandleSendChunkMaps( i_receiver, i_args );
     }
-    else if ( i_message.compare( RequestChunk ) == 0 )
+    else if ( i_method.compare( RequestChunk ) == 0 )
     {
       ret = _HandleRequestChunk( i_receiver, i_args );
     }
-    else if ( i_message.compare( SendChunk ) == 0 )
+    else if ( i_method.compare( SendChunk ) == 0 )
     {
       ret = _HandleSendChunk( i_receiver, i_args );
     }
-    else if ( i_message.compare( NotifyHaveChunk ) == 0 )
+    else if ( i_method.compare( NotifyHaveChunk ) == 0 )
     {
       ret = _HandleNotifyHaveChunk( i_receiver, i_args );
     }
@@ -125,7 +125,7 @@ namespace libBitFlood
     return ret;
   }
 
-  Error::ErrorCode ChunkMessageHandler::_HandleRequestChunkMaps( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
+  Error::ErrorCode ChunkMethodHandler::_HandleRequestChunkMaps( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
   {
     const std::string& floodhash = i_args[0];
 
@@ -154,13 +154,13 @@ namespace libBitFlood
       }
     }
 
-    // send the message
-    i_receiver->SendMessage( SendChunkMaps, args );
+    // send the method
+    i_receiver->SendMethod( SendChunkMaps, args );
 
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode ChunkMessageHandler::_HandleSendChunkMaps( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
+  Error::ErrorCode ChunkMethodHandler::_HandleSendChunkMaps( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
   {
     // we'll get an array of 
     const std::string& floodId = i_args[0];
@@ -193,7 +193,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode ChunkMessageHandler::_HandleRequestChunk( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
+  Error::ErrorCode ChunkMethodHandler::_HandleRequestChunk( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
   {
     std::string& floodhash = i_args[0];
     std::string& filename = i_args[1];
@@ -245,7 +245,7 @@ namespace libBitFlood
             {
               args[3] = XmlRpcValue( data, thechunk.m_size );
 
-              i_receiver->SendMessage( SendChunk, args );
+              i_receiver->SendMethod( SendChunk, args );
             }
           }
           free( data );
@@ -262,7 +262,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode ChunkMessageHandler::_HandleSendChunk( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
+  Error::ErrorCode ChunkMethodHandler::_HandleSendChunk( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
   {
     std::string& floodhash = i_args[0];
     std::string& filename = i_args[1];
@@ -344,7 +344,7 @@ namespace libBitFlood
               args[0] = floodhash;
               args[1] = filename;
               args[2] = (int)chunkindex;
-              i_receiver->SendMessage( NotifyHaveChunk, args );
+              i_receiver->SendMethod( NotifyHaveChunk, args );
             }
             
             if ( fileptr != NULL )
@@ -361,7 +361,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
-  Error::ErrorCode ChunkMessageHandler::_HandleNotifyHaveChunk( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
+  Error::ErrorCode ChunkMethodHandler::_HandleNotifyHaveChunk( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args )
   {
     const std::string& floodhash = i_args[0];
     const std::string& filename = i_args[1];

@@ -1,62 +1,41 @@
-#ifndef _LBF_CLIENT_H_
-#define _LBF_CLIENT_H_
+#ifndef _LBF_PEER_H_
+#define _LBF_PEER_H_
 
 #include "Flood.H"
 #include "Socket.H"
 #include "PeerConnection.H"
 
+#include <XmlRpc.h>
+using namespace XmlRpc;
+
 namespace libBitFlood
 {
-  typedef ReferenceCountTemplate< class Client > ClientSPtr;
-  class Client : public ReferenceCountBase
+  class MethodHandler : public ReferenceCountBase
   {
   public:
-    class MessageHandler : public ReferenceCountBase
-    {
-    public:
-      virtual Error::ErrorCode QueryAPI( V_String& o_supportedmessages ) = 0;
-      virtual Error::ErrorCode HandleMessage( const std::string& i_message, 
-					      PeerConnectionSPtr& i_receiver,
-					      XmlRpcValue& i_args ) = 0;
-    };
-    typedef ReferenceCountTemplate< MessageHandler > MessageHandlerSPtr;
+    virtual Error::ErrorCode QueryMethods( V_String& o_supportedmethods ) = 0;
+    virtual Error::ErrorCode HandleMethod( const std::string& i_method, 
+                                           PeerConnectionSPtr& i_receiver,
+                                           XmlRpcValue& i_args ) = 0;
+  };
 
+  typedef std::map< std::string, V_MethodHandlerSPtr > M_StrToV_MethodHandlerSPtr;
 
-    class BasicMessageHandler : public MessageHandler
-    {
-    public:
-      // define our message names
-      static const char ReceivePeerList[];
-      static const char RegisterWithPeer[];
-      static const char AcknowledgePeer[];
-
-      Error::ErrorCode QueryAPI( V_String& o_supportedmessages );
-      Error::ErrorCode HandleMessage( const std::string&  i_message, 
-				      PeerConnectionSPtr& i_receiver,
-				      XmlRpcValue&        i_args );
-
-    protected:
-      Error::ErrorCode _HandleReceivePeerList( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
-      Error::ErrorCode _HandleRegisterWithPeer( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
-      Error::ErrorCode _HandleAcknowledgePeer( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
-    };
-
+  class Peer : public ReferenceCountBase
+  {
     struct Setup
     {
       std::string m_localIP;
       U32         m_localPort;
     };
 
-    typedef std::vector< MessageHandlerSPtr > V_MessageHandlerSPtr;
-    typedef std::map< std::string, V_MessageHandlerSPtr > M_StrToV_MessageHandlerSPtr;
-
   public:
     Setup                       m_setup;
     V_FloodSPtr                 m_floods;
     std::string                 m_id;
-    V_PeerConnectionSPtr        m_peers;
+    V_PeerConnectionSPtr        m_pendingpeers;
     SocketSPtr                  m_listensocket;
-    M_StrToV_MessageHandlerSPtr m_messagehandlers;
+    M_StrToV_MethodHandlerSPtr  m_methodhandlers;
 
   public:
     Error::ErrorCode Initialize( const Setup& i_setup );
@@ -64,21 +43,21 @@ namespace libBitFlood
     Error::ErrorCode UpdateTrackers( void );
     Error::ErrorCode LoopOnce( void );
 
-    Error::ErrorCode AddMessageHandler( MessageHandlerSPtr& i_handler );
-    Error::ErrorCode DispatchMessage( const std::string& i_message, 
-                                      PeerConnectionSPtr& i_receiver, 
-                                      XmlRpcValue& i_args );
+    Error::ErrorCode AddMethodHandler( MethodHandlerSPtr& i_handler );
+    Error::ErrorCode DispatchMethod( const std::string& i_method, 
+                                     PeerConnectionSPtr& i_receiver, 
+                                     XmlRpcValue& i_args );
 
   public:
     Error::ErrorCode InqFlood( const std::string& i_floodid, FloodSPtr& o_flood );
-    Error::ErrorCode InqPeer( const std::string& i_peerid, PeerConnectionSPtr& o_peer );
 
   protected:
     Error::ErrorCode _OpenListenSocket( void );
     Error::ErrorCode _ProcessPeers( void );
   };
   
-  typedef std::vector< ClientSPtr > V_ClientSPtr;
+  typedef ReferenceCountTemplate< class Peer > PeerSPtr;
+  typedef std::vector< PeerSPtr > V_PeerSPtr;
 };
 
-#endif; // _LBF_CLIENT_H_
+#endif; // _LBF_PEER_H_

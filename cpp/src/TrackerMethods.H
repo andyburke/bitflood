@@ -1,22 +1,21 @@
-#ifndef _LBF_TRACKER_H_
-#define _LBF_TRACKER_H_
+#ifndef _LBF_TRACKER_METHODS_H_
+#define _LBF_TRACKER_METHODS_H_
 
-#include "Client.H"
+#include "Peer.H"
 
 namespace libBitFlood
 {
-  class TrackerMessageHandler : public Client::MessageHandler
+  class TrackerMethodHandler : public MethodHandler
   {
   public:
-    // define our message names
+    // define our method names
     static const char RequestPeerList[];
     
   public:
-    static Error::ErrorCode AddTrackerHandlers( ClientSPtr& i_client );
-    Error::ErrorCode QueryAPI( V_String& o_supportedmessages );
-    Error::ErrorCode HandleMessage( const std::string&  i_message, 
-                                    PeerConnectionSPtr& i_receiver,
-                                    XmlRpcValue&        i_args );
+    Error::ErrorCode QueryMethods( V_String& o_supportedmethods );
+    Error::ErrorCode HandleMethod( const std::string&  i_method, 
+                                   PeerConnectionSPtr& i_receiver,
+                                   XmlRpcValue&        i_args );
   protected:
     // our handlers
     Error::ErrorCode _HandleRequestPeerList( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );

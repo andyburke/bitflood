@@ -5,6 +5,7 @@
 #include <XmlRpcServerConnection.h>
 #include <XmlRpcSocket.h>
 
+#include "Peer.H"
 #include "Flood.H"
 #include "Socket.H"
 
@@ -12,9 +13,9 @@ using namespace XmlRpc;
 
 namespace libBitFlood
 {
-  class Client;
+  // forward declares
+  typedef ReferenceCountTemplate< class Peer > PeerSPtr;
 
-  typedef ReferenceCountTemplate< class PeerConnection > PeerConnectionSPtr;
   class PeerConnection : public ReferenceCountBase
   {
   public:
@@ -76,7 +77,7 @@ namespace libBitFlood
     typedef std::map< std::string, M_StrToStr > M_StrToStrToStr;
 
   public:
-    Error::ErrorCode InitializeCommon( Client*            i_client,
+    Error::ErrorCode InitializeCommon( PeerSPtr&          i_localpeer,
                                        const std::string& i_peerHost,
                                        U32                i_peerPort );
 
@@ -91,7 +92,7 @@ namespace libBitFlood
 
     // member variables
   public:
-    Client*     m_client;
+    PeerSPtr    m_localpeer;
     SocketSPtr  m_socket;
     std::string m_id;
     bool        m_disconnected;
@@ -99,11 +100,11 @@ namespace libBitFlood
     std::string m_host;
     U32         m_port;
     U32         m_listenport;
-    FakeClient            m_fakeClient;
-    FakeServer            m_fakeServer;
-    Reader                m_reader;
-    Writer                m_writer;
-    S_String              m_registeredFloods;
+    FakeClient  m_fakeClient;
+    FakeServer  m_fakeServer;
+    Reader      m_reader;
+    Writer      m_writer;
+    S_String    m_registeredfloods;
 
   protected:
     Error::ErrorCode _Connect( void );
@@ -112,6 +113,7 @@ namespace libBitFlood
     Error::ErrorCode _ProcessReadBuffer( void );
   };
 
+  typedef ReferenceCountTemplate< class PeerConnection > PeerConnectionSPtr;
   typedef std::vector< PeerConnectionSPtr > V_PeerConnectionSPtr;
 };
 
