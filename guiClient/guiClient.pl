@@ -30,7 +30,7 @@ use BitFlood::Client;
 my ($drive, @directories) = File::Spec->splitpath($0);
 pop(@directories);
 
-my $mainWindowDef = File::Spec->catfile($drive, @directories, "guiClient.gld");
+my $mainWindowDef = File::Spec->catfile($drive, @directories, 'guiClient.gld');
 
 my $objDesign = Win32::GUI::Loft::Design->newLoad($mainWindowDef) or
   die("Could not open window file ($mainWindowDef)");
@@ -47,8 +47,12 @@ foreach my $filename (@ARGV) {
 }
 
 my $lastUpdateTime = 0;
+my $lastGUIUpdateTime = 0;
 while(1) {
-  UpdateDisplay();
+  if(time() - $lastGUIUpdateTime >= 1) {
+    UpdateDisplay();
+    $lastGUIUpdateTime = time();
+  }
 
   Win32::GUI::DoEvents();
   
@@ -59,7 +63,7 @@ while(1) {
   }
   $client->GetChunks();
   $client->LoopOnce();
-  sleep(1);
+  sleep(.1);
 }
 
 sub mainWindow_Resize {
