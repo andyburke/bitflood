@@ -7,6 +7,7 @@ use base qw(Class::Accessor);
 use RPC::XML;
 use RPC::XML::Parser;
 use IO::Socket;
+use IO::Select;
 use Errno qw(:POSIX);
 use Fcntl qw(:flock);
 use Bit::Vector;
@@ -25,7 +26,6 @@ use BitFlood::Net::BufferedWriter;
 
 
 use constant CONNECTION_TIMEOUT => 10; # seconds
-use constant FIONBIO            => 0x8004667e; # mswin32 non-blocking socket ioctl
 
 
 __PACKAGE__->mk_accessors(qw(
@@ -56,37 +56,27 @@ sub new {
   Debug("Creating new Peer...", 5);
   my $self = $class->SUPER::new(@_);
 
+  $self->client or die("Client object not specified");
+
   $self->readBuffer('');
   $self->writeBuffer('');
 
   $self->floods({});
   $self->chunkMaps({});
   $self->registered({});
-
-  $self->client or die("Client object not specified");
+  $self->targetFilehandles({});
 
   $self->port(10101) if(!defined($self->port));
-  Debug("Setting port to: " . $self->port, 7);
-  if ($self->socket) {
-    if($^O eq 'MSWin32')
-    {
-      if (!$self->socket->ioctl(FIONBIO, pack("L", 1))) {
-        Debug("Error setting nonblocking using ioctl: " . ($!));
-        die("Error setting non-blocking using ioctl! ($!)");
-      }
-    }
-    else
-    {
-      $self->socket->blocking(0)
-	  or die ("This system does not support O_NONBLOCK!");
-    }
 
-    Debug("giving ref to: " . \$self->{readBuffer}, 50);
+  if ($self->socket) {
+    Debug("connected from: " . $self->id . "(" . $self->host . ":" . $self->port . ")");
+
+    $self->socket->blocking(0)
+      or die ("Non-blocking sockets not supported");
+
     $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
     $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
   }
-
-  $self->targetFilehandles({});
 
   return $self;
 }
@@ -113,91 +103,70 @@ sub SendMessage {
 sub Connect {
   my $self = shift;
 
+  return 1 if $self->connectCompleted;
+
   if (!$self->socket) {
 
-    Debug("begin connect: " . $self->id . "(" . $self->host . ":" . $self->port . ")");
+    Debug("connecting out: " . $self->id . "(" . $self->host . ":" . $self->port . ")");
 
-    $self->socket(IO::Socket::INET->new(Proto => 'tcp')); # need to put *something* in args here...
+    $self->socket(IO::Socket::INET->new(
+					Proto    => 'tcp',
+					PeerAddr => $self->host,
+					PeerPort => $self->port,
+					Blocking => 0,
+				       ));
     if (!$self->socket) {
       Debug("socket creation failed");
       $self->disconnected(1);
       return 0;
     }
+
     $self->connectStartTime(time());
 
-    # set non-blocking
-    $self->socket->blocking(0);
-    if ($^O eq 'MSWin32') {
-      if (!$self->socket->ioctl(FIONBIO, pack("L", 1))) {
-        Debug("error setting nonblocking: " . ($!));
-        die;
-      }
-    }
-
-    if (!$self->socket) {
-      Debug("socket creation failed");
-      $self->disconnected(1);
-      return 0;
-    }
   }
 
-  if ($self->socket->connected) {
+  my $select = IO::Select->new($self->socket);
+  my $connected = $select->can_write(0);
+  Debug("checking for completed connection (" . $self->host . "): $connected [error: $! (" . ($!+0) . ")]", 25);
 
-    if (!$self->connectCompleted) {
-      $self->connectCompleted(1);
+    #if ($!{ENOTCONN}) {
+    #  # force "error slippage" to get the real error (credit DJB)
+    #  $self->socket->sysread(undef, 1);
+    #}
 
-      Debug("\$!: $! (" . ($!+0) . ")");
-      Debug("socket connected");
+  if ($connected) {
 
-      # FIXME figure out why this is needed here as well as above
-      # set non-blocking
-      $self->socket->blocking(0);
-      if ($^O eq 'MSWin32') {
-        if (!$self->socket->ioctl(FIONBIO, pack("L", 1))) {
-          Debug("error setting nonblocking: " . ($!));
-          die;
-        }
-      }
+    $self->connectCompleted(1);
 
-      $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
-      $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
-    }
+    Debug("socket connected");
 
-    return 1;
-  }
+    $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
+    $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
+    
+  } else {
 
-  my $socket_args = {
-                     PeerAddr => $self->host,
-                     PeerPort => $self->port,
-                     Proto    => 'tcp',
-                    };
-  $socket_args->{Blocking} = 0 if ($^O ne 'MSWin32');
-  $self->socket->configure($socket_args);
-
-  if (!$self->socket->connected) {
-    if ($!{ENOTCONN}) {
-      # force "error slippage" to get the real error (credit DJB)
-      $self->socket->sysread(undef, 1);
-    }
-
-    if ($!{EINPROGRESS} or $!{EAGAIN}) {
+    if ($!{EINPROGRESS} or $!{EWOULDBLOCK}) {
       # non-blocking connection is still trying to connect
       if (time > $self->connectStartTime + CONNECTION_TIMEOUT) {
-        Debug("connection timed out: " . $self->id);
-        $self->disconnected(1);
+	Debug("connection timed out: " . $self->id);
+	$self->disconnected(1);
       }
     } else {
       # some other error, signaling the connect actually failed
       Debug("failed to connect: $!");
       $self->disconnected(1);
     }
+
   }
+
   # note: if connected is true here, just return 0 anyway.  we'll do
   # the finalization stuff the next time around.  this is required to
   # support some systems (linux?) with weird configure()/connected()
   # dynamics.
 
   return 0;
+
+
 }
 
 sub GetChunk {
