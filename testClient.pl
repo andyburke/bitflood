@@ -1,6 +1,6 @@
 use strict;
 
-use Time::HiRes qw(time);
+use Time::HiRes qw(time sleep);
 use BitFlood::Client;
 
 my $c = BitFlood::Client->new();
@@ -23,5 +23,6 @@ while(1) {
   }
   $c->GetChunks;
   $c->LoopOnce();
+  sleep(.1);
 #  print "loop time: ", time() - $stime, "\n";
 }
