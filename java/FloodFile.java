@@ -34,6 +34,7 @@ public class FloodFile
     public String hash;
     public int    index;
     public int    size;
+    public long   offset;
     public int    weight;
 
     public int compareTo( Object anotherChunk ) throws ClassCastException
@@ -344,7 +345,7 @@ public class FloodFile
                 tempChunk.weight = Integer.parseInt( chunk.getAttribute( "weight" ) );
                 tempChunk.size = Integer.parseInt( chunk.getAttribute( "size" ) );
                 tempChunk.hash = chunk.getAttribute( "hash" );
-
+                
                 targetFile.chunks.set( tempChunk.index, tempChunk );
               }
             }

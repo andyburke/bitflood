@@ -3,11 +3,10 @@
  *
  */
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.util.*;
-import java.io.BufferedInputStream;
 
 /**
  * @author burke
@@ -23,15 +22,13 @@ public class Flood
   // runtime flood data
   public class RuntimeTargetFile
   {
-    String           nameOnDisk    = null;
-    int[]            chunkOffsets  = null;
-    char[]           chunkMap      = null;
-  }
-
-  public class ChunkKey
-  {
-    int fileIndex  = -1;
-    int chunkIndex = -1;
+    String               nameOnDisk    = null;
+    File                 fileObject    = null;
+    RandomAccessFile     fileHandle    = null;
+    FileChannel          fileChannel   = null;
+    FloodFile.TargetFile targetFile    = null;
+    long[]               chunkOffsets  = null;
+    char[]               chunkMap      = null;
   }
 
   public int                 totalBytes        = 0;
@@ -39,7 +36,7 @@ public class Flood
   public int                 bytesMissing      = 0;
   public int                 bytesDownloading  = 0;
 
-  public Hashtable           runtimeTargetFiles = null;
+  public Hashtable           runtimeTargetFiles = new Hashtable();
   public Vector              chunksToDownload  = new Vector();
   public HashSet             chunksDownloading = new HashSet();
 
@@ -142,29 +139,33 @@ public class Flood
       for ( int fileIndex = 0; targetFileIter.hasNext(); ++fileIndex )
       {
         FloodFile.TargetFile targetFile = (FloodFile.TargetFile) targetFileIter.next();
+
         RuntimeTargetFile runtimeTargetFile = new RuntimeTargetFile();
         runtimeTargetFile.nameOnDisk = targetFile.name;  // having the rtf have a name lets us rename the target 
+        runtimeTargetFile.targetFile = targetFile;
+        try
+        {
+          // Get a file handle and channel for the file on disk
+          runtimeTargetFile.fileObject = new File(runtimeTargetFile.nameOnDisk);
+          runtimeTargetFile.fileHandle = new RandomAccessFile(runtimeTargetFile.fileObject, "rw");
+          runtimeTargetFile.fileChannel = runtimeTargetFile.fileHandle.getChannel();
+        }
+        catch (Exception e)
+        {
+          e.printStackTrace();
+        }
+
         runtimeTargetFiles.put( targetFile.name, runtimeTargetFile );
 
         // track some stats
         totalBytes += targetFile.size;
 
         int numChunks = targetFile.chunks.size();
-        runtimeTargetFile.chunkOffsets = new int[numChunks];
+        runtimeTargetFile.chunkOffsets = new long[numChunks];
         runtimeTargetFile.chunkMap = new char[numChunks];
 
-        InputStream inputFileStream = null;
-        try
-        {
-          inputFileStream = new BufferedInputStream( new FileInputStream( runtimeTargetFile.nameOnDisk ) );
-          inputFileStream.mark( inputFileStream.available() );
-        }
-        catch ( Exception e )
-        {
-        }
-
         Iterator chunkiter = targetFile.chunks.iterator();
-        for ( int nextOffset = 0; chunkiter.hasNext(); )
+        for ( long nextOffset = 0; chunkiter.hasNext(); )
         {
           FloodFile.Chunk chunk = (FloodFile.Chunk) chunkiter.next();
 
@@ -175,48 +176,44 @@ public class Flood
           runtimeTargetFile.chunkMap[chunk.index] = '0';
 
           // see if the existing chunk is valid
-          if ( inputFileStream != null )
-          {
-            byte[] chunkData = new byte[chunk.size];
+          byte[] chunkData = new byte[chunk.size];
 
-            try
-            {
-              inputFileStream.skip( nextOffset );
-              if ( inputFileStream.read( chunkData ) == chunk.size )
-              {
-                String existingHash = Encoder.SHA1Base64Encode( chunkData, chunk.size );
-                if ( existingHash.compareTo( chunk.hash ) == 0 )
-                {
-                  runtimeTargetFile.chunkMap[chunk.index] = '1';
-
-                  // how many bytes did we start with
-                  bytesAtStartup += chunk.size;
-                }
-              }
-              // FIXME throw some error
-              else
-              {
-              }
-
-              inputFileStream.reset();
-            }
-            catch ( IOException e )
-            {
-            }
-          }
-
-          nextOffset += chunk.size;
-        }
-
-        if ( inputFileStream != null )
-        {
           try
           {
-            inputFileStream.close();
+            FileLock readLock = null;
+            try
+            {
+              readLock = runtimeTargetFile.fileChannel.tryLock();
+            }
+            catch( Exception e)
+            {
+              e.printStackTrace();
+            }
+            
+            runtimeTargetFile.fileHandle.seek( nextOffset );
+            if ( runtimeTargetFile.fileHandle.read(chunkData) == chunk.size )
+            {
+              String existingHash = Encoder.SHA1Base64Encode( chunkData, chunk.size );
+              if ( existingHash.compareTo( chunk.hash ) == 0 )
+              {
+                runtimeTargetFile.chunkMap[chunk.index] = '1';
+
+                // how many bytes did we start with
+                bytesAtStartup += chunk.size;
+              }
+            }
+            // FIXME throw some error
+            else
+            {
+            }
+            readLock.release();
           }
           catch ( IOException e )
           {
+            e.printStackTrace();
           }
+
+          nextOffset += chunk.size;
         }
       }
     }
