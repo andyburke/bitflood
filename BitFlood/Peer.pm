@@ -7,7 +7,7 @@ use base qw(Class::Accessor);
 use RPC::XML;
 use RPC::XML::Parser;
 use IO::Socket;
-use POSIX qw(:errno_h);
+use Errno qw(:POSIX);
 use Bit::Vector;
 use Digest::SHA1 qw(sha1_base64);
 use Time::HiRes qw(time);
@@ -21,6 +21,10 @@ use BitFlood::Logger::Multi;
 use BitFlood::Logger::File;
 use BitFlood::Net::BufferedReader;
 use BitFlood::Net::BufferedWriter;
+
+
+use constant CONNECTION_TIMEOUT => 10; # seconds
+use constant FIONBIO            => 0x8004667e; # mswin32 non-blocking socket ioctl
 
 
 __PACKAGE__->mk_accessors(qw(
@@ -62,7 +66,7 @@ sub new {
   if ($self->socket) {
     $self->socket->blocking(0)
       or die ("This system does not support O_NONBLOCK!");
-    
+
     Debug("giving ref to: " . \$self->{readBuffer}, 50);
     $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
     $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
@@ -78,7 +82,7 @@ sub SendMessage {
   my @methodArgs = @_;
 
   Debug(">>>", 10);
-  
+
   unshift(@methodArgs, $flood->contentHash);
   Debug("method $methodName (" . scalar(@methodArgs) . " args) -> " . $self->host, 5);
   my $request = RPC::XML::request->new($methodName, @methodArgs);
@@ -93,27 +97,77 @@ sub SendMessage {
 sub Connect {
   my $self = shift;
 
-  return 1 if $self->socket;
+  if (!$self->socket) {
 
-  Debug($self->id . "(" . $self->host . ":" . $self->port . ")");
-  $self->socket(IO::Socket::INET->new(
-				      PeerHost => $self->host,
-				      PeerPort => $self->port,
-				      Proto => 'tcp',
-				      Timeout => 1, # FIXME long enough?
-				      Blocking => 0,
-				     ));
-  if(!$self->socket) {
-    Debug("failure: ($!) " . $self->id . " (" . $self->host . ":" . $self->port . ")");
-    $self->disconnected(1);
-    return undef;
+    Debug("begin connect: " . $self->id . "(" . $self->host . ":" . $self->port . ")");
+
+    $self->socket(IO::Socket::INET->new(Proto => 'tcp')); # need to put *something* in args here...
+    if (!$self->socket) {
+      Debug("socket creation failed");
+      $self->disconnected(1);
+      return 0;
+    }
+
+    # set non-blocking
+    $self->socket->blocking(0);
+    if ($^O eq 'MSWin32') {
+      if (!$self->socket->ioctl(FIONBIO, pack("L", 1))) {
+        Debug("error setting nonblocking: " . ($!));
+        die;
+      }
+    }
+
+    if (!$self->socket) {
+      Debug("socket creation failed");
+      $self->disconnected(1);
+      return 0;
+    }
   }
 
-  $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
-  $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
-  
-  Debug("connected to peer", 10);
-  return 1;
+  return 1 if ($self->socket->connected);
+
+  if (!$self->socket->configure({
+                                 PeerAddr => $self->host,
+                                 PeerPort => $self->port,
+                                 Proto    => 'tcp',
+                                }))
+    {
+
+    if ($!{EINPROGRESS}) {
+      # non-blocking connection is still trying to connect
+      if (time > $self->connectionTime + CONNECTION_TIMEOUT) {
+        Debug("connection timed out");
+        $self->disconnected(1);
+      }
+      return 0;
+    } else {
+      # some other error, signaling the connect actually failed
+      Debug("failed to connect: $!");
+      $self->disconnected(1);
+      return 0;
+    }
+
+  } else {
+
+    Debug("socket connected successfully");
+
+    # FIXME figure out why this is needed here as well as above
+    # set non-blocking
+    $self->socket->blocking(0);
+    if ($^O eq 'MSWin32') {
+      if (!$self->socket->ioctl(FIONBIO, pack("L", 1))) {
+        Debug("error setting nonblocking: " . ($!));
+        die;
+      }
+    }
+
+    $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
+    $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
+
+    return 1;
+
+  }
+
 }
 
 sub GetChunk {
@@ -167,7 +221,7 @@ sub HandleRegister {
   $self->SendMessage('RequestChunkMaps', $flood);
   $self->registered->{$flood->contentHash} = 1;
 }
-    
+
 
 sub HandleRequestChunkMaps {
   my $self = shift;
@@ -390,7 +444,8 @@ sub LoopOnce {
 
   Debug(">>>", 10);
 
-  $self->Connect;
+  $self->Connect or return;
+
   $self->ReadOnce;
   $self->WriteOnce;
 
@@ -420,10 +475,10 @@ sub ReadOnce {
   my $result = $self->bufferedReader->Read();
   Debug("readBuffer address after read: " . \$self->readBuffer, 50);
 
-  if ($result == EAGAIN) {
+  if ($result == -1) {
     Debug("Would block...", 50);
     return;
-  } elsif(!$result) {
+  } elsif($result == 0) {
     Debug("read error, disconnecting peer: " . $self->id);
     $self->disconnected(1);
     return;
@@ -456,10 +511,10 @@ sub WriteOnce {
 
   my $result = $self->bufferedWriter->Write();
 
-  if ($result == EAGAIN) {
+  if ($result == -1) {
     Debug("Would block...", 50);
     return;
-  } elsif(!$result) {
+  } elsif($result == 0) {
     Debug("write error, disconnecting peer: " . $self->id);
     $self->disconnected(1);
     return;
