@@ -22,11 +22,12 @@ namespace libBitFlood
 
   {
     // cache relevant data (host, port, localpeer)
-    m_localpeer = i_localpeer.Get();
-    m_host      = i_peerhost;
-    m_port      = i_peerport;
-    m_flood     = NULL;
-    m_fakeServer = new FakeServer();
+    m_chunksdownloading = 0;
+    m_localpeer         = i_localpeer.Get();
+    m_host              = i_peerhost;
+    m_port              = i_peerport;
+    m_flood             = NULL;
+    m_fakeServer        = new FakeServer();
 
     return Error::NO_ERROR_LBF;
   }

@@ -181,24 +181,34 @@ namespace libBitFlood
             Flood::P_ChunkKey chunkkey( (*rtfiter).first, chunkindex );
             (*rtfiter).second.m_chunkmap[ chunkindex ] = '1';
             
-            Flood::V_ChunkKey::iterator chunkiter = i_receiver->m_flood->m_chunkstodownload.begin();
-            Flood::V_ChunkKey::iterator chunkend  = i_receiver->m_flood->m_chunkstodownload.end();
-            
-            for ( ; chunkiter != chunkend; ++chunkiter )
+
+            // remove this as a chunk to download
+            i_receiver->m_flood->m_chunkstodownload.erase( chunkkey );
+
+            // 
+            Flood::M_P_ChunkKeyToChunkDownload::iterator removed = i_receiver->m_flood->m_chunksdownloading.find( chunkkey );
+            if ( removed == i_receiver->m_flood->m_chunksdownloading.end() )
             {
-              if ( (*chunkiter) == chunkkey )
-              {
-                i_receiver->m_flood->m_chunkstodownload.erase( chunkiter );
-                break;
-              }
             }
-            
+            else if ( (*removed).second.m_from.Get() != i_receiver.Get() )
+            {
+            }
+            else
+            {
+              (*removed).second.m_from->m_chunksdownloading--;
+            }
             i_receiver->m_flood->m_chunksdownloading.erase( chunkkey );
-            
+              
             XmlRpcValue args;
             args[0] = filename;
             args[1] = (int)chunkindex;
-            i_receiver->SendMethod( NotifyHaveChunk, args );
+
+            V_PeerConnectionSPtr::iterator iter = i_receiver->m_flood->m_peers.begin();
+            V_PeerConnectionSPtr::iterator end  = i_receiver->m_flood->m_peers.end();
+            for ( ; iter != end; ++iter )
+            {
+              (*iter)->SendMethod( NotifyHaveChunk, args );
+            }
           }
             
           if ( fileptr != NULL )

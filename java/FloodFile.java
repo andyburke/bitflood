@@ -165,11 +165,11 @@ public class FloodFile
     System.out.println( "# Trackers : " + trackers.size() );
 
     System.out.println( "Files:" );
-    TargetFile[] sortedTargetFiles = (TargetFile[]) targetFiles.values().toArray();
+    Object[] sortedTargetFiles = targetFiles.values().toArray();
     Arrays.sort( sortedTargetFiles );
     for ( int targetFileIndex = 0; targetFileIndex < sortedTargetFiles.length; targetFileIndex++ )
     {
-      TargetFile file = sortedTargetFiles[targetFileIndex];
+      TargetFile file = (TargetFile)sortedTargetFiles[targetFileIndex];
       if ( file == null )
       {
         System.out.println( "Error: null targetfile?" );
@@ -229,11 +229,11 @@ public class FloodFile
       root.appendChild( item );
     }
 
-    TargetFile[] sortedTargetFiles = (TargetFile[]) targetFiles.values().toArray();
+    Object[] sortedTargetFiles = targetFiles.values().toArray();
     Arrays.sort( sortedTargetFiles );
     for ( int targetFileIndex = 0; targetFileIndex < sortedTargetFiles.length; targetFileIndex++ )
     {
-      TargetFile file = sortedTargetFiles[targetFileIndex];
+      TargetFile file = (TargetFile)sortedTargetFiles[targetFileIndex];
 
       Element fileNode = document.createElement( "File" );
       fileNode.setAttribute( "name", file.name ); // FIXME: have to cleanse the filename to spec (unix)
@@ -564,7 +564,7 @@ public class FloodFile
       // calculate the content hash
       String content = "";
 
-      TargetFile[] sortedTargetFiles = (TargetFile[]) targetFiles.values().toArray();
+      Object[] sortedTargetFiles = targetFiles.values().toArray();
       Arrays.sort( sortedTargetFiles );
 
       Iterator fileiter = Arrays.asList( sortedTargetFiles ).iterator();

@@ -137,7 +137,7 @@ public class Flood
   {
     if ( floodFile.targetFiles.size() > 0 )
     {
-
+      runtimeTargetFiles = new Hashtable( floodFile.targetFiles.size() );
       Iterator targetFileIter = Arrays.asList(floodFile.targetFiles.values().toArray()).iterator();
       for ( int fileIndex = 0; targetFileIter.hasNext(); ++fileIndex )
       {

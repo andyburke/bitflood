@@ -17,7 +17,9 @@
 namespace libBitFlood
 {
   // 
-  const U32 MAX_CHUNKS_PER_PEER = 1;
+  const U32 MAX_CHUNKS_PER_PEER             = 1;
+  const U32 SECONDS_CHUNK_REQUEST_TIMEOUT   = 120;
+  const U32 SECONDS_TRACKER_UPDATE_INTERVAL = 20;
 
   //
   Error::ErrorCode Flood::Initialize( PeerSPtr& i_localpeer, FloodFileSPtr& i_floodfile )
@@ -34,13 +36,11 @@ namespace libBitFlood
 
   Error::ErrorCode Flood::LoopOnce( void )
   {
-    const U32 UPDATE_INTERVAL = 20;
-
     GetChunks();
 
     time_t now;
     time( &now );
-    if ( now - m_lasttrackerupdate >= UPDATE_INTERVAL )
+    if ( now - m_lasttrackerupdate >= SECONDS_TRACKER_UPDATE_INTERVAL )
     {
       UpdateTrackers();
       time( &m_lasttrackerupdate );
@@ -89,8 +89,8 @@ namespace libBitFlood
     Flood::P_ChunkKey* todownload_key = NULL;
 
     // figure out what chunk to get from which peer and ask for it
-    V_ChunkKey::iterator chunkiter = m_chunkstodownload.begin();
-    V_ChunkKey::iterator chunkend  = m_chunkstodownload.end();
+    S_ChunkKey::iterator chunkiter = m_chunkstodownload.begin();
+    S_ChunkKey::iterator chunkend  = m_chunkstodownload.end();
 
     for ( ; chunkiter != chunkend && !foundchunk; ++chunkiter )
     {
@@ -108,12 +108,16 @@ namespace libBitFlood
           PeerConnectionSPtr& thepeer = (*peeriter);
           if ( thepeer->m_chunksdownloading < MAX_CHUNKS_PER_PEER )
           {
-            const std::string& chunkmap = thepeer->m_chunkmaps[ thechunkkey.first ];
-            if ( chunkmap[ thechunkkey.second ] == '1' )
+            PeerConnection::M_StrToStr::iterator chunkmapiter = thepeer->m_chunkmaps.find( thechunkkey.first );
+            if ( chunkmapiter != thepeer->m_chunkmaps.end() )
             {
-              foundchunk = true;
-              todownload_from  = thepeer;
-              todownload_key   = &thechunkkey;
+              const std::string& chunkmap = (*chunkmapiter).second;
+              if ( chunkmap[ thechunkkey.second ] == '1' )
+              {
+                foundchunk = true;
+                todownload_from  = thepeer;
+                todownload_key   = &thechunkkey;
+              }
             }
           }
         }
@@ -136,7 +140,26 @@ namespace libBitFlood
       m_chunksdownloading[ *todownload_key ] = download;
     }
 
-    M_P_ChunkKeyToChunkDownload
+    // prune old requests
+    time_t now;
+    time( &now );
+
+    M_P_ChunkKeyToChunkDownload::iterator downloadsiter = m_chunksdownloading.begin();
+    M_P_ChunkKeyToChunkDownload::iterator downloadsend  = m_chunksdownloading.end();
+    for ( ; downloadsiter != downloadsend; )
+    {
+      ChunkDownload& download = (*downloadsiter).second;
+      if ( now - download.m_start > SECONDS_CHUNK_REQUEST_TIMEOUT )
+      {
+        download.m_from->m_chunksdownloading--;
+        downloadsiter = m_chunksdownloading.erase( downloadsiter );
+      }
+      else
+      {
+        ++downloadsiter;
+      }
+    }
+
 
     return Error::NO_ERROR_LBF;
   }
@@ -257,7 +280,7 @@ namespace libBitFlood
         // do we need to download this chunk?  remember that somewhere
         if ( rtf.m_chunkmap[ chunk.m_index ] == '0' )
         {
-          m_chunkstodownload.push_back( P_ChunkKey( file->m_name, chunk.m_index ) );
+          m_chunkstodownload.insert( P_ChunkKey( file->m_name, chunk.m_index ) );
         }
       }
 
