@@ -44,6 +44,7 @@ sub new {
   my $class = shift;
   my %args = @_;
   
+  Debug('>>>', 'trace');
   Debug("Creating Client object", 30);
 
   my $self = $class->SUPER::new(\%args);
@@ -70,11 +71,14 @@ sub new {
   
   
   Debug("Finished creating client object");
+  Debug('<<<', 'trace');
   return $self;
 }
 
 sub OpenListenSocket {
   my $self = shift;
+
+  Debug('>>>', 'trace');
 
   my @portList = $self->port ?
       ($self->port) : (DEFAULT_LISTEN_PORT .. DEFAULT_LISTEN_PORT + 10);
@@ -95,7 +99,7 @@ sub OpenListenSocket {
     Debug("probed port number: " . $self->port, 'net', 5);
   }
   Debug("listening on " . $self->localIp . "(external) :" . $self->port, 'net', 5);
-
+  Debug('<<<', 'trace');
 }
 
 # FIXME eventually remove actual RPC calls from here, maybe push
@@ -104,6 +108,8 @@ sub AddFloodFile {
   my $self = shift;
   my $filename = shift;
   my $localPath = shift || '.'; # FIXME mac?
+
+  Debug('>>>', 'trace');
 
   my $flood = BitFlood::Flood->new({filename  => $filename,
                                     localPath => $localPath});
@@ -116,14 +122,21 @@ sub AddFloodFile {
     push(@{$flood->trackers}, $tracker);
   }
 
+  Debug('<<<', 'trace');
+  
 }
 
 # FIXME bad name, should be like "FigureOutWhatChunkToGetAndDoIt"
 sub GetChunks {
   my $self = shift;
   
-  return if(!@{$self->peers}); # no peers to get chunks from
-  
+  Debug('>>>', 'trace');
+
+  if(!@{$self->peers}) { # no peers to get chunks from
+    Debug('<<<', 'trace');
+    return;
+  }
+
   foreach my $flood (values %{$self->floods}) {
     $flood->startTime(time()) if(!defined($flood->startTime));
     $flood->sessionStartTime(time()) if(!defined($flood->sessionStartTime));
@@ -135,11 +148,14 @@ sub GetChunks {
     }
   }
 
+  Debug('<<<', 'trace');
 }
 
 
 sub Register {
   my $self = shift;
+
+  Debug('>>>', 'trace');
 
   foreach my $flood (values %{$self->floods}) {
     foreach my $tracker (@{$flood->trackers}) {
@@ -154,11 +170,14 @@ sub Register {
 	);
     }
   }
+  Debug('<<<', 'trace');
 }
 
 
 sub UpdatePeerList {
   my $self = shift;
+
+  Debug('>>>', 'trace');
 
   foreach my $flood (values %{$self->floods}) {
     my $tracker = $flood->trackers->[int(rand(@{$flood->trackers}))]; #FIXME random ok?
@@ -203,6 +222,7 @@ sub UpdatePeerList {
       Debug("Did not receive a peerlist from the tracker", 'net', 10);
     }
   }
+  Debug('<<<', 'trace');
 }
 
 
@@ -210,6 +230,8 @@ sub Disconnect {
   my $self = shift;
 
 #  print "Disconnecting from tracker...\n";
+
+  Debug('>>>', 'trace');
 
   foreach my $flood (values %{$self->floods}) {
     foreach my $tracker (@{$flood->trackers}) {
@@ -222,21 +244,27 @@ sub Disconnect {
 	);
     }
   }
+  Debug('<<<', 'trace');
 }
 
 sub ProcessPeers {
   my $self = shift;
+
+  Debug('>>>', 'trace');
 
   foreach my $peer (@{$self->peers}) {
     $peer->LoopOnce();
   }
   # reap disconnected peers
   $self->peers([ grep { !$_->disconnected } @{$self->peers} ]);
+  Debug('<<<', 'trace');
 }
 
 sub AddConnection {
   my $self = shift;
   my $conn = shift;
+
+  Debug('>>>', 'trace');
 
   my $peer = BitFlood::Peer->new({
 				  client => $self,
@@ -245,10 +273,13 @@ sub AddConnection {
 				  socket => $conn,
 				 });
   push(@{$self->peers}, $peer);
+  Debug('<<<', 'trace');
 }
 
 sub LoopOnce {
   my $self = shift;
+
+  Debug('>>>', 'trace');
 
   $self->ProcessPeers;
 
@@ -259,6 +290,7 @@ sub LoopOnce {
   return if(!defined($conn));
 
   $self->AddConnection($conn);
+  Debug('<<<', 'trace');
 }
 
 

@@ -54,6 +54,7 @@ __PACKAGE__->mk_accessors(qw(
 sub new {
   my $class = shift;
 
+  Debug('>>>', 'trace');
   Debug("Creating new Peer", 5);
   my $self = $class->SUPER::new(@_);
 
@@ -87,6 +88,7 @@ sub new {
     $self->connectCompleted(1);
   }
 
+  Debug('<<<', 'trace');
   return $self;
 }
 
@@ -96,24 +98,24 @@ sub SendMessage {
   my $flood = shift;
   my @methodArgs = @_;
 
-  Debug(">>>", 10);
+  Debug('>>>', 'trace');
 
   unshift(@methodArgs, $flood->contentHash);
   Debug("$methodName (" . scalar(@methodArgs) . " args) -> " . $self->host . ':' . $self->port, 'net', 20);
   my $request = RPC::XML::request->new($methodName, @methodArgs);
   $self->writeBuffer($self->writeBuffer . $request->as_string . "\n");
 
-  Debug("<<<", 10);
+  Debug('<<<', 'trace');
   return 1;
 }
 
 sub Connect {
   my $self = shift;
 
-  Debug(">>>", 10);
+  Debug('>>>', 'trace');
 
   if ($self->connectCompleted) {
-    Debug("<<<", 10);
+    Debug('<<<', 'trace');
     return 1;
   }
 
@@ -130,7 +132,7 @@ sub Connect {
     if (!$self->socket) {
       Debug("Socket creation failed ($!)", 'net');
       $self->disconnected(1);
-      Debug("<<<", 10);
+      Debug('<<<', 'trace');
       return undef;
     }
 
@@ -150,7 +152,7 @@ sub Connect {
     $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
     $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
 
-    Debug("<<<", 10);
+    Debug('<<<', 'trace');
     return 1;
     
   } else {
@@ -167,7 +169,7 @@ sub Connect {
       $self->disconnected(1);
     }
 
-    Debug("<<<", 10);
+    Debug('<<<', 'trace');
     return undef;
 
   }
@@ -180,7 +182,7 @@ sub GetChunk {
   my $file = shift;
   my $chunk = shift;
 
-  Debug(">>>", 10);
+  Debug('>>>', 'trace');
   $self->SendMessage(
 		     'RequestChunk',
 		     $flood,
@@ -193,7 +195,7 @@ sub GetChunk {
   $file->{downloadBeginTime} ||= time();
   $file->{downloadBytes} ||= 0;
 
-  Debug("<<<", 10);
+  Debug('<<<', 'trace');
 }
 
 
@@ -202,20 +204,25 @@ sub HandleRegister {
   my $flood = shift;
   my $peerId = shift;
 
+  Debug('>>>', 'trace');
+
   if (!length($peerId)) {
     Debug("invalid peer ID", 'net');
     $self->disconnected(1);
+    Debug('<<<', 'trace');
     return;
   }
 
   if (1 < grep { $_->id eq $peerId} @{$self->client->peers}) {
     Debug("disconnecting duplicate peer", 'net');
     $self->disconnected(1);
+    Debug('<<<', 'trace');
     return;
   }
 
   if ($self->floods->{$flood->contentHash}) {
     Debug("duplicate Register message from $peerId for " . $flood->contentHash, 'net');
+    Debug('<<<', 'trace');
     return;
   }
 
@@ -224,6 +231,9 @@ sub HandleRegister {
 
   $self->SendMessage('RequestChunkMaps', $flood);
   $self->registered->{$flood->contentHash} = 1;
+
+  Debug('<<<', 'trace');
+  return 1;
 }
 
 
@@ -231,7 +241,7 @@ sub HandleRequestChunkMaps {
   my $self = shift;
   my $flood = shift;
 
-  Debug(">>>", 10);
+  Debug('>>>', 'trace');
   my $chunkMaps = [
 		   map
 		     { $_->{name} => $_->{chunkMap}->to_Bin() }
@@ -239,7 +249,7 @@ sub HandleRequestChunkMaps {
 		  ];
 
   $self->SendMessage('SendChunkMaps', $flood, $chunkMaps);
-  Debug("<<<", 10);
+  Debug('<<<', 'trace');
 }
 
 sub HandleSendChunkMaps {
@@ -248,13 +258,13 @@ sub HandleSendChunkMaps {
   my $chunkMapsArrayRef = shift;
   my %chunkMaps = @{$chunkMapsArrayRef};
   
-  Debug(">>>", 10);
+  Debug('>>>', 'trace');
   foreach my $chunkMap (values %chunkMaps) {
     $chunkMap = Bit::Vector->new_Bin(length($chunkMap), $chunkMap);
   }
   $self->chunkMaps->{$flood->contentHash} = \%chunkMaps;
 
-  Debug("<<<", 10);
+  Debug('<<<', 'trace');
 }
 
 sub HandleRequestChunk {
@@ -263,10 +273,11 @@ sub HandleRequestChunk {
   my $filename = shift;
   my $index = shift;
 
-  Debug(">>>", 10);
+  Debug('>>>', 10);
   my $file = $flood->Files->{$filename};
   if (!$file->{chunkMap}->bit_test($index)) {
     Debug("don't have chunk: ".substr($filename,-20)."#$index", 'net');
+    Debug('<<<', 'trace');    
     return;
   }
 
@@ -279,6 +290,7 @@ sub HandleRequestChunk {
   my $chunk = $file->{Chunk}[$index];
   if (!$chunk) {
     Debug("out-of-range chunk index: $filename#$index", 'net');
+    Debug('<<<', 'trace');
     return;
   }
 
@@ -300,7 +312,7 @@ sub HandleRequestChunk {
 		     $index,
 		     RPC::XML::base64->new($chunkData)
 		    );
-  Debug("<<<", 10);
+  Debug('<<<', 'trace');
 }
 
 sub HandleSendChunk {
@@ -310,17 +322,19 @@ sub HandleSendChunk {
   my $index = shift;
   my $chunkData = shift;
 
-  Debug(">>>", 10);
+  Debug('>>>', 'trace');
 
   my $file = $flood->Files->{$filename};
   if (!$file) {
     Debug("unknown file: $filename", 'net');
+    Debug('<<<', 'trace');
     return;
   }
 
   my $chunk = $file->{Chunk}->[$index];
   if (!$chunk) {
     Debug("out-of-range chunk index: $filename#$index", 'net');
+    Debug('<<<', 'trace');
     return;
   }
 
@@ -389,7 +403,7 @@ sub HandleSendChunk {
 	   $file->{downloadBytes} / 1024 / (time() - $file->{downloadBeginTime} + 1));
   }
   
-  Debug("<<<", 10);
+  Debug('<<<', 'trace');
 }
 
 sub HandleNotifyHaveChunk {
@@ -398,11 +412,11 @@ sub HandleNotifyHaveChunk {
   my $filename = shift;
   my $index = shift;
 
-  Debug(">>>", 10);
+  Debug('>>>', 'trace');
   my $file = $flood->Files->{$filename};
   if (!$file) {
     Debug("unrecognized filename". 'net');
-    Debug("<<<", 10);
+    Debug('<<<', 'trace');
     return;
   }
   Debug("peer " . $self->id ." (".$self->host.":".$self->port.") has ".substr($filename,-20)."#".$index, 'net', 40);
@@ -413,19 +427,19 @@ sub HandleNotifyHaveChunk {
     Debug("notified about a chunk before we have chunkmaps", 'net');
   }
 
-  Debug("<<<", 10);
+  Debug('<<<', 'trace');
 }
 
 sub DispatchRequests {
   my $self = shift;
   my $requestXml = shift;
 
-  Debug(">>>", 10);
+  Debug('>>>', 'trace');
 
   my $request = RPC::XML::Parser->new()->parse($requestXml);
   if (!ref($request)) {
     Debug("invalid XML: $requestXml", 'net');
-    Debug("<<<", 10);
+    Debug('<<<', 'trace');
     return;
   }
 
@@ -448,7 +462,7 @@ sub DispatchRequests {
 	  $self->disconnected(1);
 	}
       }
-      Debug("<<<", 10);
+      Debug('<<<', 'trace');
       return;
     }
     $methodRef->($self, $flood, @requestArgs);
@@ -456,17 +470,17 @@ sub DispatchRequests {
     Debug("Unsupported RPC request method: $request->{name}", 'net');
   }
 
-  Debug("<<<", 10);
+  Debug('<<<', 'trace');
 }
 
 
 sub LoopOnce {
   my $self = shift;
 
-  Debug(">>>", 10);
+  Debug('>>>', 'trace');
 
   if (!$self->Connect) {
-    Debug("<<<", 10);
+    Debug('<<<', 'trace');
     return;
   }
 
@@ -475,23 +489,24 @@ sub LoopOnce {
 
   $self->ProcessReadBuffer;
 
-  Debug("<<<", 10);
+  Debug('<<<', 'trace');
 }
 
 
 sub ReadOnce {
   my $self = shift;
 
-  Debug(">>>", 10);
+  Debug('>>>', 'trace');
 
   if(!defined($self->bufferedReader)) {
     Debug("No buffered reader object");
+    Debug('<<<', 'trace');
     return;
   }
 
   if ($self->disconnected) {
     Debug("previously disconnected", 'net', 10);
-    Debug("<<<", 10);
+    Debug('<<<', 'trace');
     return;
   }
 
@@ -501,41 +516,41 @@ sub ReadOnce {
 
   if ($bytesRead == -1) {
     Debug("would block", 'net', 30);
-    Debug("<<<", 10);
+    Debug('<<<', 'trace');
     return;
   } elsif($bytesRead == 0) {
     Debug("read error, disconnecting peer: " . $self->id, 'net');
     $self->disconnected(1);
-    Debug("<<<", 10);
+    Debug('<<<', 'trace');
     return;
   }
 
   $self->CalculateReadSpeed($bytesRead);
   $self->lastReadTime(time());
 
-  Debug("<<<", 10);
+  Debug('<<<', 'trace');
 }
 
 sub WriteOnce {
   my $self = shift;
 
-  Debug(">>>", 10);
+  Debug('>>>', 'trace');
 
   if(!length($self->writeBuffer)) {
     Debug("nothing to write", 50);
-    Debug("<<<", 10);
+    Debug('<<<', 'trace');
     return;
   }
 
   if(!defined($self->bufferedWriter)) {
     Debug("No buffered writer");
-    Debug("<<<", 10);
+    Debug('<<<', 'trace');
     return;
   }
 
   if ($self->disconnected) {
     Debug("previously disconnected", 'net', 10);
-    Debug("<<<", 10);
+    Debug('<<<', 'trace');
     return;
   }
 
@@ -543,25 +558,25 @@ sub WriteOnce {
 
   if ($bytesWritten == -1) {
     Debug("would block", 'net', 30);
-    Debug("<<<", 10);
+    Debug('<<<', 'trace');
     return;
   } elsif($bytesWritten == 0) {
     Debug("write error, disconnecting peer: " . $self->id, 'net');
     $self->disconnected(1);
-    Debug("<<<", 10);
+    Debug('<<<', 'trace');
     return;
   }
 
   $self->CalculateWriteSpeed($bytesWritten);
   $self->lastWriteTime(time());
 
-  Debug("<<<", 10);
+  Debug('<<<', 10);
 }
 
 sub ProcessReadBuffer {
   my $self = shift;
 
-  Debug(">>>", 10);
+  Debug('>>>', 'trace');
 
   my $currentMessage;
   my $currentMessageTail;
@@ -585,13 +600,15 @@ sub ProcessReadBuffer {
     Debug("  remainder: " . $self->readBuffer, 50);
   } while ($tailLength);
 
-  Debug("<<<", 10);
+  Debug('<<<', 10);
 }
 
 
 sub CalculateReadSpeed {
   my $self = shift;
   my $bytesRead = shift;
+
+  Debug('>>>', 'trace');
 
   return if !defined $self->lastReadTime;
 
@@ -602,13 +619,19 @@ sub CalculateReadSpeed {
     $self->readSpeed(undef);
   }
   Debug("read speed: " . ReadableSize($self->readSpeed) . "/s", 'net', 40);
+  Debug('<<<', 'trace');
 }
 
 sub CalculateWriteSpeed {
   my $self = shift;
   my $bytesWritten = shift;
 
-  return if !defined $self->lastWriteTime;
+  Debug('>>>', 'trace');
+
+  if(!defined $self->lastWriteTime) {
+    Debug('<<<', 'trace');
+    return;
+  }
 
   my $timeDelta = time() - $self->lastWriteTime;
   if ($timeDelta) {
@@ -617,10 +640,13 @@ sub CalculateWriteSpeed {
     $self->writeSpeed(undef);
   }
   Debug("write speed: " . ReadableSize($self->writeSpeed) . "/s", 'net', 40);
+  Debug('<<<', 'trace');
 }
 
 sub disconnected {
   my $self = shift;
+
+  Debug('>>>', 'trace');
 
   if (@_ and $_[0]) {
     if ($self->socket) {
@@ -629,14 +655,17 @@ sub disconnected {
     }
   }
   $self->_disconnected_accessor(@_);
+  Debug('<<<', 'trace');
 }
 
 sub DESTROY {
   my $self = shift;
 
+  Debug('>>>', 'trace');
   foreach my $filehandle (values(%{$self->targetFilehandles})) {
     $filehandle->close();
   }
+  Debug('<<<', 'trace');
 }
 
 

@@ -25,6 +25,8 @@ __PACKAGE__->mk_accessors(qw(data filename contentHash localPath
 sub new {
   my $class = shift;
 
+  Debug('>>>', 'trace');
+
   my $self = $class->SUPER::new(@_);
 
   $self->trackers([]);
@@ -37,11 +39,14 @@ sub new {
   
   $self->open if defined $self->filename;
 
+  Debug('<<<', 'trace');
   return $self;
 }
 
 sub open {
   my $self = shift;
+
+  Debug('>>>', 'trace');
 
   my $fileHandle = IO::File->new($self->filename, 'r');
   defined($fileHandle) or die("Could not open file: " . $self->filename . " ($!)");
@@ -62,42 +67,56 @@ sub open {
   $self->BuildLocalFilenames();
   $self->InitializeFiles();
   $self->SortNeededChunksByWeight();
+
+  Debug('<<<', 'trace');
 }
 
 sub SetFilenames {
   my $self = shift;
 
+  Debug('>>>', 'trace');
+
   while (my ($filename, $file) = each %{$self->Files}) {
     $file->{name} = $filename;
   }
+  Debug('<<<', 'trace');
 }
 
 
 sub SortChunksInPlace {
   my $self = shift;
 
+  Debug('>>>', 'trace');
   foreach my $targetFile (values(%{$self->Files})) {
     $targetFile->{Chunk} = [ sort { $a->{index} <=> $b->{index} } @{$targetFile->{Chunk}} ];
   }
+  Debug('<<<', 'trace');
 }
 
 sub SortNeededChunksByWeight {
   my $self = shift;
+  Debug('>>>', 'trace');
   $self->neededChunksByWeight([ sort { $b->{chunk}->{weight} <=> $a->{chunk}->{weight} } @{$self->neededChunksByWeight} ]);
+  Debug('<<<', 'trace');
 }
 
 
 sub BuildChunkMaps {
   my $self = shift;
 
+  Debug('>>>', 'trace');
+
   my %chunkMaps;
   foreach my $file (values(%{$self->Files})) {
     $file->{chunkMap} = Bit::Vector->new(scalar @{$file->{Chunk}});
   }
+  Debug('<<<', 'trace');
 }
 
 sub BuildChunkOffsets {
   my $self = shift;
+
+  Debug('>>>', 'trace');
 
   foreach my $file (values(%{$self->Files})) {
     my $offset = 0;
@@ -106,19 +125,25 @@ sub BuildChunkOffsets {
       $offset += $chunk->{size};
     }
   }
+  Debug('<<<', 'trace');
 }
 
 
 sub BuildLocalFilenames {
   my $self = shift;
 
+  Debug('>>>', 'trace');
+
   while (my ($filename, $file) = each  %{$self->Files}) {
     $file->{localFilename} = LocalFilename(File::Spec->catfile($self->localPath, $filename));
   }
+  Debug('<<<', 'trace');
 }
 
 sub InitializeFiles {
   my $self = shift;
+
+  Debug('>>>', 'trace');
 
   foreach my $file (values %{$self->Files}) {
     $self->totalBytes($self->totalBytes + $file->{Size});
@@ -167,6 +192,8 @@ sub InitializeFiles {
       printf("Checking: %-35.35s [%6.2f%%] [%d/%d chunks OK]\n", substr($file->{name}, -35), 100, $validChunkCount, $totalChunks);
     }
   }
+  Debug('<<<', 'trace');
+
 }
 
 
