@@ -93,7 +93,7 @@ public class Peer
         PeerConnection peer = (PeerConnection) peeriter.next();
         if ( peer.disconnected )
         {
-          System.out.println( "Reaping " + peer.id + " (pending)" );
+          System.out.println( "Reaping " + peer.id + ":" + peer.hostname + ":" + peer.port + " (pending)");
           peeriter.remove();
         }
       }
@@ -150,55 +150,15 @@ public class Peer
     try
     {
       listenSocketChannel = ServerSocketChannel.open();
-    }
-    catch ( Exception e )
-    {
-      System.out.println( "Error making listen socket: " + e );
-    }
-
-    try
-    {
       listenSocketChannel.configureBlocking( false );
-    }
-    catch ( Exception e )
-    {
-      System.out.println( "Error setting listen socket non-blocking: " + e );
-    }
-
-    try
-    {
       listenSocketChannel.socket().bind( new InetSocketAddress( port ) );
-    }
-    catch ( Exception e )
-    {
-      System.out.println( "Error binding to address: " + e );
-    }
-
-    try
-    {
       listenSocketChannel.socket().setReuseAddress( true );
-    }
-    catch ( Exception e )
-    {
-      System.out.println( "Error setting resuse address: " + e );
-    }
-
-    try
-    {
       listenSocketSelector = Selector.open();
-    }
-    catch ( Exception e )
-    {
-      System.out.println( "Error making the listen selector: " + e );
-    }
-
-    try
-    {
       listenSocketChannel.register( listenSocketSelector, SelectionKey.OP_ACCEPT );
     }
     catch ( Exception e )
     {
-      System.out.println( "Error registering listen socket selector: " + e );
+      System.out.println( "Error making listen socket: " + e );
     }
   }
 

@@ -6,6 +6,7 @@
 import java.nio.channels.FileLock;
 import java.util.Vector;
 import java.util.Iterator;
+import java.util.Date;
 
 /**
  * @author burke
@@ -43,13 +44,19 @@ public class SendChunkMethodHandler implements MethodHandler
     {
       throw new Exception( "No chunk data specified in SendChunk");
     }
-    
+
     Flood.RuntimeTargetFile runtimeTargetFile = (Flood.RuntimeTargetFile) receiver.flood.runtimeTargetFiles.get(targetFilename);
     if(runtimeTargetFile == null)
     {
       throw new Exception( "Unknown target file specified in SendChunk");
     }
-    
+
+    Flood.ChunkKey chunkKey = receiver.flood.MakeChunkKey( runtimeTargetFile, chunkIndex.intValue() );
+    if ( !receiver.flood.chunksDownloading.containsKey( chunkKey ) )
+    {
+      throw new Exception( "We've already received this chunk");
+    }
+
     FloodFile.Chunk chunkInfo = (FloodFile.Chunk) runtimeTargetFile.targetFile.chunks.elementAt(chunkIndex.intValue());
     if( chunkInfo == null )
     {
@@ -75,10 +82,15 @@ public class SendChunkMethodHandler implements MethodHandler
       runtimeTargetFile.fileHandle.write(chunkData);
       writeLock.release();
       
-      Flood.ChunkKey chunkKey = receiver.flood.MakeChunkKey( runtimeTargetFile, chunkIndex.intValue() );
-      receiver.flood.chunksDownloading.remove( chunkKey );
+      Flood.ChunkDownload download = (Flood.ChunkDownload)receiver.flood.chunksDownloading.remove( chunkKey );
       receiver.flood.chunksToDownload.remove( chunkKey );
       receiver.chunksDownloading--;
+      receiver.flood.bytesDownloading -= chunkInfo.size;
+      receiver.flood.bytesMissing -= chunkInfo.size;
+      
+      Date now = new Date();
+      System.out.println( receiver.id + " sent chunk: " + targetFilename + "#" + chunkIndex + " " + chunkInfo.size / (now.getTime() - download.startTime.getTime()) + "K/s" );
+      
       
       Vector nhcParams = new Vector( 2 );
       nhcParams.add( targetFilename );

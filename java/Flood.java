@@ -31,7 +31,7 @@ public class Flood
     char[]               chunkMap      = null;
   }
 
-  public class ChunkKey
+  public class ChunkKey 
   {
     public RuntimeTargetFile runtimeTargetFile = null;
     public int chunkIndex = 0;
@@ -41,10 +41,46 @@ public class Flood
       runtimeTargetFile = file;
       chunkIndex = index;
     }
+    
+    public int hashCode()
+    {
+      if ( runtimeTargetFile == null )
+      {
+        return chunkIndex;
+      }
+      return chunkIndex + runtimeTargetFile.hashCode();
+    }
+    
+    public boolean equals( Object rhs )
+    {
+      if ( !( rhs instanceof ChunkKey ) )
+      {
+        return false;
+      }
+      
+      ChunkKey realRhs = (ChunkKey)rhs;
+      if ( runtimeTargetFile != realRhs.runtimeTargetFile )
+      {
+        return false;
+      }
+      
+      if ( chunkIndex != realRhs.chunkIndex )
+      {
+        return false;
+      }
+      
+      return true;
+    }
   }
   public ChunkKey MakeChunkKey( RuntimeTargetFile file, int index )
   {
     return new ChunkKey( file, index );
+  }
+  
+  public class ChunkDownload
+  {
+    public PeerConnection downloadFrom = null;
+    public Date startTime = null;
   }
   
   public int                 totalBytes        = 0;
@@ -54,7 +90,7 @@ public class Flood
 
   public Hashtable           runtimeTargetFiles = new Hashtable();
   public Vector              chunksToDownload  = new Vector();
-  public HashSet             chunksDownloading = new HashSet();
+  public Hashtable           chunksDownloading = new Hashtable();
 
   public Flood()
   {
@@ -95,7 +131,7 @@ public class Flood
       PeerConnection peer = (PeerConnection) peeriter.next();
       if ( peer.disconnected )
       {
-        System.out.println( "Reaping " + peer.id );
+        System.out.println( "Reaping " + peer.id + ":" + peer.hostname + ":" + peer.port );
         peeriter.remove();
       }
     }
@@ -299,7 +335,14 @@ public class Flood
       todownload_from.chunksDownloading++;
       todownload_from.SendMethod( RequestChunkMethodHandler.methodName, parameters );
 
-      chunksDownloading.add( todownload_key );
+      ChunkDownload download = new ChunkDownload();
+      download.downloadFrom = todownload_from;
+      download.startTime = new Date();
+      
+      chunksDownloading.put( todownload_key, download );
+
+      FloodFile.Chunk chunk = (FloodFile.Chunk)todownload_key.runtimeTargetFile.targetFile.chunks.elementAt( todownload_key.chunkIndex );
+      bytesDownloading += chunk.size;
     }
   }
 

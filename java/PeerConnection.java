@@ -51,6 +51,7 @@ public class PeerConnection
       socketChannel.configureBlocking( false );
       socketChannel.register( socketSelector, socketChannel.validOps() );
       socketChannel.connect( new InetSocketAddress( InetAddress.getByName( hostname ), port ) );
+      System.out.println( "Connecting to " + id + ":" + hostname + ":" + port );
     }
     catch ( Exception e )
     {
@@ -216,7 +217,7 @@ public class PeerConnection
         Vector args = new Vector();
         StringBuffer methodName = new StringBuffer();
         XMLEnvelopeProcessor.decode( new String( message ), methodName, args );
-        System.out.println( localPeer.id + " <- " + id + " (" + methodName + ")" );
+        //System.out.println( localPeer.id + " <- " + id + " (" + methodName + ")" );
         localPeer.HandleMethod( this, methodName.toString(), args );
       }
     }
@@ -227,7 +228,7 @@ public class PeerConnection
   public void SendMethod( final String methodName, final Vector parameters )
   {
     String out = XMLEnvelopeProcessor.encode( methodName, parameters );
-    System.out.println( localPeer.id + " -> " + id + " (" + methodName + ")" );
+    //System.out.println( localPeer.id + " -> " + id + " (" + methodName + ")" );
 
     writeBuffer.put( ( out.replaceAll( "\n", "" ) + "\n" ).getBytes() );
   }
