@@ -244,7 +244,7 @@ sub HandleRequestChunkMaps {
   Debug('>>>', 'trace');
   my $chunkMaps = [
 		   map
-		     { $_->{name} => $_->{chunkMap}->to_Bin() }
+		     { $_->{name} => RPC::XML::string->new($_->{chunkMap}->to_Bin()) }
 		     values %{$flood->Files}
 		  ];
 
