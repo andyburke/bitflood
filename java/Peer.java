@@ -42,13 +42,22 @@ public class Peer
 
   public boolean JoinFlood( String floodFilename )
   {
+    return JoinFlood(floodFilename, true); // init files by default
+  }
+  
+  public boolean JoinFlood( String floodFilename, boolean initializeLocalFiles)
+  {
     Flood floodToJoin = new Flood( this, floodFilename );
     if ( floodToJoin.Id() != null )
     {
       floods.put( floodToJoin.Id(), floodToJoin );
+      if( initializeLocalFiles )
+      {
+        floodToJoin.SetupFilesAndChunks();
+      }
       return true;
     }
-    return false;
+    return false;    
   }
 
   public void LoopOnce()

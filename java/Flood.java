@@ -65,7 +65,6 @@ public class Flood
     localPeer = peer;
     floodFile = new FloodFile( floodFilename );
     floodFile.Read();
-    SetupFilesAndChunks();
   }
 
   public String Id()
@@ -149,7 +148,7 @@ public class Flood
     return retVal;
   }
 
-  protected void SetupFilesAndChunks()
+  public void SetupFilesAndChunks()
   {
     if ( floodFile.targetFiles.size() > 0 )
     {
@@ -166,6 +165,15 @@ public class Flood
         {
           // Get a file handle and channel for the file on disk
           runtimeTargetFile.fileObject = new File(runtimeTargetFile.nameOnDisk);
+
+          if( !runtimeTargetFile.fileObject.exists() )
+          {
+            // make any necessary dirs
+            String targetFileDirectoryPath = runtimeTargetFile.fileObject.getAbsolutePath();
+            File runtimeTargetFileDirectory = new File(targetFileDirectoryPath.substring( 0, targetFileDirectoryPath.lastIndexOf( '/' )));
+            runtimeTargetFileDirectory.mkdirs();
+          }
+          
           runtimeTargetFile.fileHandle = new RandomAccessFile(runtimeTargetFile.fileObject, "rw");
           runtimeTargetFile.fileChannel = runtimeTargetFile.fileHandle.getChannel();
         }

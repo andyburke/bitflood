@@ -62,7 +62,7 @@ public class TrackerTest
 
     Peer tracker = new Peer( localIP, localPort );
     tracker.ActAsTracker();
-    tracker.JoinFlood( floodFilename );
+    tracker.JoinFlood( floodFilename, false ); // false for 'don't initialize files'
 
     boolean quit = false;
     while ( !quit )
