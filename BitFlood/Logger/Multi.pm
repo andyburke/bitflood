@@ -27,18 +27,13 @@ sub add {
   push(@{$self->loggers}, $ref);
 }
 
-sub log {
+sub commit {
   my $self = shift;
   my $ref = shift;
 
   foreach my $logger (@{$self->loggers}) {
     $logger->log($ref);
   }
-}
-
-sub commit {
-  my $self = shift;
-  die("Attempt to commit() on a Multi-logger object.");
 }
 
 sub close {
