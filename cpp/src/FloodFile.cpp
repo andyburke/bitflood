@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <assert.h>
 
+#include <WINSOCK2.H>
+#include <Ws2tcpip.h>
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -33,6 +35,8 @@ namespace libBitFlood
     const wchar_t* CHUNK_WEIGHT = L"weight";
     const wchar_t* CHUNK_HASH   = L"hash";
     const wchar_t* TRACKER      = L"Tracker";
+    const wchar_t* TRACKER_HOST = L"host";
+    const wchar_t* TRACKER_PORT = L"port";
   };
 
   Error::ErrorCode FloodFile::ToXML( std::string& o_xml )
@@ -96,16 +100,20 @@ namespace libBitFlood
         }
 
         // write the trackers
-        V_String::const_iterator trackeriter = m_trackers.begin();
-        V_String::const_iterator trackerend  = m_trackers.end();
+        V_TrackerInfo::const_iterator trackeriter = m_trackers.begin();
+        V_TrackerInfo::const_iterator trackerend  = m_trackers.end();
 
         for ( ; trackeriter != trackerend; ++trackeriter )
         { 
+          const TrackerInfo& tracker = (*trackeriter);
           DOMElement* trackerElem = doc->createElement( TRACKER );
           rootElem->appendChild(trackerElem);
 
-          DOMText* trackerName = doc->createTextNode( XMLString::transcode( trackeriter->c_str() ) );
-          trackerElem->appendChild(trackerName);
+          std::wstringstream portStrm;
+          portStrm << tracker.m_port;
+
+          trackerElem->setAttribute( TRACKER_HOST, XMLString::transcode( tracker.m_host.c_str() ) );
+          trackerElem->setAttribute( TRACKER_PORT, portStrm.str().c_str() );
         }
 
         // write the the output string
@@ -272,12 +280,25 @@ namespace libBitFlood
       {
         for ( U32 trackerindex = 0; trackerindex < list->getLength(); ++trackerindex )
         {
-          DOMNodeSPtr tracker = list->item( trackerindex );
-          DOMNodeSPtr tracker_child = tracker->getFirstChild();
-          if ( tracker_child )
-          {
-            m_trackers.push_back( XMLString::transcode( tracker_child->getNodeValue() ) );
-          }
+          DOMElementSPtr tracker = (DOMElement*)list->item( trackerindex );
+
+          TrackerInfo lbftracker;
+
+          lbftracker.m_host = XMLString::transcode( tracker->getAttribute( TRACKER_HOST ) );
+
+          hostent* tmp = gethostbyname( lbftracker.m_host.c_str() );
+          lbftracker.m_host = inet_ntoa (*(struct in_addr *)*tmp->h_addr_list);
+
+          std::wstringstream tracker_port_convert;
+          tracker_port_convert << tracker->getAttribute( TRACKER_PORT );
+          tracker_port_convert >> lbftracker.m_port;
+
+          std::stringstream idstrm;
+          idstrm << lbftracker.m_host << lbftracker.m_port;
+
+          Encoder::Base64Encode( (const U8*)idstrm.str().c_str(), idstrm.str().length(), lbftracker.m_id );
+
+          m_trackers.push_back( lbftracker );
         }
         list = NULL;
       }
@@ -285,7 +306,7 @@ namespace libBitFlood
 
     // sort the files alphabetically
     std::sort( m_files.begin(), m_files.end(), SortFilesAlphabetically );
-    
+
 
 
     // compute our content hash
@@ -305,14 +326,14 @@ namespace libBitFlood
 
     V_File::const_iterator fileiter = m_files.begin();
     V_File::const_iterator fileend  = m_files.end();
-    
+
     for ( ; fileiter != fileend; ++fileiter )
     {
       tohash << (*fileiter).m_name;
 
       V_Chunk::const_iterator chunkiter = (*fileiter).m_chunks.begin();
       V_Chunk::const_iterator chunkend  = (*fileiter).m_chunks.end();
-      
+
       for ( ; chunkiter != chunkend; ++chunkiter )
       {
         tohash << (*chunkiter).m_hash;
@@ -322,7 +343,7 @@ namespace libBitFlood
     // hash 
     std::string tohash_str = tohash.str();
     Encoder::Base64Encode( (const U8*)tohash_str.data(), tohash_str.length(), o_hash );
-      
+
     return Error::NO_ERROR_LBF;
   }
 };

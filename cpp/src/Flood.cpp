@@ -22,33 +22,6 @@ namespace libBitFlood
     m_localpeer = i_localpeer.Get();
     m_floodfile = i_floodfile;
 
-    V_String::const_iterator trackeriter = m_floodfile->m_trackers.begin();
-    V_String::const_iterator trackerend = m_floodfile->m_trackers.end();
-
-    for( ; trackeriter != trackerend; ++trackeriter )
-    {
-      TrackerInfo info;
-      const std::string& trackerurl = *trackeriter;
-
-      U32 h_start = trackerurl.find( "http://" ) + strlen( "http://" );
-      U32 p_start = trackerurl.find( ':', h_start ) + 1;
-      U32 u_start = trackerurl.find( '/', p_start ) + 1;
-
-      info.m_host = trackerurl.substr( h_start, p_start - h_start - 1 );
-      std::stringstream port_converter;
-      port_converter << trackerurl.substr( p_start, u_start - p_start - 1 );
-      port_converter >> info.m_port;
-
-      hostent* tmp = gethostbyname( info.m_host.c_str() );
-      info.m_host = inet_ntoa (*(struct in_addr *)*tmp->h_addr_list);
-
-      std::stringstream idstrm;
-      idstrm << info.m_host << info.m_port;
-
-      Encoder::Base64Encode( (const U8*)idstrm.str().c_str(), idstrm.str().length(), info.m_id );
-      m_trackerinfos.push_back( info );
-    }
-
     // here we setup our internal representation of the state of the files
     // and the chunks that we either have already downloaded or want to download
     _SetupFilesAndChunks();
@@ -72,18 +45,33 @@ namespace libBitFlood
 
     // copy the peer sptr vector, chances are it will change in this loop
     V_PeerConnectionSPtr peers = m_peers;
-    
-    V_PeerConnectionSPtr::iterator peeriter = peers.begin();
-    V_PeerConnectionSPtr::iterator peerend  = peers.end();
 
-    for ( ; peeriter != peerend; ++peeriter )
     {
-      // process
-      (*peeriter)->LoopOnce();
-
-      // reap defunct peer connections
-      if ( (*peeriter)->m_disconnected )
+      V_PeerConnectionSPtr::iterator peeriter = peers.begin();
+      V_PeerConnectionSPtr::iterator peerend  = peers.end();
+      
+      for ( ; peeriter != peerend; ++peeriter )
       {
+	// process
+	(*peeriter)->LoopOnce();
+      }
+    }
+
+    /// now reap peers
+    {
+      V_PeerConnectionSPtr::iterator peeriter = m_peers.begin();
+      V_PeerConnectionSPtr::iterator peerend  = m_peers.end();
+      
+      for ( ; peeriter != peerend; )
+      {
+	if ( (*peeriter)->m_disconnected )
+	{
+	  peeriter = m_peers.erase( peeriter );
+	}
+	else
+	{
+	  ++peeriter;
+	}
       }
     }
 
@@ -148,11 +136,11 @@ namespace libBitFlood
 
   Error::ErrorCode Flood::UpdateTrackers( void )
   {
-    V_TrackerInfo::const_iterator trackeriter = m_trackerinfos.begin();
-    V_TrackerInfo::const_iterator trackerend  = m_trackerinfos.end();
+    FloodFile::V_TrackerInfo::const_iterator trackeriter = m_floodfile->m_trackers.begin();
+    FloodFile::V_TrackerInfo::const_iterator trackerend  = m_floodfile->m_trackers.end();
     for ( ; trackeriter != trackerend; ++trackeriter )
     {
-      const Flood::TrackerInfo& tracker = (*trackeriter);
+      const FloodFile::TrackerInfo& tracker = (*trackeriter);
       
       if ( tracker.m_id.compare( m_localpeer->m_localid ) != 0 )
       {

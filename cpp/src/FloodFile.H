@@ -25,9 +25,18 @@ namespace libBitFlood
 
     typedef std::vector< File > V_File;
 
-    V_String    m_trackers;
-    V_File      m_files;
-    std::string m_contentHash;
+    struct TrackerInfo
+    {
+      std::string m_host;
+      U32         m_port;
+      std::string m_id;
+    };
+
+    typedef std::vector< TrackerInfo > V_TrackerInfo;
+
+    V_TrackerInfo m_trackers;
+    V_File        m_files;
+    std::string   m_contentHash;
 
   public:
     Error::ErrorCode ToXML( std::string& o_xml );

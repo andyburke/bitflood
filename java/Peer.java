@@ -37,7 +37,6 @@ public class Peer
     SetupListenSocket();
 
     AddMethodHandler( new RegisterMethodHandler() );
-    AddMethodHandler( new RegisterMethodHandler() );
     AddMethodHandler( new SendPeerListMethodHandler() );
   }
 

@@ -7,6 +7,7 @@
 #include <Encoder.H>
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
+#include <sstream>
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -37,10 +38,23 @@ int main(int argc, char* argv[])
       return 1;
     }
 
+    Encoder::ToEncode::Tracker tracker;
+    std::string trackerurl = argv[2];
+
+    U32 h_start = trackerurl.find( "http://" ) + strlen( "http://" );
+    U32 p_start = trackerurl.find( ':', h_start ) + 1;
+    U32 u_start = trackerurl.find( '/', p_start ) + 1;
+
+    tracker.first = trackerurl.substr( h_start, p_start - h_start - 1 );
+
+    std::stringstream port_converter;
+    port_converter << trackerurl.substr( p_start, u_start - p_start - 1 );
+    port_converter >> tracker.second;
+
     Encoder::ToEncode e;
     e.m_files.push_back( argv[1] );
     e.m_chunksize = 262144;
-    e.m_trackers.push_back( argv[2] );
+    e.m_trackers.push_back( tracker );
 
     FloodFile out;
     Encoder::EncodeFile( e, out );

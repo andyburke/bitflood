@@ -17,8 +17,8 @@ public class NotifyHaveChunkMethodHandler implements MethodHandler
     return methodName;
   }
   
+  // TODO - implement
   public void HandleMethod( PeerConnection receiver, final Vector parameters ) throws Exception
   {
-    
   }
 }

@@ -135,18 +135,33 @@ namespace libBitFlood
   {
     // copy the peer sptr vector, chances are it will change in this loop
     V_PeerConnectionSPtr pendingpeers = m_pendingpeers;
-    
-    V_PeerConnectionSPtr::iterator peeriter = pendingpeers.begin();
-    V_PeerConnectionSPtr::iterator peerend  = pendingpeers.end();
 
-    for ( ; peeriter != peerend; ++peeriter )
     {
-      // process
-      (*peeriter)->LoopOnce();
-
-      // reap defunct peer connections
-      if ( (*peeriter)->m_disconnected )
+      V_PeerConnectionSPtr::iterator peeriter = pendingpeers.begin();
+      V_PeerConnectionSPtr::iterator peerend  = pendingpeers.end();
+      
+      for ( ; peeriter != peerend; ++peeriter )
       {
+	// process
+	(*peeriter)->LoopOnce();
+      }
+    }
+
+    /// now reap peers
+    {
+      V_PeerConnectionSPtr::iterator peeriter = m_pendingpeers.begin();
+      V_PeerConnectionSPtr::iterator peerend  = m_pendingpeers.end();
+      
+      for ( ; peeriter != peerend; )
+      {
+	if ( (*peeriter)->m_disconnected )
+	{
+	  peeriter = m_pendingpeers.erase( peeriter );
+	}
+	else
+	{
+	  ++peeriter;
+	}
       }
     }
 

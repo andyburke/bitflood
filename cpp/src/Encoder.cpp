@@ -19,7 +19,6 @@ namespace libBitFlood
       Error::ErrorCode ret = Error::NO_ERROR_LBF;
 
       libBitFlood::FloodFile toReturn;
-      toReturn.m_trackers = i_toencode.m_trackers;
 
       // check incoming data - move to a function in ToEncode?
       if ( i_toencode.m_files.empty() )
@@ -80,6 +79,18 @@ namespace libBitFlood
         }
 
         delete [] buffer;
+
+        ToEncode::V_Tracker::const_iterator trackeriter = i_toencode.m_trackers.begin();
+        ToEncode::V_Tracker::const_iterator trackerend  = i_toencode.m_trackers.end();
+        for ( ; trackeriter != trackerend; ++trackeriter )
+        {
+          const ToEncode::Tracker& tracker = (*trackeriter);
+          
+          libBitFlood::FloodFile::TrackerInfo trackerinfo;
+          trackerinfo.m_host = tracker.first;
+          trackerinfo.m_port = tracker.second;
+          toReturn.m_trackers.push_back( trackerinfo );
+        }
       }
 
       if ( ret == Error::NO_ERROR_LBF )
