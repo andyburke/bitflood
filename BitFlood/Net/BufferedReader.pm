@@ -4,7 +4,7 @@ use strict;
 
 use base qw(Class::Accessor);
 
-use POSIX qw(:errno_h);
+use Errno qw(:POSIX);
 use Time::HiRes qw(time);
 
 use Data::Dumper; # XXX
@@ -56,12 +56,12 @@ sub Read {
   my $bytesRead = $self->socket->sysread($data, $self->windowSize);
   my $transferTime = time() - $readStartTime;
   if (!defined $bytesRead) {
-    if ($! == EAGAIN) {
+    if ($! == EWOULDBLOCK) {
       Debug("would block", 50);
       Debug("<<<", 10);
-      return EAGAIN;
+      return -1;
     } else {
-      Debug("unexpected socket error: $!");
+      Debug("unexpected socket error: $! (" . ($!+0) . ")");
       Debug("<<<", 10);
       return 0;
     }
@@ -74,7 +74,6 @@ sub Read {
     return 0;
   }
 
-  
   Debug("before: " . ${$self->buffer} . "/" . $self->buffer, 50);
   ${$self->buffer} = ${$self->buffer} . $data;
   Debug("after: " . ${$self->buffer} . "/" . $self->buffer, 50);

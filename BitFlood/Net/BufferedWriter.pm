@@ -4,7 +4,7 @@ use strict;
 
 use base qw(Class::Accessor);
 
-use POSIX qw(:errno_h);
+use Errno qw(:POSIX);
 use Time::HiRes qw(time);
 
 use Data::Dumper; # XXX
@@ -59,9 +59,9 @@ sub Write {
     $bytesWritten = $self->socket->syswrite(${$self->buffer}, $self->windowSize);
     $transferTime = time() - $transferStartTime;
     if (!defined $bytesWritten) {
-      if ($! == EAGAIN) {
+      if ($! == EWOULDBLOCK) {
 	Debug("would block", 50);
-	return EAGAIN;
+	return -1;
       } else {
 	Debug("unexpected socket error: $!");
 	return 0;
