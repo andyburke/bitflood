@@ -3,7 +3,7 @@ package BitFlood::Logger;
 use strict;
 
 use base qw(BitFlood::Accessor);
-__PACKAGE__->mk_accessors(qw(filters));
+__PACKAGE__->mk_accessors(qw(filters muted));
 
 
 use BitFlood::Utils;
@@ -17,6 +17,7 @@ sub new {
   my $self = bless({}, $class);
 
   $self->filters([]);
+  $self->muted(0);
 
   my %loadedFilterModuleNames;
   if(exists($args->{filters}))
@@ -54,6 +55,8 @@ sub filter {
 sub log {
   my $self = shift;
   my $ref = shift;
+
+  return if $self->muted;
 
   chomp(my $string = Stringify($ref));
   $self->filter(\$string);
