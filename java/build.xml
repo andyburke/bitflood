@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="BitFlood" default="init" basedir=".">
+  <property name="bin" location="bin"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${bin}"/>
+  </target>
+
+  <target name="Encoder" depends="init" description="build the encoder " >
+    <javac destdir="${bin}"
+    	   srcdir=".">
+      <classpath>
+    	<pathelement path="sdk/xerces/xerces-2_6_2/xml-apis.jar" />
+      	<pathelement path="sdk/xerces/xerces-2_6_2/xercesImpl.jar" />
+      </classpath>
+  	  <include name="EncoderTest.java" />
+      <include name="Encoder.java" />
+    </javac>
+  </target>
+</project> 

@@ -1,8 +1,6 @@
 /*
  * Created on Nov 15, 2004
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 
 import java.io.*;
@@ -17,16 +15,13 @@ import sun.misc.BASE64Encoder;
 
 /**
  * @author burke
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 public class Encoder {
 	private String floodFilename;
 	private int chunkSize;
 	private String weightingFunction;
 	private String[] trackers;
-	private String[] filesToEncode;
+	private String[] pathsToEncode;
 	
 	// simple constructor
 	public Encoder(String floodFilename,
@@ -39,7 +34,7 @@ public class Encoder {
 	  this.chunkSize = chunkSize;
 	  this.weightingFunction = weightingFunction;
 	  this.trackers = trackers;
-	  this.filesToEncode = filesToEncode;
+	  this.pathsToEncode = filesToEncode;
 	  
 	}
 
@@ -81,30 +76,117 @@ public class Encoder {
 		  root.appendChild(item);
 		}
 		
+		String[] filesToEncode = new String[32];
 	  // for all the files to encode
-	  for(int i = 0; i < filesToEncode.length; i++) {
-	  	if(filesToEncode[i] == null)
+	  for(int pathToEncodeIndex = 0; pathToEncodeIndex < pathsToEncode.length; pathToEncodeIndex++) {
+	  	if(pathsToEncode[pathToEncodeIndex] == null)
 	  	{
 	  		break;
 	  	}
 	  	
 	  	
-	  	File file = new File(filesToEncode[i]);
-	  	
-	  	Element fileNode = document.createElement("File");
-	  	fileNode.setAttribute("name", filesToEncode[i]); // FIXME: have to cleanse the filename to spec (unix)
-	  	fileNode.setAttribute("Size", Long.toString(file.length()));
-	  	fileInfo.appendChild(fileNode);
+	  	File file = new File(pathsToEncode[pathToEncodeIndex]);
+	  	pathsToEncode[pathToEncodeIndex] = file.getAbsolutePath(); // change this to be the abs path for cleanup later on
 	  	
 	  	if(file.isDirectory())
 	  	{
-	  		// TODO: recurse and add all files
+	  		pathsToEncode[pathToEncodeIndex] = pathsToEncode[pathToEncodeIndex] + '/'; // for cleanup, later on
+
+	  		File dir = file; // just a little less confusing
+	  		String[] childFiles = new String[32];
+	  		RecursiveFilenameFind(dir.getPath(), childFiles);
+	  		int foundFilesIndex = 0;
+	  		for(; foundFilesIndex < filesToEncode.length; foundFilesIndex++) {
+	  			if(filesToEncode[foundFilesIndex] == null)
+	  			{
+	  				break;
+	  			}
+	  		}
+	  		for(int childIndex = 0; childIndex < childFiles.length; childIndex++) {
+	  			if(childFiles[childIndex] == null)
+	  			{
+	  				break;
+	  			}
+	  			
+	  			if(foundFilesIndex + childIndex >= filesToEncode.length)
+	  			{
+	   				int newSize = 2 * filesToEncode.length;
+	  				String[] tempFilesToEncode = new String[newSize];
+	  				System.arraycopy(filesToEncode, 0, tempFilesToEncode, 0, filesToEncode.length);
+	  				filesToEncode = tempFilesToEncode;
+	  			}
+	  			
+	  			if(filesToEncode[foundFilesIndex + childIndex] == null)
+	  			{
+	  				filesToEncode[foundFilesIndex + childIndex] = childFiles[childIndex];
+	  			}
+	  			else
+	  			{
+	  				System.out.println("Error, filesToEncode has gaps?");
+	  				System.exit(0);
+	  			}
+	  		}
 	  	}
-	  	else
+	  	else // just a regular file
 	  	{
-	  		InputStream inputFileStream = null;
+	  		int foundFilesIndex = 0;
+	  		for(; foundFilesIndex < filesToEncode.length; foundFilesIndex++) {
+	  			if(filesToEncode[foundFilesIndex] == null)
+	  			{
+	  				break;
+	  			}
+	  		}
+  			if(foundFilesIndex >= filesToEncode.length)
+  			{
+   				int newSize = 2 * filesToEncode.length;
+  				String[] tempFilesToEncode = new String[newSize];
+  				System.arraycopy(filesToEncode, 0, tempFilesToEncode, 0, filesToEncode.length);
+  				filesToEncode = tempFilesToEncode;
+  			}
+	  		
+  			filesToEncode[foundFilesIndex] = file.getAbsolutePath();
+	  	}
+	  	
+	  	for(int fileToEncodeIndex = 0; fileToEncodeIndex < filesToEncode.length; fileToEncodeIndex++) {
+	  		if(filesToEncode[fileToEncodeIndex] == null)
+	  		{
+	  			break;
+	  		}
+	  		
+	  		File fileToEncode = new File(filesToEncode[fileToEncodeIndex]);
+	  		Element fileNode = document.createElement("File");
+		  	String cleanFilename = null;
+	  		for(int k = 0; k < pathsToEncode.length; k++) {
+		  		if(pathsToEncode[k] == null)
+		  		{
+		  			break;
+		  		}
+		  		if(filesToEncode[fileToEncodeIndex].startsWith(pathsToEncode[k]))
+		  		{
+		  			String tempPathToEncode = pathsToEncode[k];
+		  			tempPathToEncode.replace('\\', '/');
+		  			
+	  				if(tempPathToEncode.endsWith("/"))
+		  			{
+	  					int lastSlashIndex = tempPathToEncode.lastIndexOf('/', tempPathToEncode.length() - 2);
+		  				cleanFilename = filesToEncode[fileToEncodeIndex].substring(lastSlashIndex + 1);
+		  				cleanFilename.replace('\\', '/');
+		  			}
+		  			else
+		  			{
+		  				String tempFilename = filesToEncode[fileToEncodeIndex];
+		  				tempFilename.replace('\\', '/');
+		  				cleanFilename = tempFilename.substring(tempFilename.lastIndexOf('/'), tempFilename.length());
+		  			}
+		  		}
+		  	}
+	  		fileNode.setAttribute("name", cleanFilename); // FIXME: have to cleanse the filename to spec (unix)
+		  	fileNode.setAttribute("Size", Long.toString(fileToEncode.length()));
+		  	fileInfo.appendChild(fileNode);
+
+		  	InputStream inputFileStream = null;
 	  		try {
-	  			inputFileStream = new FileInputStream(file);
+	  			inputFileStream = new FileInputStream(fileToEncode);
 	  		} catch(Exception e) {
 	  			System.out.println("Error: " + e);
 	  			System.exit(0);
@@ -116,7 +198,7 @@ public class Encoder {
 	      int offset = 0;
 	      int bytesRead = 0;
 	      int weight = 0;
-	      while (offset < file.length()) {
+	      while (offset < fileToEncode.length()) {
 	        
 	      	try {
 	      		bytesRead = inputFileStream.read(chunkData, 0, chunkSize);
@@ -201,5 +283,38 @@ public class Encoder {
 	    }
 	  	
 	  }
+	}
+
+	private boolean RecursiveFilenameFind(String root, String[] result) {
+		File currentDir = new File(root);
+		if(currentDir.isDirectory()) {
+			File[] subFiles = currentDir.listFiles();
+			for(int i = 0; i < subFiles.length; i++) {
+				if(subFiles[i] == null)
+				{
+					break;
+				}
+				
+				if(subFiles[i].isDirectory()) {
+					RecursiveFilenameFind(subFiles[i].getAbsolutePath(), result);
+				} else {
+					int resultIndex = 0;
+					for(; resultIndex < result.length; resultIndex++) {
+						if(result[resultIndex] == null)
+						{	
+							break;
+						}
+					}
+					
+					if(resultIndex >= result.length) {
+						String[] temp = new String[2 * result.length];
+						System.arraycopy(result, 0, temp, 0, result.length);
+	  				result = temp;
+					}
+					result[resultIndex] = subFiles[i].getAbsolutePath();
+				}
+			}
+		}
+		return true;
 	}
 }
