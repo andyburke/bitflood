@@ -12,4 +12,4 @@ my $iPort = 10101 + $iClient;
 
 mkpath $sClientDir;
 chdir $sClientDir;
-system( "java -classpath ../sdk/xerces/xerces-2_6_2/xercesImpl.jar:../sdk/xerces/xerces-2_6_2/xml-apis.jar:./BitFlood.jar com.net.BitFlood.test.ClientTest -flood ../test/sparta.flood -localIP vux.fdntech.com -localPort $iPort" );
+system( "java -classpath ../../sdk/xerces/xerces-2_6_2/xercesImpl.jar:../../sdk/xerces/xerces-2_6_2/xml-apis.jar:../../bin/BitFlood.jar com.net.BitFlood.test.ClientTest -flood ../sparta.flood -localIP vux.fdntech.com -localPort $iPort" );
