@@ -19,7 +19,7 @@ use BitFlood::Debug;
 
 __PACKAGE__->mk_accessors(qw(data filename contentHash localPath 
                              trackers peers startTime totalBytes downloadBytes
-                             neededChunksByWeight));
+                             neededChunksByWeight paused));
 
 
 sub new {
@@ -32,7 +32,8 @@ sub new {
   $self->totalBytes(0);
   $self->downloadBytes(0);
   $self->neededChunksByWeight([]);
-
+  $self->paused(0);
+  
   $self->open if defined $self->filename;
 
   return $self;
