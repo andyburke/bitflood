@@ -103,6 +103,7 @@ sub SendMessage {
   unshift(@methodArgs, $flood->contentHash);
   Debug("$methodName (" . scalar(@methodArgs) . " args) -> " . $self->host . ':' . $self->port, 'net', 20);
   my $request = RPC::XML::request->new($methodName, @methodArgs);
+  Debug('  envelope: ' . $request->as_string, 'net', 100);
   $self->writeBuffer($self->writeBuffer . $request->as_string . "\n");
 
   Debug('<<<', 'trace');
