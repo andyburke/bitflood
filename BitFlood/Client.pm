@@ -14,11 +14,13 @@ use File::Spec;
 use File::Spec::Unix;
 use File::Find;
 use File::Path;
+use Bit::Vector;
+use Data::Dumper; # XXX
 
 use BitFlood::Utils;
 
 
-__PACKAGE__->mk_accessors(qw(floodFiles neededChunks));
+__PACKAGE__->mk_accessors(qw(floods neededChunks));
 
 
 sub new {
@@ -28,9 +30,8 @@ sub new {
   my $self = RPC::XML::Server->new(port => $args{port} || 10101);
   bless $self, $class;
 
-  $self->floodFiles({});
-  $self->neededChunks({});
-  
+  $self->floods({});
+
   $self->add_method({
     name => 'RequestChunk', # the name of the method
     version => '0.0.1', # the method version
@@ -45,7 +46,7 @@ sub new {
 
       #open();
     },
-      
+
   });
 
   return $self;
@@ -61,74 +62,64 @@ sub AddFloodFile {
   my $floodData = XMLin(\*FLOODFILE, ForceArray => ['File']);
   seek(FLOODFILE, 0, 0);
   my $contents = join('', <FLOODFILE>);
-  my $fileHash = sha1_base64($contents);
+  my $floodFileHash = sha1_base64($contents);
   close(FLOODFILE);
 
-  $self->floodFiles->{$fileHash} = { floodData  => $floodData,
-                                     chunkIndex => $self->BuildChunkIndex($floodData)  };
+  my $chunkMaps = $self->BuildChunkMaps($floodData);
+  $self->floods->{$floodFileHash} = { floodData  => $floodData,
+                                      chunkMaps  => $chunkMaps };
 }
 
-sub BuildChunkIndex {
+
+sub BuildChunkMaps {
   my $self = shift;
   my $floodData = shift;
 
-  my @index;
-  while (my ($fileName, $file) = each %{$floodData->{FileInfo}{File}}) {
-    foreach my $chunk (@{$file->{Chunk}}) {
-      push(@index, [$fileName, $chunk->{index}]);
-    }
+  my %chunkMaps;
+  while (my ($fileName, $file) = each  %{$floodData->{FileInfo}{File}}) {
+    $chunkMaps{$fileName} = Bit::Vector->new(scalar @{$file->{Chunk}});
   }
 
-  return \@index;
+  return \%chunkMaps;
 }
+
 
 sub InitializeTargetFiles {
   my $self = shift;
 
-  foreach my $floodFileHash (keys(%{$self->floodFiles})) {
-    my $floodFile = $self->floodFiles->{$floodFileHash}{floodData};
-    foreach my $targetFile (keys(%{$floodFile->{FileInfo}->{File}})) {
-      my $localFilename = LocalFilename($targetFile);
+  foreach my $flood (values(%{$self->floods})) {
+    my $floodData = $flood->{floodData};
+    while (my ($targetFileName, $targetFile) = each %{$floodData->{FileInfo}->{File}}) {
+      my $localFilename = LocalFilename($targetFileName);
 
       if(!-f $localFilename)   # file doesn't exist, initialize it to 0
       {
         mkpath(GetLocalPathFromFilename($localFilename));
         open(OUTFILE, ">$localFilename");
-        my $fileSize = $floodFile->{FileInfo}->{File}->{$targetFile}->{Size};
+        my $fileSize = $targetFile->{Size};
         if($fileSize > 0) {
           seek(OUTFILE, $fileSize-1, 0);
           syswrite(OUTFILE, 0, 1);
         }
         close(OUTFILE);
-
-=pod
-
-        foreach my $chunk (@{$floodFile->{FileInfo}->{File}->{$targetFile}->{Chunk}}) {
-          #FIXME: this is really inefficient, memory-wise
-          if(ref($self->{neededChunks}->{$floodFileHash}->{$targetFile}) ne 'ARRAY') $self->{neededChunks}->{$floodFileHash}->{$targetFile} = []; 
-          push(@{$self->neededChunks->{$floodFileHash}->{$targetFile}}, $chunk);
-        }
-
-=cut
-
       }
       else # file DOES exist, we need to decide what we need to get...
       {
         open(OUTFILE, "<$localFilename");
         my $buffer;
-        foreach my $chunk (sort { $a->{index} <=> $b->{index} } @{$floodFile->{FileInfo}->{File}->{$targetFile}->{Chunk}}) {
+        foreach my $chunk (sort { $a->{index} <=> $b->{index} } @{$targetFile->{Chunk}}) {
           read(OUTFILE, $buffer, $chunk->{size});
           my $hash = sha1_base64($buffer);
-          if($hash ne $chunk->{hash}) {
-            #if(ref($self->{neededChunks}->{$floodFileHash}->{$targetFile}) ne 'ARRAY') $self->{neededChunks}->{$floodFileHash}->{$targetFile} = []; 
-            # FIXME: very ineffecient...
-            #push(@{$self->{neededChunks}->{$floodFileHash}->{$targetFile}}, $chunk);
+          if($hash eq $chunk->{hash}) {
+            $flood->{chunkMaps}{$targetFileName}->Bit_On($chunk->{index});
           }
         }
         close(OUTFILE);
       }
+      print "CM: $targetFileName [", $flood->{chunkMaps}{$targetFileName}->to_ASCII, "] \n";
     }
   }
+
 }
 
 1;
