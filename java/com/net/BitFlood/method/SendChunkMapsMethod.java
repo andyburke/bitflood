@@ -1,19 +1,20 @@
-package com.net.BitFlood;
+package com.net.BitFlood.method;
 
 /*
  * Created on Nov 12, 2004
  *
  */
 
+import com.net.BitFlood.*;
 import java.util.*;
 
 /**
  * @author burke
  *  
  */
-public class SendChunkMapsMethodHandler implements MethodHandler
+public class SendChunkMapsMethod implements MethodHandler
 {
-  final static String methodName = "SendChunkMaps";
+  final static public String methodName = "SendChunkMaps";
   public String getMethodName()
   {
     return methodName;

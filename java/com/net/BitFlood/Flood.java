@@ -5,6 +5,7 @@ package com.net.BitFlood;
  *
  */
 
+import com.net.BitFlood.method.*;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -27,26 +28,26 @@ public class Flood
   // runtime flood data
   public class RuntimeTargetFile
   {
-    String               name          = null;
-    String               nameOnDisk    = null;
-    File                 fileObject    = null;
-    RandomAccessFile     fileHandle    = null;
-    FileChannel          fileChannel   = null;
-    FloodFile.TargetFile targetFile    = null;
-    long[]               chunkOffsets  = null;
-    char[]               chunkMap      = null;
-    Vector               chunks        = null;
+    public String               name          = null;
+    public String               nameOnDisk    = null;
+    public File                 fileObject    = null;
+    public RandomAccessFile     fileHandle    = null;
+    public FileChannel          fileChannel   = null;
+    public FloodFile.TargetFile targetFile    = null;
+    public long[]               chunkOffsets  = null;
+    public char[]               chunkMap      = null;
+    public Vector               chunks        = null;
   }
   
   public class RuntimeChunk
   {
-    int               index                  = -1;
-    int               weight                 = 0;
-    int               size                   = 0;
-    RuntimeTargetFile ownerRuntimeTargetFile = null;
-    boolean           downloading            = false;
-    Date              downloadStartDate      = null;
-    PeerConnection    downloadFrom           = null;
+    public int               index                  = -1;
+    public int               weight                 = 0;
+    public int               size                   = 0;
+    public RuntimeTargetFile ownerRuntimeTargetFile = null;
+    public boolean           downloading            = false;
+    public Date              downloadStartDate      = null;
+    public PeerConnection    downloadFrom           = null;
   }
   
   public int                 totalBytes        = 0;
@@ -152,7 +153,7 @@ public class Flood
           }
 
           // Request the tracker's peer list
-          peer.SendMethod( RequestPeerListMethodHandler.methodName, new Vector() );
+          peer.SendMethod( RequestPeerListMethod.methodName, new Vector() );
         }
       }
     }
@@ -341,7 +342,7 @@ public class Flood
       parameters.add( new Integer( chunkToDownload.index ) );
       
       peerConnectionToUse.chunksDownloading++;
-      peerConnectionToUse.SendMethod( RequestChunkMethodHandler.methodName, parameters );
+      peerConnectionToUse.SendMethod( RequestChunkMethod.methodName, parameters );
 
       chunkToDownload.downloading       = true; // FIXME this needs to be checked for timeout in LoopOnce
       chunkToDownload.downloadFrom      = peerConnectionToUse;

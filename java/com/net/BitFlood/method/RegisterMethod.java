@@ -1,19 +1,20 @@
-package com.net.BitFlood;
+package com.net.BitFlood.method;
 
 /*
  * Created on Nov 12, 2004
  *
  */
 
+import com.net.BitFlood.*;
 import java.util.Vector;
 
 /**
  * @author burke
  *  
  */
-public class RegisterMethodHandler implements MethodHandler
+public class RegisterMethod implements MethodHandler
 {
-  final static String methodName = "Register";
+  final static public String methodName = "Register";
   public String getMethodName()
   {
     return methodName;
@@ -61,7 +62,7 @@ public class RegisterMethodHandler implements MethodHandler
     receiver.flood = flood;
     
     // ask for chunks
-    receiver.SendMethod( RequestChunkMapsMethodHandler.methodName, new Vector() );
+    receiver.SendMethod( RequestChunkMapsMethod.methodName, new Vector() );
     
     flood.peerConnections.add( receiver );
     Logger.LogNormal( "Registered peer: " + receiver + " with the flood: " + floodId );

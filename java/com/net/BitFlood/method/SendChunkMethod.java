@@ -1,10 +1,11 @@
-package com.net.BitFlood;
+package com.net.BitFlood.method;
 
 /*
  * Created on Nov 12, 2004
  *
  */
 
+import com.net.BitFlood.*;
 import java.nio.channels.FileLock;
 import java.util.Vector;
 import java.util.Iterator;
@@ -14,9 +15,9 @@ import java.util.Date;
  * @author burke
  *  
  */
-public class SendChunkMethodHandler implements MethodHandler
+public class SendChunkMethod implements MethodHandler
 {
-  final static String methodName = "SendChunk";
+  final static public String methodName = "SendChunk";
   public String getMethodName()
   {
     return methodName;
@@ -102,7 +103,7 @@ public class SendChunkMethodHandler implements MethodHandler
       while( peerIter.hasNext() )
       {
         PeerConnection peerConnection = (PeerConnection)peerIter.next();
-        peerConnection.SendMethod( NotifyHaveChunkMethodHandler.methodName, nhcParams );
+        peerConnection.SendMethod( NotifyHaveChunkMethod.methodName, nhcParams );
       }
     }
     else

@@ -5,6 +5,7 @@ package com.net.BitFlood;
  *
  */
 
+import com.net.BitFlood.method.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.net.*;
@@ -74,11 +75,11 @@ public class PeerConnection
       args.add( flood.localPeer.id );
       args.add( new Integer( flood.localPeer.port ) );
 
-      SendMethod( RegisterMethodHandler.methodName, args );
+      SendMethod( RegisterMethod.methodName, args );
     }
 
     // request some chunks
-    SendMethod( RequestChunkMapsMethodHandler.methodName, new Vector() );
+    SendMethod( RequestChunkMapsMethod.methodName, new Vector() );
   }
 
   public PeerConnection(Peer peer, SocketChannel incomingSocketConnection)

@@ -1,19 +1,20 @@
-package com.net.BitFlood;
+package com.net.BitFlood.method;
 
 /*
  * Created on Nov 12, 2004
  *
  */
 
+import com.net.BitFlood.*;
 import java.util.*;
 
 /**
  * @author burke
  *  
  */
-public class RequestChunkMapsMethodHandler implements MethodHandler
+public class RequestChunkMapsMethod implements MethodHandler
 {
-  final static String methodName = "RequestChunkMaps";
+  final static public String methodName = "RequestChunkMaps";
 
   public String getMethodName()
   {
@@ -39,6 +40,6 @@ public class RequestChunkMapsMethodHandler implements MethodHandler
       scmParams.add( new String( runtimeTargetFile.chunkMap ) );
     }
     
-    receiver.SendMethod( SendChunkMapsMethodHandler.methodName, scmParams );
+    receiver.SendMethod( SendChunkMapsMethod.methodName, scmParams );
   }
 }

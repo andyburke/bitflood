@@ -1,10 +1,11 @@
-package com.net.BitFlood;
+package com.net.BitFlood.method;
 
 /*
  * Created on Nov 12, 2004
  *
  */
 
+import com.net.BitFlood.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,9 +15,9 @@ import java.util.*;
  * @author burke
  *  
  */
-public class RequestChunkMethodHandler implements MethodHandler
+public class RequestChunkMethod implements MethodHandler
 {
-  final static String methodName = "RequestChunk";
+  final static public String methodName = "RequestChunk";
 
   public String getMethodName()
   {
@@ -103,6 +104,6 @@ public class RequestChunkMethodHandler implements MethodHandler
     scParams.add( fileName );
     scParams.add( chunkIndex );
     scParams.add( chunkData );
-    receiver.SendMethod( SendChunkMethodHandler.methodName, scParams );
+    receiver.SendMethod( SendChunkMethod.methodName, scParams );
   }
 }

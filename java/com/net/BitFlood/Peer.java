@@ -5,6 +5,7 @@ package com.net.BitFlood;
  *
  */
 
+import com.net.BitFlood.method.*;
 import java.util.*;
 import java.nio.channels.*;
 import java.net.*;
@@ -43,8 +44,8 @@ public class Peer
 
     SetupListenSocket();
 
-    AddMethodHandler( new RegisterMethodHandler() );
-    AddMethodHandler( new SendPeerListMethodHandler() );
+    AddMethodHandler( new RegisterMethod() );
+    AddMethodHandler( new SendPeerListMethod() );
   }
 
   public boolean JoinFlood( String floodFilename )
@@ -192,20 +193,20 @@ public class Peer
 
   public void ActAsTracker()
   {
-    AddMethodHandler( new RequestPeerListMethodHandler() );
+    AddMethodHandler( new RequestPeerListMethod() );
   }
 
   public void ActAsSeed()
   {
-    AddMethodHandler( new RequestChunkMapsMethodHandler() );
-    AddMethodHandler( new RequestChunkMethodHandler() );
+    AddMethodHandler( new RequestChunkMapsMethod() );
+    AddMethodHandler( new RequestChunkMethod() );
   }
 
   public void ActAsLeech()
   {
-    AddMethodHandler( new SendChunkMapsMethodHandler() );
-    AddMethodHandler( new SendChunkMethodHandler() );
-    AddMethodHandler( new NotifyHaveChunkMethodHandler() );
+    AddMethodHandler( new SendChunkMapsMethod() );
+    AddMethodHandler( new SendChunkMethod() );
+    AddMethodHandler( new NotifyHaveChunkMethod() );
   }
 
   protected void AddMethodHandler( MethodHandler handler )

@@ -1,19 +1,20 @@
-package com.net.BitFlood;
+package com.net.BitFlood.method;
 
 /*
  * Created on Nov 12, 2004
  *
  */
 
+import com.net.BitFlood.*;
 import java.util.Vector;
 
 /**
  * @author burke
  *  
  */
-public class NotifyHaveChunkMethodHandler implements MethodHandler
+public class NotifyHaveChunkMethod implements MethodHandler
 {
-  final static String methodName = "NotifyHaveChunk";
+  final static public String methodName = "NotifyHaveChunk";
 
   public String getMethodName()
   {
