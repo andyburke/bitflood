@@ -20,12 +20,14 @@ use File::Find;
 use File::Path;
 use Bit::Vector;
 use IO::File;
+use Socket;
+use Sys::Hostname;
 use Data::Dumper; # XXX
 
 use BitFlood::Utils;
+use BitFlood::Flood;
 
-
-__PACKAGE__->mk_accessors(qw(floods trackers peers gettingChunks));
+__PACKAGE__->mk_accessors(qw(floods trackers peers chunksToGet));
 
 
 sub new {
@@ -38,7 +40,6 @@ sub new {
   $self->floods({});
   $self->trackers({});
   $self->peers({});
-  $self->gettingChunks(0);
 
   $self->add_method({
     name => 'RequestChunk', # the name of the method
@@ -48,26 +49,32 @@ sub new {
     help => 'A method to request a given chunk.', # help for this method
     code => sub {
       my $self = shift;
+
+      printf("RequestChunk: sending: %s %s %d\n", @_);
+
       my $fileHash = shift;
       my $filename = shift;
       my $index = shift;
 
       my $flood = $self->floods->{$fileHash};
+      my $file = $flood->Files->{$filename};
       # FIXME: return error here...
-      return unless($flood->{chunkMaps}{$filename}->bit_test($index));
+      return unless($file->{chunkMap}->bit_test($index));
+      print " -> have chunk\n";
 
-      my $chunkSourceFilename = $flood->{localTargetFilenames}{$filename};
+      my $chunkSourceFilename = $file->{localFilename};
       # FIXME: error
-      return unless($chunkSourceFilename);
+      return unless(defined $chunkSourceFilename);
+      print " -> have source filename\n";
 
-      my $chunk = $flood->{floodData}{FileInfo}{File}{$filename}{Chunk}[$index];
+      my $chunk = $file->{Chunk}[$index];
       # FIXME: return error
       return unless($chunk);
+      print " -> got chunk object\n";
 
-      my $chunkOffset = $flood->{chunkOffsets}{$filename}[$index];
       my $chunkData;
       my $chunkSourceFile = IO::File->new($chunkSourceFilename, 'r');
-      $chunkSourceFile->seek($chunkOffset, 0);
+      $chunkSourceFile->seek($chunk->{offset}, 0);
       $chunkSourceFile->read($chunkData, $chunk->{size});
       $chunkSourceFile->close();
 
@@ -85,189 +92,114 @@ sub Start {
   $self->server_loop();
 }
 
+# FIXME eventually remove actual RPC calls from here, maybe push
+# outbound events on a queue or something?
 sub AddFloodFile {
   my $self = shift;
   my $filename = shift;
-  my $localPath = shift || '.';
+  my $localPath = shift || '.'; # FIXME mac?
 
-  return if(!-f $filename);
-
-  open(FLOODFILE, $filename);
-  my $floodData = XMLin(\*FLOODFILE, ForceArray => [qw(File Tracker)]);
-  seek(FLOODFILE, 0, 0);
-  my $contents = join('', <FLOODFILE>);
-  my $floodFileHash = sha1_base64($contents);
-  close(FLOODFILE);
-
-  # NOTE: this guarantees that our chunks are in order, per target file,
-  #       but means that we can NEVER write the floodfile back out, so
-  #       screw you
-  $self->SortChunksInPlace($floodData);
-
-  my $chunkMaps = $self->BuildChunkMaps($floodData);
-  my $localTargetFilenames = $self->BuildLocalTargetFilenames($floodData, $localPath);
-  my $chunkOffsets = $self->BuildChunkOffsets($floodData);
-  $self->floods->{$floodFileHash} = {
-                                     localTargetFilenames => $localTargetFilenames,
-                                     floodData            => $floodData,
-                                     chunkMaps            => $chunkMaps,
-                                     chunkOffsets         => $chunkOffsets,
-                                    };
+  my $flood = BitFlood::Flood->new({filename  => $filename,
+                                    localPath => $localPath});
+  $self->floods->{$flood->contentHash} = $flood;
 
   # add our trackers for this flood file...
-  $self->trackers->{$floodFileHash} ||= [];
-  foreach my $tracker (@{$floodData->{Tracker}}) {
-    my $tracker = RPC::XML::Client->new($tracker);
-    push(@{$self->trackers->{$floodFileHash}}, $tracker);
+  foreach my $trackerURL (@{$flood->TrackerURLs}) {
+    my $tracker = RPC::XML::Client->new($trackerURL);
+    push(@{$flood->trackers}, $tracker);
     $tracker->simple_request(
                              'Register',
-                             $floodFileHash,
-                             '192.168.2.128',
+                             $flood->contentHash,
+                             inet_ntoa(scalar gethostbyname(hostname())), # FIXME good enough?
                              $self->port,
                             );
 
-    $self->peers->{$floodFileHash} ||= [];
-    foreach my $peerAddress (@{$tracker->simple_request('RequestPeers', $floodFileHash)}) {
-      push(@{$self->peers->{$floodFileHash}}, RPC::XML::Client->new($peerAddress));
+    foreach my $peerAddress (@{$tracker->simple_request('RequestPeers', $flood->contentHash)}) {
+      push(@{$flood->peers}, RPC::XML::Client->new($peerAddress));
     }
 
   }
 
 }
 
-
-
-sub BuildChunkMaps {
-  my $self = shift;
-  my $floodData = shift;
-
-  my %chunkMaps;
-  while (my ($fileName, $file) = each  %{$floodData->{FileInfo}{File}}) {
-    $chunkMaps{$fileName} = Bit::Vector->new(scalar @{$file->{Chunk}});
-  }
-
-  return \%chunkMaps;
-}
-
-sub BuildLocalTargetFilenames {
-  my $self = shift;
-  my $floodData = shift;
-  my $localPath = shift;
-
-  my %localTargetFilenames;
-  while (my ($fileName, $file) = each  %{$floodData->{FileInfo}{File}}) {
-    $localTargetFilenames{$fileName} = LocalFilename(File::Spec->catfile($localPath, $fileName));
-  }
-
-  return \%localTargetFilenames;
-}
-
-sub BuildChunkOffsets {
-  my $self = shift;
-  my $floodData = shift;
-
-  my %chunkOffsets;
-  while (my ($fileName, $file) = each  %{$floodData->{FileInfo}{File}}) {
-    $chunkOffsets{$fileName} = [];
-    my $offset = 0;
-    foreach my $chunk (@{$file->{Chunk}}) {
-      push(@{$chunkOffsets{$fileName}}, $offset);
-      $offset += $chunk->{size};
-    }
-  }
-
-  return \%chunkOffsets;
-}
-
-sub SortChunksInPlace {
-  my $self = shift;
-  my $floodData = shift;
-
-  foreach my $targetFile (values(%{$floodData->{FileInfo}{File}})) {
-    $targetFile->{Chunk} = [ sort { $a->{index} <=> $b->{index} } @{$targetFile->{Chunk}} ];
-  }
-}
-
-sub InitializeTargetFiles {
-  my $self = shift;
-
-  foreach my $flood (values(%{$self->floods})) {
-    my $floodData = $flood->{floodData};
-    while (my ($targetFileName, $targetFile) = each %{$floodData->{FileInfo}->{File}}) {
-      my $localTargetFilename = $flood->{localTargetFilenames}{$targetFileName};
-
-      if(!-f $localTargetFilename)   # file doesn't exist, initialize it to 0
-      {
-        mkpath(GetLocalPathFromFilename($localTargetFilename));
-        open(OUTFILE, ">$localTargetFilename");
-        my $fileSize = $targetFile->{Size};
-        if($fileSize > 0) {
-          seek(OUTFILE, $fileSize-1, 0);
-          syswrite(OUTFILE, 0, 1);
-        }
-        close(OUTFILE);
-      }
-      else # file DOES exist, we need to decide what we need to get...
-      {
-        open(OUTFILE, "<$localTargetFilename");
-        my $buffer;
-        foreach my $chunk (@{$targetFile->{Chunk}}) {
-          read(OUTFILE, $buffer, $chunk->{size});
-          my $hash = sha1_base64($buffer);
-          if($hash eq $chunk->{hash}) {
-            $flood->{chunkMaps}{$targetFileName}->Bit_On($chunk->{index});
-          }
-        }
-        close(OUTFILE);
-      }
-      print "$targetFileName [", $flood->{chunkMaps}{$targetFileName}->to_ASCII, "] \n";
-    }
-  }
-
-}
 
 sub GetChunk {
   my $self = shift;
+
+  printf("GetChunk: getting: %s %s %d\n", @_);
+
   my $floodFileHash = shift;
   my $targetFilename = shift;
   my $index = shift;
 
   my $flood = $self->floods->{$floodFileHash};
-  $flood->{$floodFileHash}->{gettingChunk} = 1;
-  share($flood->{$floodFileHash}->{gettingChunk});
+  my $file = $flood->Files->{$targetFilename};
+  my $chunk = $file->{Chunk}[$index];
 
-  my $thread = threads::create->(sub {
-    my $targetFile = IO::File->new($flood->{localTargetFilenames}{$targetFilename}, 'r+');
-    $targetFile->seek($flood->{chunkOffsets}{$targetFilename}[$index], 0);
+#  share($file->{chunkMap});
+#  share($file->{totalDownloading});
+#  share($chunk->{downloading});
+  
+  $chunk->{downloading} = 1;
+  {
+#    lock($file->{totalDownloading});
+    $file->{totalDownloading}++;
+  }
 
-    my $chunkData = $self->peers->{$floodFileHash}[0]->simple_request('RequestChunk', $floodFileHash, $targetFilename, $index);
+#  my $thread = threads->create(sub {
+    my $targetFile = IO::File->new($file->{localFilename}, 'r+');
+    $targetFile->seek($chunk->{offset}, 0);
+    print "  -> making RPC call\n";
+    my $chunkData = $flood->peers->[0]->simple_request('RequestChunk', $floodFileHash, $targetFilename, $index); # FIXME choose which peer
+    print "  -> finished RPC call\n";
 
-    my $chunk = $flood->{floodData}{FileInfo}{File}{$targetFilename}{Chunk}[$index];
-    
     if(sha1_base64($chunkData) eq $chunk->{hash}) {
+      print "  -> hashes match\n";
       $targetFile->print($chunkData);
-      $flood->{chunkMaps}{$targetFilename}->Bit_On($index);
+      print "  -> updating chunkmap\n";
+#      lock($file->{chunkMap});
+      $file->{chunkMap}->Bit_On($index);
+      print "  -> updated chunkmap OK\n";
     } else {
-      print "FAIL!!!!!!!!!!!!!!!!!\n";
+      print "  -> FAIL!!!!!!!!!!!!!!!!!\n";
     }
-    $targetFile->close();
-    
-    $flood->{gettingChunk} = 0;
-  });
 
-  $thread->detach();
+    $targetFile->close();
+    delete $chunk->{downloading};
+#    lock($file->{totalDownloading});
+    $file->{totalDownloading}--;
+    print "  -> done getting chunk\n";
+#  });
+
+#  $thread->detach();
 
 }
 
 sub GetChunks {
   my $self = shift;
 
-  foreach my $floodFileHash (keys(%{$self->floods})) {
-    my $flood = $self->floods->{$floodFileHash};
-    next if($flood->{$floodFileHash}->{gettingChunk}); # this one is getting a chunk right now
-    $self->GetChunk($floodFileHash,); # FIXME: busticated
+  my %incompleteFiles;
+  foreach my $flood (values %{$self->floods}) {
+    my $files = [ grep { ! $_->{chunkMap}->is_full } values %{$flood->Files} ];
+    $incompleteFiles{$flood->contentHash} = $files if @$files;
+  }
+
+  if (%incompleteFiles) {
+
+    while (my ($floodFileHash, $files) = each %incompleteFiles) {
+      foreach my $file (@$files) {
+        next if $self->floods->{$floodFileHash}->{totalDownloading}; # FIXME only getting one chunk at a time
+        my $chunkMap = $file->{chunkMap};
+        for (my $index = 0; $index < $chunkMap->Size; $index++) {
+          next if $chunkMap->bit_test($index);
+          $self->GetChunk($floodFileHash, $file->{name}, $index);
+          last;
+        }
+      }
+    }
     
   }
+
 }
 
 sub do_one_loop
