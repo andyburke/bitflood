@@ -54,7 +54,7 @@ __PACKAGE__->mk_accessors(qw(
 sub new {
   my $class = shift;
 
-  Debug("Creating new Peer...", 5);
+  Debug("Creating new Peer", 5);
   my $self = $class->SUPER::new(@_);
 
   $self->client or die("Client object not specified");
@@ -119,7 +119,7 @@ sub Connect {
 
   if (!$self->socket) {
 
-    Debug("connecting out: " . $self->id . "(" . $self->host . ":" . $self->port . ")", 'net', 10);
+    Debug("connecting out to " . $self->host . ":" . $self->port . " (" . $self->id . ")", 'net', 10);
 
     $self->socket(IO::Socket::INET->new(
 					Proto    => 'tcp',
@@ -140,7 +140,7 @@ sub Connect {
 
   my $select = IO::Select->new($self->socket);
   my $connected = $select->can_write(0);
-  Debug("checking for completed connection (" . $self->host . "): $connected [error: $! (" . ($!+0) . ")]", 'net', 30);
+  Debug("checking for completed connection to " . $self->host . ":" . $self->port . "... " . ($connected ? 'yes' : 'no') ." [error: $! (" . ($!+0) . ")]", 'net', 30);
 
   if ($connected) {
 
@@ -479,7 +479,7 @@ sub ReadOnce {
   Debug(">>>", 10);
 
   if(!defined($self->bufferedReader)) {
-    Debug("No buffered reader object...");
+    Debug("No buffered reader object");
     return;
   }
 
@@ -494,7 +494,7 @@ sub ReadOnce {
   Debug("readBuffer address after read: " . \$self->readBuffer, 50);
 
   if ($result == -1) {
-    Debug("Would block...", 'net', 30);
+    Debug("would block", 'net', 30);
     Debug("<<<", 10);
     return;
   } elsif($result == 0) {
@@ -513,13 +513,13 @@ sub WriteOnce {
   Debug(">>>", 10);
 
   if(!length($self->writeBuffer)) {
-    Debug("nothing to write...", 50);
+    Debug("nothing to write", 50);
     Debug("<<<", 10);
     return;
   }
 
   if(!defined($self->bufferedWriter)) {
-    Debug("No buffered writer...");
+    Debug("No buffered writer");
     Debug("<<<", 10);
     return;
   }
@@ -533,11 +533,13 @@ sub WriteOnce {
   my $result = $self->bufferedWriter->Write();
 
   if ($result == -1) {
-    Debug("Would block...", 'net', 30);
+    Debug("would block", 'net', 30);
+    Debug("<<<", 10);
     return;
   } elsif($result == 0) {
     Debug("write error, disconnecting peer: " . $self->id, 'net');
     $self->disconnected(1);
+    Debug("<<<", 10);
     return;
   }
 

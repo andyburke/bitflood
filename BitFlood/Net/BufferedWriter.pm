@@ -16,7 +16,7 @@ __PACKAGE__->mk_accessors(qw(buffer socket windowSize));
 
 use constant MAX_SOCKET_WINDOW => 256 * 1024;
 use constant MIN_SOCKET_WINDOW => 512;
-use constant DEFAULT_SOCKET_WINDOW => 64 * 1024;
+use constant DEFAULT_SOCKET_WINDOW => 128 * 1024;
 #use constant MAX_SOCKET_WINDOW => 4 * 1024;
 #use constant MIN_SOCKET_WINDOW => 4 * 1024;
 #use constant DEFAULT_SOCKET_WINDOW => 4 * 1024;
@@ -37,7 +37,7 @@ sub new {
   }
 
   if(!$self->windowSize) {
-    Debug("No windowSize specified, setting to: " . DEFAULT_SOCKET_WINDOW, 'net');
+    Debug("No windowSize specified, setting to: " . DEFAULT_SOCKET_WINDOW, 'net', 40);
     $self->windowSize(DEFAULT_SOCKET_WINDOW);
   }
 
@@ -49,28 +49,24 @@ sub Write {
 
   Debug(">>>", 10);
 
-  my $transferStartTime;
   my $bytesWritten;
-  my $transferTime;
 
   if(length(${$self->buffer})) {
 #    Debug("buffer: " . ${$self->buffer}, 50);
 #    Debug("window: " . $self->windowSize, 50);
     # FIXME look into local ( $SIG{PIPE} ) ?
-    $transferStartTime = time();
     $bytesWritten = $self->socket->syswrite(${$self->buffer}, $self->windowSize);
-    $transferTime = time() - $transferStartTime;
     if (!defined $bytesWritten) {
       if ($! == EWOULDBLOCK) {
-	Debug("would block", 50);
         Debug("<<<", 10);
 	return -1;
       } else {
-	Debug("unexpected socket error: $!");
+	Debug("unexpected socket error: $!", 'net');
         Debug("<<<", 10);
 	return 0;
       }
     }
+    Debug("wrote $bytesWritten bytes", 'net', 40);
     
     my $dataWritten = substr(${$self->buffer}, 0, $bytesWritten, '');
     Debug("wrote data: $dataWritten", 'net', 100);

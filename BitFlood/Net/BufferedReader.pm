@@ -16,7 +16,7 @@ __PACKAGE__->mk_accessors(qw(buffer socket windowSize));
 
 use constant MAX_SOCKET_WINDOW => 256 * 1024;
 use constant MIN_SOCKET_WINDOW => 512;
-use constant DEFAULT_SOCKET_WINDOW => 64 * 1024;
+use constant DEFAULT_SOCKET_WINDOW => 128 * 1024;
 #use constant MAX_SOCKET_WINDOW => 4 * 1024;
 #use constant MIN_SOCKET_WINDOW => 4 * 1024;
 #use constant DEFAULT_SOCKET_WINDOW => 4 * 1024;
@@ -39,7 +39,7 @@ sub new {
   }
 
   if(!$self->windowSize) {
-    Debug("No windowSize specified, setting to: " . DEFAULT_SOCKET_WINDOW, 'net');
+    Debug("No windowSize specified, setting to: " . DEFAULT_SOCKET_WINDOW, 'net', 40);
     $self->windowSize(DEFAULT_SOCKET_WINDOW);
   }
 
@@ -54,12 +54,9 @@ sub Read {
   Debug("read window (" . $self->socket->peerhost . ':' . $self->socket->peerport . "): " . $self->windowSize, 'net', 50);
 
   my $data;
-  my $readStartTime = time();
   my $bytesRead = $self->socket->sysread($data, $self->windowSize);
-  my $transferTime = time() - $readStartTime;
   if (!defined $bytesRead) {
     if ($! == EWOULDBLOCK) {
-      Debug("would block", 'net', 50);
       Debug("<<<", 10);
       return -1;
     } else {
@@ -68,6 +65,7 @@ sub Read {
       return 0;
     }
   }
+  Debug("read $bytesRead bytes", 'net', 40);
 
   if (!length($data)) { # remote end disconnected
     Debug("<<<", 10);
