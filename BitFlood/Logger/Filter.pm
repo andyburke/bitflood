@@ -2,7 +2,7 @@ package BitFlood::Logger::Filter;
 
 use strict;
 
-use base qw(Class::Accessor);
+use base qw(BitFlood::Accessor);
 __PACKAGE__->mk_accessors(qw());
 
 # dummy subs, meant to be overridden
