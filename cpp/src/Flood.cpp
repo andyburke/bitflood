@@ -257,7 +257,7 @@ namespace libBitFlood
               }
 
               // sort the chunks in index order
-              std::sort( lbffile.m_chunks.begin(), lbf.m_chunks.end(), SortChunksByIndex );
+              std::sort( lbffile.m_chunks.begin(), lbffile.m_chunks.end(), SortChunksByIndex );
             }
 
             m_files.push_back( lbffile );
