@@ -14,11 +14,11 @@ use constant UPDATE_INTERVAL => 20;
 
 # this locates the BitFlood/ directory and adds it to our include path
 BEGIN {
-  print "got: $0\n";
+#  print "got: $0\n";
   my ($volume, $directories, $file) = File::Spec->splitpath($0);
   my @dirs = File::Spec->splitdir($directories);
   pop(@dirs) while(@dirs && !-e File::Spec->catfile($volume, @dirs, 'BitFlood'));
-  print "pushing on inc: " . File::Spec->catfile($volume, @dirs) . "\n";
+#  print "pushing on inc: " . File::Spec->catfile($volume, @dirs) . "\n";
   push(@INC, File::Spec->catfile($volume, @dirs));
 }
 
@@ -61,9 +61,11 @@ while(1) {
     $client->UpdatePeerList;
     $lastUpdateTime = time();
   }
+
   $client->GetChunks();
   $client->LoopOnce();
-  sleep(.1);
+
+  sleep(1);
 }
 
 sub mainWindow_Resize {
@@ -88,16 +90,39 @@ sub floods_OpenButton_Click {
 
 sub UpdateDisplay {
   $mainWindow->floods_FloodsListView->Clear();
+
   foreach my $flood (values(%{$client->floods})) {
+
+    my $seeds = 0;
+    my $peers = 0;
+
+    foreach my $peer (@{$client->peers}) {
+      my $chunkMaps = $peer->chunkMaps->{$flood->contentHash};
+      if(defined($chunkMaps)) {
+	$peers++;
+
+	my $allFilesComplete = 1;
+	foreach my $filename (keys(%{$chunkMaps})) {
+	  if(!$chunkMaps->{$filename}->is_full()) {
+	    $allFilesComplete = 0;
+	    print "$filename is not complete..." . $chunkMaps->{$filename}->to_Enum() . "\n";
+	  }
+	}
+	
+	$seeds++ if $allFilesComplete;
+      }
+    }
+
     $mainWindow->floods_FloodsListView->InsertItem(-text => [
 							     $flood->filename,
-							     $flood->contentHash,
+							     ReadableSize($flood->totalBytes),
+							     ReadableSize($flood->downloadBytes),
 							     $flood->totalBytes ? sprintf("%3.2f%%", 100 * $flood->downloadBytes / $flood->totalBytes) : '0%',
 							     ReadableTimeDelta(time() - $flood->startTime),
-							     000, # FIXME: calculate this
-							     sprintf("%5.2f K/s", ($flood->downloadBytes / 1024) / ((time() - $flood->startTime) + 1)),
-							     000, # FIXME: find complete peers
-							     000, # FIXME: find incomplete peers
+							     ReadableTimeDelta(($flood->totalBytes - $flood->downloadBytes) / ($flood->downloadBytes / (time() - $flood->startTime) + 1) + 1),
+							     sprintf("%s/s", ReadableSize(($flood->downloadBytes) / ((time() - $flood->startTime) + 1))),
+							     $seeds, # FIXME: find complete peers
+							     $peers - $seeds, # FIXME: find incomplete peers
 							     'n/a',
 							     'n/a',
 							    ]);
@@ -116,3 +141,24 @@ sub ReadableTimeDelta {
   return "$hours:$minutes:$seconds";
 
 } 
+
+sub ReadableSize {
+  my $size = shift;
+
+  if(int($size / (1024 * 1024 * 1024))) # gigabytes
+  {
+    return sprintf("%.2f GB", $size / (1024 * 1024 * 1024));
+  }
+  elsif(int($size / (1024 * 1024))) # megabytes
+  {
+    return sprintf("%.2f MB", $size / (1024 * 1024));
+  }
+  elsif(int($size / 1024)) # kilobytes
+  {
+    return sprintf("%.2f KB", $size / 1024);
+  }
+  else # bytes
+  {
+    return sprintf("%d B", $size);
+  }
+}
