@@ -16,7 +16,7 @@ __PACKAGE__->mk_accessors(qw(buffer socket windowSize));
 
 use constant MAX_SOCKET_WINDOW => 256 * 1024;
 use constant MIN_SOCKET_WINDOW => 512;
-use constant DEFAULT_SOCKET_WINDOW => MIN_SOCKET_WINDOW + ((MAX_SOCKET_WINDOW - MIN_SOCKET_WINDOW) / 2);
+use constant DEFAULT_SOCKET_WINDOW => 64 * 1024;
 #use constant MAX_SOCKET_WINDOW => 4 * 1024;
 #use constant MIN_SOCKET_WINDOW => 4 * 1024;
 #use constant DEFAULT_SOCKET_WINDOW => 4 * 1024;
