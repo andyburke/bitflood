@@ -99,7 +99,7 @@ sub SendMessage {
   Debug(">>>", 10);
 
   unshift(@methodArgs, $flood->contentHash);
-  Debug("method $methodName (" . scalar(@methodArgs) . " args) -> " . $self->host . ':' . $self->port, 'net', 20);
+  Debug("$methodName (" . scalar(@methodArgs) . " args) -> " . $self->host . ':' . $self->port, 'net', 20);
   my $request = RPC::XML::request->new($methodName, @methodArgs);
   $self->writeBuffer($self->writeBuffer . $request->as_string . "\n");
 
@@ -145,7 +145,7 @@ sub Connect {
   if ($connected) {
 
     $self->connectCompleted(1);
-    Debug("socket connected", 'net', 10);
+    Debug("socket connected to " . $self->host . ":" . $self->port, 'net', 10);
 
     $self->bufferedReader(BitFlood::Net::BufferedReader->new({buffer => \$self->{readBuffer}, socket => $self->socket}));
     $self->bufferedWriter(BitFlood::Net::BufferedWriter->new({buffer => \$self->{writeBuffer}, socket => $self->socket}));
@@ -406,8 +406,12 @@ sub HandleNotifyHaveChunk {
     return;
   }
   Debug("peer " . $self->id ." (".$self->host.":".$self->port.") has ".substr($filename,-20)."#".$index, 'net', 40);
-  $self->chunkMaps->{$flood->contentHash}{$filename}->Bit_On($index);
-  Debug("chunkmap now: " . $self->chunkMaps->{$flood->contentHash}{$filename}->to_ASCII, 10);
+  if(defined($self->chunkMaps->{$flood->contentHash}{$filename})) {
+    $self->chunkMaps->{$flood->contentHash}{$filename}->Bit_On($index);
+    Debug("chunkmap now: " . $self->chunkMaps->{$flood->contentHash}{$filename}->to_ASCII, 10);
+  } else {
+    Debug("notified about a chunk before we have chunkmaps", 'net');
+  }
 
   Debug("<<<", 10);
 }
@@ -427,7 +431,7 @@ sub DispatchRequests {
 
   my $methodName = 'Handle' . $request->{name};
   if (my $methodRef = $self->can($methodName)) {
-    Debug("dispatching to $methodName", 'net', 20);
+    Debug($self->host . ":" . $self->port . " -> $methodName", 'net', 20);
     my @requestArgs = map { $_->value } @{$request->{args}};
     my $floodHash = shift(@requestArgs);
     my $flood;
@@ -449,7 +453,7 @@ sub DispatchRequests {
     }
     $methodRef->($self, $flood, @requestArgs);
   } else {
-    Debug("Invalid RPC request method: $request->{name}", 'net');
+    Debug("Unsupported RPC request method: $request->{name}", 'net');
   }
 
   Debug("<<<", 10);
