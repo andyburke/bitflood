@@ -26,7 +26,7 @@ SetDebugLineNumbers($ENV{BITFLOOD_DEBUG_LINENUMBERS}) if(defined($ENV{BITFLOOD_D
 
 AddStdout() unless defined($ENV{BITFLOOD_DEBUG_QUIET});
 AddStderr() if defined($ENV{BITFLOOD_DEBUG_STDERR});
-AddFile() if defined($ENV{BITFLOOD_DEBUG_FILE});  
+AddFile($ENV{BITFLOOD_DEBUG_FILENAME} || 'debug.log.txt') if defined($ENV{BITFLOOD_DEBUG_FILE});  
 
 sub SetDebugLevel {
   $debugLevel = shift;
@@ -45,7 +45,8 @@ sub AddStderr {
 }
 
 sub AddFile {
-  my $filename = shift || $ENV{BITFLOOD_DEBUG_FILENAME} || 'debug.log.txt';
+  my $filename = shift;
+  $filename or return;
   $logger->add(BitFlood::Logger::File->new($filename));
 }
 
