@@ -29,7 +29,7 @@ AddLogger('', 'Stdout')
   unless defined($ENV{BITFLOOD_DEBUG_QUIET});
 AddLogger('', 'Stderr')
   if defined($ENV{BITFLOOD_DEBUG_STDERR});
-AddLogger('', 'File', $ENV{BITFLOOD_DEBUG_FILENAME} || 'debug.log')
+AddLogger('', 'File', $ENV{BITFLOOD_DEBUG_FILENAME} || 'debug.log', append => 0)
   if defined($ENV{BITFLOOD_DEBUG_FILE});  
 
 foreach my $channel (split(',', $ENV{BITFLOOD_DEBUG_CHANNELS})) {
