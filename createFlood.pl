@@ -21,7 +21,7 @@ if($getHelp or !$floodFile or !@trackerUrls or !@ARGV) {
   my ($appName) = $0 =~ /[\\\/]?(.*?)$/;
   print <<USAGE;
 Usage:
-  $appName -flood <floodname.flood> -tracker <host> [-tracker <host>...] [-weighting [topheavy|bottomheavy]] <files/dirs to add>
+  $appName -flood <floodname.flood> -tracker <host> [-tracker <host>...] [-weighting [topheavy|bottomheavy|topheavyperfile|bottomheavyperfile]] <files/dirs to add>
 USAGE
   exit(0);
 }
