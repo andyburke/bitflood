@@ -67,6 +67,68 @@ sub encode {
   foreach my $fileStruct (sort { $a->{cleanFilename} cmp $b->{cleanFilename} } @fileInfo) {
     $self->_EncodeFile($fileStruct);
   }
+  
+  if($self->weightingFunction eq 'topheavyperfile')
+  {
+    foreach my $file (values(%{$self->data->{Files}})) {
+      $file->{Chunk} or next;
+      my $numChunks = scalar(@{$file->{Chunk}});
+      for(my $i = 0; $i < $numChunks; $i++) {
+	$file->{Chunk}->[$i]->{weight} = $numChunks - $i;
+      }
+    }
+  }
+  elsif($self->weightingFunction eq 'bottomheavyperfile')
+  {
+    foreach my $file (values(%{$self->data->{Files}})) {
+      $file->{Chunk} or next;
+      my $numChunks = scalar(@{$file->{Chunk}});
+      for(my $i = 0; $i < $numChunks; $i++) {
+	$file->{Chunk}->[$i]->{weight} = $i;
+      }
+    }
+  }
+  elsif($self->weightingFunction eq 'topheavy')
+  {
+    my $totalChunks = 0; 
+    foreach my $file (values(%{$self->data->{Files}})) {
+      $file->{Chunk} or next;
+      $totalChunks += scalar(@{$file->{Chunk}});
+    }
+    foreach my $filename (sort(keys(%{$self->data->{Files}}))) {
+      my $file = $self->data->{Files}->{$filename};
+      $file->{Chunk} or next;      
+      my $numChunks = scalar(@{$file->{Chunk}});
+      for(my $i = 0; $i < $numChunks; $i++) {
+	$file->{Chunk}->[$i]->{weight} = $totalChunks--;
+      }
+    }
+  }
+  elsif($self->weightingFunction eq 'bottomheavy')
+  {
+    my $weight = 0;
+    foreach my $filename (sort(keys(%{$self->data->{Files}}))) {
+      my $file = $self->data->{Files}->{$filename};
+      $file->{Chunk} or next;
+      my $numChunks = scalar(@{$file->{Chunk}});
+      for(my $i = 0; $i < $numChunks; $i++) {
+	$file->{Chunk}->[$i]->{weight} = $weight++;
+      }
+    }
+  }
+  else
+  {
+    # random weighting
+    foreach my $file (values(%{$self->data->{Files}})) {
+      $file->{Chunk} or next;
+      my $numChunks = scalar(@{$file->{Chunk}});
+      for(my $i = 0; $i < $numChunks; $i++) {
+	$file->{Chunk}->[$i]->{weight} = int(rand() * $numChunks);
+      }
+    }
+  }
+  
+
   print "Total Time: " . (time() - $startTime) . "s\n";
 
   return XMLout(
@@ -104,6 +166,7 @@ sub _EncodeFile {
     push(@{$self->data->{Files}->{$cleanFilename}->{Chunk}}, { index => $index++,
                                                                hash => sha1_base64($buffer),
                                                                size => $readLength,
+							       weight => 0,
                                                              });
     $bytesRead += length($buffer);
     printf("%6.2f%% %11.3f\r", 100*$bytesRead/$totalSize, $bytesRead/1048576);
@@ -112,21 +175,6 @@ sub _EncodeFile {
   print "100.00%\n";
 
   close(INFILE);
-
-  if($self->weightingFunction eq 'topheavy') {
-    for(my $i = 0; $i < $index; $i++) {
-      $self->data->{Files}->{$cleanFilename}->{Chunk}->[$i]->{weight} = $index - $i;
-    }
-  } elsif($self->weightingFunction eq 'bottomheavy') {
-    for(my $i = 0; $i < $index; $i++) {
-      $self->data->{Files}->{$cleanFilename}->{Chunk}->[$i]->{weight} = $i;
-    }
-  } else {
-    for(my $i = 0; $i < $index; $i++) {
-      $self->data->{Files}->{$cleanFilename}->{Chunk}->[$i]->{weight} = 0;
-    }
-  }
-  
 }
 
  
