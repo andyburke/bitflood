@@ -8,6 +8,8 @@ __PACKAGE__->mk_accessors(qw(
 ));
 
 use Net::Jabber qw(Client);
+use Time::HiRes qw(time);
+use POSIX qw(strftime);
 
 
 # args: recipient, serverHost, serverPort,
@@ -40,8 +42,15 @@ sub commit {
 
   $self->connected or return;
 
+  my $time = time();
+  my $timeString = sprintf(
+			   '%s.%03d',
+			   strftime('%Y%m%d%H%M%S', localtime($time)),
+			   ($time - int($time)) * 1000
+			   );
+
   my $im = Net::Jabber::Message->new();
-  $im->SetMessage(body => $string, type => "chat");
+  $im->SetMessage(body => "$timeString: $string", type => "chat");
   $im->SetTo($self->recipient);
 
   $self->client->Send($im);
