@@ -1,0 +1,441 @@
+<HTML><HEAD><SCRIPT language="JavaScript" src="../resources/script.js" type="text/javascript"></SCRIPT><TITLE>XMLChar.hpp Source File</TITLE><link href="XercesApi.css" rel="stylesheet" type="text/css"></HEAD><BODY alink="#ff0000" bgcolor="#ffffff" leftmargin="4" link="#0000ff" marginheight="4" marginwidth="4" text="#000000" topmargin="4" vlink="#0000aa"><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" height="60" rowspan="3" valign="top" width="135"><IMG border="0" height="60" hspace="0" src="../resources/logo.gif" vspace="0" width="135"></TD><TD align="left" colspan="4" height="5" valign="top" width="456"><IMG border="0" height="5" hspace="0" src="../resources/line.gif" vspace="0" width="456"></TD><TD align="left" height="60" rowspan="3" valign="top" width="29"><IMG border="0" height="60" hspace="0" src="../resources/right.gif" vspace="0" width="29"></TD></TR><TR><TD align="left" bgcolor="#0086b2" colspan="4" height="35" valign="top" width="456"><IMG alt="" border="0" height="35" hspace="0" src="../graphics/api-header.jpg" vspace="0" width="456"></TD></TR><TR><TD align="left" height="20" valign="top" width="168"><IMG border="0" height="20" hspace="0" src="../resources/bottom.gif" vspace="0" width="168"></TD><TD align="left" height="20" valign="top" width="96"><A href="http://xml.apache.org/" onMouseOut="rolloverOff('xml');" onMouseOver="rolloverOn('xml');" target="new"><IMG alt="http://xml.apache.org/" border="0" height="20" hspace="0" name="xml" onLoad="rolloverLoad('xml','../resources/button-xml-hi.gif','../resources/button-xml-lo.gif');" src="../resources/button-xml-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.apache.org/" onMouseOut="rolloverOff('asf');" onMouseOver="rolloverOn('asf');" target="new"><IMG alt="http://www.apache.org/" border="0" height="20" hspace="0" name="asf" onLoad="rolloverLoad('asf','../resources/button-asf-hi.gif','../resources/button-asf-lo.gif');" src="../resources/button-asf-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.w3.org/" onMouseOut="rolloverOff('w3c');" onMouseOver="rolloverOn('w3c');" target="new"><IMG alt="http://www.w3.org/" border="0" height="20" hspace="0" name="w3c" onLoad="rolloverLoad('w3c','../resources/button-w3c-hi.gif','../resources/button-w3c-lo.gif');" src="../resources/button-w3c-lo.gif" vspace="0" width="96"></A></TD></TR></TABLE><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" valign="top" width="120"><IMG border="0" height="14" hspace="0" src="../resources/join.gif" vspace="0" width="120"><BR>
+  <A href="../../index.html" onMouseOut="rolloverOff('side-ext-2');" onMouseOver="rolloverOn('side-ext-2');"><IMG alt="Home" border="0" height="12" hspace="0" name="side-ext-2" onLoad="rolloverLoad('side-ext-2','../graphics/ext-2-label-2.jpg','../graphics/ext-2-label-3.jpg');" src="../graphics/ext-2-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="../index.html" onMouseOut="rolloverOff('side-index');" onMouseOver="rolloverOn('side-index');"><IMG alt="Readme" border="0" height="12" hspace="0" name="side-index" onLoad="rolloverLoad('side-index','../graphics/index-label-2.jpg','../graphics/index-label-3.jpg');" src="../graphics/index-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../releases.html" onMouseOut="rolloverOff('side-releases');" onMouseOver="rolloverOn('side-releases');"><IMG alt="Release Info" border="0" height="12" hspace="0" name="side-releases" onLoad="rolloverLoad('side-releases','../graphics/releases-label-2.jpg','../graphics/releases-label-3.jpg');" src="../graphics/releases-label-3.jpg" vspace="0" width="120"></A><BR>
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+  <A href="../install.html" onMouseOut="rolloverOff('side-install');" onMouseOver="rolloverOn('side-install');"><IMG alt="Installation" border="0" height="12" hspace="0" name="side-install" onLoad="rolloverLoad('side-install','../graphics/install-label-2.jpg','../graphics/install-label-3.jpg');" src="../graphics/install-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="http://xml.apache.org/dist/xerces-c/" onMouseOut="rolloverOff('side-ext-18');" onMouseOver="rolloverOn('side-ext-18');"><IMG alt="Download" border="0" height="12" hspace="0" name="side-ext-18" onLoad="rolloverLoad('side-ext-18','../graphics/ext-18-label-2.jpg','../graphics/ext-18-label-3.jpg');" src="../graphics/ext-18-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../build.html" onMouseOut="rolloverOff('side-build');" onMouseOver="rolloverOn('side-build');"><IMG alt="Build" border="0" height="12" hspace="0" name="side-build" onLoad="rolloverLoad('side-build','../graphics/build-label-2.jpg','../graphics/build-label-3.jpg');" src="../graphics/build-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+  <A href="../faqs.html" onMouseOut="rolloverOff('side-faqs');" onMouseOver="rolloverOn('side-faqs');"><IMG alt="FAQs" border="0" height="12" hspace="0" name="side-faqs" onLoad="rolloverLoad('side-faqs','../graphics/faqs-label-2.jpg','../graphics/faqs-label-3.jpg');" src="../graphics/faqs-label-3.jpg" vspace="0" width="120"></A><BR>  
+  <A href="../samples.html" onMouseOut="rolloverOff('side-samples');" onMouseOver="rolloverOn('side-samples');"><IMG alt="Samples" border="0" height="12" hspace="0" name="side-samples" onLoad="rolloverLoad('side-samples','../graphics/samples-label-2.jpg','../graphics/samples-label-3.jpg');" src="../graphics/samples-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../api.html" onMouseOut="rolloverOff('side-api');" onMouseOver="rolloverOn('side-api');"><IMG alt="API Docs" border="0" height="12" hspace="0" name="side-api" onLoad="rolloverLoad('side-api','../graphics/api-label-2.jpg','../graphics/api-label-3.jpg');" src="../graphics/api-label-3.jpg" vspace="0" width="120"></A><BR>  
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>  
+  <A href="../ApacheDOMC++Binding.html" onMouseOut="rolloverOff('side-ext-68');" onMouseOver="rolloverOn('side-ext-68');"><IMG alt="DOM C++ Binding" border="0" height="12" hspace="0" name="side-ext-68" onLoad="rolloverLoad('side-ext-68','../graphics/ext-68-label-2.jpg','../graphics/ext-68-label-3.jpg');" src="../graphics/ext-68-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <A href="../program.html" onMouseOut="rolloverOff('side-program');" onMouseOver="rolloverOn('side-program');"><IMG alt="Programming" border="0" height="12" hspace="0" name="side-program" onLoad="rolloverLoad('side-program','../graphics/program-label-2.jpg','../graphics/program-label-3.jpg');" src="../graphics/program-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../migrate.html" onMouseOut="rolloverOff('side-migrate');" onMouseOver="rolloverOn('side-migrate');"><IMG alt="Migration Guide" border="0" height="12" hspace="0" name="side-migrate" onLoad="rolloverLoad('side-migrate','../graphics/migrate-label-2.jpg','../graphics/migrate-label-3.jpg');" src="../graphics/migrate-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="../feedback.html" onMouseOut="rolloverOff('side-feedback');" onMouseOver="rolloverOn('side-feedback');"><IMG alt="Feedback" border="0" height="12" hspace="0" name="side-feedback" onLoad="rolloverLoad('side-feedback','../graphics/feedback-label-2.jpg','../graphics/feedback-label-3.jpg');" src="../graphics/feedback-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../bug-report.html" onMouseOut="rolloverOff('side-bug-report');" onMouseOver="rolloverOn('side-bug-report');"><IMG alt="Bug-Reporting" border="0" height="12" hspace="0" name="side-bug-report" onLoad="rolloverLoad('side-bug-report','../graphics/bug-report-label-2.jpg','../graphics/bug-report-label-3.jpg');" src="../graphics/bug-report-label-3.jpg" vspace="0" width="120"></A><BR>  
+  <A href="../pdf.html" onMouseOut="rolloverOff('side-pdf');" onMouseOver="rolloverOn('side-pdf');"><IMG alt="PDF Document" border="0" height="12" hspace="0" name="side-pdf" onLoad="rolloverLoad('side-pdf','../graphics/pdf-label-2.jpg','../graphics/pdf-label-3.jpg');" src="../graphics/pdf-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="http://xml.apache.org/websrc/cvsweb.cgi/xml-xerces/c/" onMouseOut="rolloverOff('side-ext-100');" onMouseOver="rolloverOn('side-ext-100');"><IMG alt="CVS Repository" border="0" height="12" hspace="0" name="side-ext-100" onLoad="rolloverLoad('side-ext-100','../graphics/ext-100-label-2.jpg','../graphics/ext-100-label-3.jpg');" src="../graphics/ext-100-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <A href="http://marc.theaimsgroup.com/?l=xerces-c-dev" onMouseOut="rolloverOff('side-ext-102');" onMouseOver="rolloverOn('side-ext-102');"><IMG alt="Mail Archive" border="0" height="12" hspace="0" name="side-ext-102" onLoad="rolloverLoad('side-ext-102','../graphics/ext-102-label-2.jpg','../graphics/ext-102-label-3.jpg');" src="../graphics/ext-102-label-3.jpg" vspace="0" width="120"></A><BR>
+
+
+<IMG border="0" height="14" hspace="0" src="../resources/close.gif" vspace="0" width="120"><BR></TD><TD align="left" valign="top" width="500"><TABLE border="0" cellpadding="3" cellspacing="0"><TR><TD>
+    <TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#FFFFFF" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="../resources/void.gif" vspace="0" width="2"><B>API Docs for SAX and DOM</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+	    <P>
+<!-- Generated by Doxygen 1.2.14 -->
+<center>
+<a class="qindex" href="index.html">Main Page</a> &nbsp; <a class="qindex" href="hierarchy.html">Class Hierarchy</a> &nbsp; <a class="qindex" href="classes.html">Alphabetical List</a> &nbsp; <a class="qindex" href="annotated.html">Compound List</a> &nbsp; <a class="qindex" href="files.html">File List</a> &nbsp; <a class="qindex" href="functions.html">Compound Members</a> &nbsp; <a class="qindex" href="globals.html">File Members</a> &nbsp; </center>
+<hr><h1>XMLChar.hpp</h1><a href="XMLChar_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><pre>00001 <font class="comment">/*</font>
+00002 <font class="comment"> * Copyright 2002,2004 The Apache Software Foundation.</font>
+00003 <font class="comment"> * </font>
+00004 <font class="comment"> * Licensed under the Apache License, Version 2.0 (the "License");</font>
+00005 <font class="comment"> * you may not use this file except in compliance with the License.</font>
+00006 <font class="comment"> * You may obtain a copy of the License at</font>
+00007 <font class="comment"> * </font>
+00008 <font class="comment"> *      http://www.apache.org/licenses/LICENSE-2.0</font>
+00009 <font class="comment"> * </font>
+00010 <font class="comment"> * Unless required by applicable law or agreed to in writing, software</font>
+00011 <font class="comment"> * distributed under the License is distributed on an "AS IS" BASIS,</font>
+00012 <font class="comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</font>
+00013 <font class="comment"> * See the License for the specific language governing permissions and</font>
+00014 <font class="comment"> * limitations under the License.</font>
+00015 <font class="comment"> */</font>
+00016 
+00017 <font class="comment">/*</font>
+00018 <font class="comment"> * $Log: XMLChar.hpp,v $</font>
+00019 <font class="comment"> * Revision 1.5  2004/09/08 13:56:24  peiyongz</font>
+00020 <font class="comment"> * Apache License Version 2.0</font>
+00021 <font class="comment"> *</font>
+00022 <font class="comment"> * Revision 1.4  2004/08/11 16:08:04  peiyongz</font>
+00023 <font class="comment"> * isValidNmToken</font>
+00024 <font class="comment"> *</font>
+00025 <font class="comment"> * Revision 1.3  2004/01/29 11:48:47  cargilld</font>
+00026 <font class="comment"> * Code cleanup changes to get rid of various compiler diagnostic messages.</font>
+00027 <font class="comment"> *</font>
+00028 <font class="comment"> * Revision 1.2  2003/08/14 02:57:27  knoaman</font>
+00029 <font class="comment"> * Code refactoring to improve performance of validation.</font>
+00030 <font class="comment"> *</font>
+00031 <font class="comment"> * Revision 1.1  2002/12/20 22:10:21  tng</font>
+00032 <font class="comment"> * XML 1.1</font>
+00033 <font class="comment"> *</font>
+00034 <font class="comment"> */</font>
+00035 
+00036 <font class="preprocessor">#if !defined(XMLCHAR_HPP)</font>
+<a name="l00037"></a><a class="code" href="XMLChar_8hpp.html#a0">00037</a> <font class="preprocessor"></font><font class="preprocessor">#define XMLCHAR_HPP</font>
+00038 <font class="preprocessor"></font>
+00039 <font class="preprocessor">#include &lt;<a class="code" href="XMLUniDefs_8hpp.html">xercesc/util/XMLUniDefs.hpp</a>&gt;</font>
+00040 
+00041 <a class="code" href="XercesDefs_8hpp.html#a2">XERCES_CPP_NAMESPACE_BEGIN</a>
+00042 
+00043 <font class="comment">// ---------------------------------------------------------------------------</font>
+00044 <font class="comment">//  This file defines Char and utility that conforms to XML 1.0 and XML 1.1</font>
+00045 <font class="comment">// ---------------------------------------------------------------------------</font>
+00046 <font class="comment">// Masks for the fgCharCharsTable1_0 array</font>
+<a name="l00047"></a><a class="code" href="XMLChar_8hpp.html#a1">00047</a> <font class="keyword">const</font> <a class="code" href="XercesDefs_8hpp.html#a16">XMLByte</a>   <a class="code" href="XMLChar_8hpp.html#a1">gLetterCharMask</a>             = 0x1;
+<a name="l00048"></a><a class="code" href="XMLChar_8hpp.html#a2">00048</a> <font class="keyword">const</font> <a class="code" href="XercesDefs_8hpp.html#a16">XMLByte</a>   <a class="code" href="XMLChar_8hpp.html#a2">gFirstNameCharMask</a>          = 0x2;
+<a name="l00049"></a><a class="code" href="XMLChar_8hpp.html#a3">00049</a> <font class="keyword">const</font> <a class="code" href="XercesDefs_8hpp.html#a16">XMLByte</a>   <a class="code" href="XMLChar_8hpp.html#a3">gNameCharMask</a>               = 0x4;
+<a name="l00050"></a><a class="code" href="XMLChar_8hpp.html#a4">00050</a> <font class="keyword">const</font> <a class="code" href="XercesDefs_8hpp.html#a16">XMLByte</a>   <a class="code" href="XMLChar_8hpp.html#a4">gPlainContentCharMask</a>       = 0x8;
+<a name="l00051"></a><a class="code" href="XMLChar_8hpp.html#a5">00051</a> <font class="keyword">const</font> <a class="code" href="XercesDefs_8hpp.html#a16">XMLByte</a>   <a class="code" href="XMLChar_8hpp.html#a5">gSpecialStartTagCharMask</a>    = 0x10;
+<a name="l00052"></a><a class="code" href="XMLChar_8hpp.html#a6">00052</a> <font class="keyword">const</font> <a class="code" href="XercesDefs_8hpp.html#a16">XMLByte</a>   <a class="code" href="XMLChar_8hpp.html#a6">gControlCharMask</a>            = 0x20;
+<a name="l00053"></a><a class="code" href="XMLChar_8hpp.html#a7">00053</a> <font class="keyword">const</font> <a class="code" href="XercesDefs_8hpp.html#a16">XMLByte</a>   <a class="code" href="XMLChar_8hpp.html#a7">gXMLCharMask</a>                = 0x40;
+<a name="l00054"></a><a class="code" href="XMLChar_8hpp.html#a8">00054</a> <font class="keyword">const</font> <a class="code" href="XercesDefs_8hpp.html#a16">XMLByte</a>   <a class="code" href="XMLChar_8hpp.html#a8">gWhitespaceCharMask</a>         = 0x80;
+00055 
+00056 <font class="comment">// ---------------------------------------------------------------------------</font>
+00057 <font class="comment">//  This class is for XML 1.0</font>
+00058 <font class="comment">// ---------------------------------------------------------------------------</font>
+<a name="l00059"></a><a class="code" href="classXMLChar1__0.html">00059</a> <font class="keyword">class </font><a class="code" href="XercesDefs_8hpp.html#a8"></a> <a class="code" href="classXMLChar1__0.html">XMLChar1_0</a>
+00060 {
+00061 <font class="keyword">public</font>:
+00062     <font class="comment">// -----------------------------------------------------------------------</font>
+00063     <font class="comment">//  Public, static methods, check the string</font>
+00064     <font class="comment">// -----------------------------------------------------------------------</font>
+00065     <font class="keyword">static</font> <font class="keywordtype">bool</font> isAllSpaces
+00066     (
+00067         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toCheck
+00068         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+00069     );
+00070 
+00071     <font class="keyword">static</font> <font class="keywordtype">bool</font> containsWhiteSpace
+00072     (
+00073         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toCheck
+00074         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+00075     );
+00076 
+00077     <font class="keyword">static</font> <font class="keywordtype">bool</font> isValidNmtoken
+00078     (
+00079         <font class="keyword">const</font>   XMLCh*        <font class="keyword">const</font>    toCheck
+00080       , <font class="keyword">const</font>   <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>           count
+00081     );
+00082 
+00083     <font class="keyword">static</font> <font class="keywordtype">bool</font> isValidName
+00084     (
+00085         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toCheck
+00086         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+00087     );
+00088 
+00089     <font class="keyword">static</font> <font class="keywordtype">bool</font> isValidNCName
+00090     (
+00091         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toCheck
+00092         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+00093     );
+00094 
+00095     <font class="keyword">static</font> <font class="keywordtype">bool</font> isValidQName
+00096     (
+00097         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toCheck
+00098         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+00099     );
+00100 
+00101     <font class="comment">// -----------------------------------------------------------------------</font>
+00102     <font class="comment">//  Public, static methods, check the XMLCh</font>
+00103     <font class="comment">//  surrogate pair is assumed if second parameter is not null</font>
+00104     <font class="comment">// -----------------------------------------------------------------------</font>
+00105     <font class="keyword">static</font> <font class="keywordtype">bool</font> isXMLLetter(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00106     <font class="keyword">static</font> <font class="keywordtype">bool</font> isFirstNameChar(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00107     <font class="keyword">static</font> <font class="keywordtype">bool</font> isNameChar(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00108     <font class="keyword">static</font> <font class="keywordtype">bool</font> isPlainContentChar(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00109     <font class="keyword">static</font> <font class="keywordtype">bool</font> isSpecialStartTagChar(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00110     <font class="keyword">static</font> <font class="keywordtype">bool</font> isXMLChar(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00111     <font class="keyword">static</font> <font class="keywordtype">bool</font> isWhitespace(<font class="keyword">const</font> XMLCh toCheck);
+00112     <font class="keyword">static</font> <font class="keywordtype">bool</font> isWhitespace(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2);
+00113     <font class="keyword">static</font> <font class="keywordtype">bool</font> isControlChar(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00114 
+00115     <font class="keyword">static</font> <font class="keywordtype">bool</font> isPublicIdChar(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00116 
+00117     <font class="comment">// -----------------------------------------------------------------------</font>
+00118     <font class="comment">//  Special Non-conformant Public, static methods</font>
+00119     <font class="comment">// -----------------------------------------------------------------------</font>
+00123 <font class="comment"></font>    <font class="keyword">static</font> <font class="keywordtype">bool</font> isNELRecognized();
+00124 
+00128     <font class="keyword">static</font> <font class="keywordtype">void</font> enableNELWS();
+00129 
+00130 <font class="keyword">private</font>:
+00131     <font class="comment">// -----------------------------------------------------------------------</font>
+00132     <font class="comment">//  Unimplemented constructors and operators</font>
+00133     <font class="comment">// -----------------------------------------------------------------------</font>
+00134     <a class="code" href="classXMLChar1__0.html">XMLChar1_0</a>();
+00135 
+00136     <font class="comment">// -----------------------------------------------------------------------</font>
+00137     <font class="comment">//  Static data members</font>
+00138     <font class="comment">//</font>
+00139     <font class="comment">//  fgCharCharsTable1_0</font>
+00140     <font class="comment">//      The character characteristics table. Bits in each byte, represent</font>
+00141     <font class="comment">//      the characteristics of each character. It is generated via some</font>
+00142     <font class="comment">//      code and then hard coded into the cpp file for speed.</font>
+00143     <font class="comment">//</font>
+00144     <font class="comment">//  fNEL</font>
+00145     <font class="comment">//      Flag to respresents whether NEL and LSEP newline recognition is enabled</font>
+00146     <font class="comment">//      or disabled</font>
+00147     <font class="comment">// -----------------------------------------------------------------------</font>
+00148     <font class="keyword">static</font> <a class="code" href="XercesDefs_8hpp.html#a16">XMLByte</a>  fgCharCharsTable1_0[0x10000];
+00149     <font class="keyword">static</font> <font class="keywordtype">bool</font>     enableNEL;
+00150 
+<a name="l00151"></a><a class="code" href="classXMLChar1__0.html#l0">00151</a>     <font class="keyword">friend</font> <font class="keyword">class </font>XMLReader;
+00152 };
+00153 
+00154 
+00155 <font class="comment">// ---------------------------------------------------------------------------</font>
+00156 <font class="comment">//  XMLReader: Public, static methods</font>
+00157 <font class="comment">// ---------------------------------------------------------------------------</font>
+<a name="l00158"></a><a class="code" href="classXMLChar1__0.html#d6">00158</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__0.html#d6">XMLChar1_0::isXMLLetter</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00159 {
+00160     <font class="keywordflow">if</font> (!toCheck2)
+00161         <font class="keywordflow">return</font> ((fgCharCharsTable1_0[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a1">gLetterCharMask</a>) != 0);
+00162     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00163 }
+00164 
+<a name="l00165"></a><a class="code" href="classXMLChar1__0.html#d7">00165</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__0.html#d7">XMLChar1_0::isFirstNameChar</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00166 {
+00167     <font class="keywordflow">if</font> (!toCheck2)
+00168         <font class="keywordflow">return</font> ((fgCharCharsTable1_0[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a2">gFirstNameCharMask</a>) != 0);
+00169     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00170 }
+00171 
+<a name="l00172"></a><a class="code" href="classXMLChar1__0.html#d8">00172</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__0.html#d8">XMLChar1_0::isNameChar</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00173 {
+00174     <font class="keywordflow">if</font> (!toCheck2)
+00175         <font class="keywordflow">return</font> ((fgCharCharsTable1_0[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a3">gNameCharMask</a>) != 0);
+00176     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00177 }
+00178 
+<a name="l00179"></a><a class="code" href="classXMLChar1__0.html#d9">00179</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__0.html#d9">XMLChar1_0::isPlainContentChar</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00180 {
+00181     <font class="keywordflow">if</font> (!toCheck2)
+00182         <font class="keywordflow">return</font> ((fgCharCharsTable1_0[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a4">gPlainContentCharMask</a>) != 0);
+00183     <font class="keywordflow">else</font> {
+00184         <font class="keywordflow">if</font> ((toCheck &gt;= 0xD800) &amp;&amp; (toCheck &lt;= 0xDBFF))
+00185            <font class="keywordflow">if</font> ((toCheck2 &gt;= 0xDC00) &amp;&amp; (toCheck2 &lt;= 0xDFFF))
+00186                <font class="keywordflow">return</font> <font class="keyword">true</font>;
+00187     }
+00188     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00189 }
+00190 
+00191 
+<a name="l00192"></a><a class="code" href="classXMLChar1__0.html#d10">00192</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__0.html#d10">XMLChar1_0::isSpecialStartTagChar</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00193 {
+00194     <font class="keywordflow">if</font> (!toCheck2)
+00195         <font class="keywordflow">return</font> ((fgCharCharsTable1_0[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a5">gSpecialStartTagCharMask</a>) != 0);
+00196     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00197 }
+00198 
+<a name="l00199"></a><a class="code" href="classXMLChar1__0.html#d11">00199</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__0.html#d11">XMLChar1_0::isXMLChar</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00200 {
+00201     <font class="keywordflow">if</font> (!toCheck2)
+00202         <font class="keywordflow">return</font> ((fgCharCharsTable1_0[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a7">gXMLCharMask</a>) != 0);
+00203     <font class="keywordflow">else</font> {
+00204         <font class="keywordflow">if</font> ((toCheck &gt;= 0xD800) &amp;&amp; (toCheck &lt;= 0xDBFF))
+00205            <font class="keywordflow">if</font> ((toCheck2 &gt;= 0xDC00) &amp;&amp; (toCheck2 &lt;= 0xDFFF))
+00206                <font class="keywordflow">return</font> <font class="keyword">true</font>;
+00207     }
+00208     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00209 }
+00210 
+<a name="l00211"></a><a class="code" href="classXMLChar1__0.html#d12">00211</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__0.html#d12">XMLChar1_0::isWhitespace</a>(<font class="keyword">const</font> XMLCh toCheck)
+00212 {
+00213     <font class="keywordflow">return</font> ((fgCharCharsTable1_0[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a8">gWhitespaceCharMask</a>) != 0);
+00214 }
+00215 
+<a name="l00216"></a><a class="code" href="classXMLChar1__0.html#d13">00216</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__0.html#d12">XMLChar1_0::isWhitespace</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00217 {
+00218     <font class="keywordflow">if</font> (!toCheck2)
+00219         <font class="keywordflow">return</font> ((fgCharCharsTable1_0[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a8">gWhitespaceCharMask</a>) != 0);
+00220     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00221 }
+00222 
+<a name="l00223"></a><a class="code" href="classXMLChar1__0.html#d14">00223</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__0.html#d14">XMLChar1_0::isControlChar</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00224 {
+00225     <font class="keywordflow">if</font> (!toCheck2)
+00226         <font class="keywordflow">return</font> ((fgCharCharsTable1_0[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a6">gControlCharMask</a>) != 0);
+00227     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00228 }
+00229 
+<a name="l00230"></a><a class="code" href="classXMLChar1__0.html#d16">00230</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__0.html#d16">XMLChar1_0::isNELRecognized</a>() {
+00231 
+00232     <font class="keywordflow">return</font> enableNEL;
+00233 }
+00234 
+00235 
+00236 <font class="comment">// ---------------------------------------------------------------------------</font>
+00237 <font class="comment">//  This class is for XML 1.1</font>
+00238 <font class="comment">// ---------------------------------------------------------------------------</font>
+<a name="l00239"></a><a class="code" href="classXMLChar1__1.html">00239</a> <font class="keyword">class </font><a class="code" href="XercesDefs_8hpp.html#a8"></a> XMLChar1_1
+00240 {
+00241 <font class="keyword">public</font>:
+00242     <font class="comment">// -----------------------------------------------------------------------</font>
+00243     <font class="comment">//  Public, static methods, check the string</font>
+00244     <font class="comment">// -----------------------------------------------------------------------</font>
+00245     <font class="keyword">static</font> <font class="keywordtype">bool</font> isAllSpaces
+00246     (
+00247         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toCheck
+00248         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+00249     );
+00250 
+00251     <font class="keyword">static</font> <font class="keywordtype">bool</font> containsWhiteSpace
+00252     (
+00253         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toCheck
+00254         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+00255     );
+00256 
+00257     <font class="keyword">static</font> <font class="keywordtype">bool</font> isValidNmtoken
+00258     (
+00259         <font class="keyword">const</font>   XMLCh*        <font class="keyword">const</font>    toCheck
+00260       , <font class="keyword">const</font>   <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>           count
+00261     );
+00262 
+00263     <font class="keyword">static</font> <font class="keywordtype">bool</font> isValidName
+00264     (
+00265         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toCheck
+00266         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+00267     );
+00268 
+00269     <font class="keyword">static</font> <font class="keywordtype">bool</font> isValidNCName
+00270     (
+00271         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toCheck
+00272         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+00273     );
+00274 
+00275     <font class="keyword">static</font> <font class="keywordtype">bool</font> isValidQName
+00276     (
+00277         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toCheck
+00278         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+00279     );
+00280 
+00281     <font class="comment">// -----------------------------------------------------------------------</font>
+00282     <font class="comment">//  Public, static methods, check the XMLCh</font>
+00283     <font class="comment">// -----------------------------------------------------------------------</font>
+00284     <font class="keyword">static</font> <font class="keywordtype">bool</font> isXMLLetter(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00285     <font class="keyword">static</font> <font class="keywordtype">bool</font> isFirstNameChar(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00286     <font class="keyword">static</font> <font class="keywordtype">bool</font> isNameChar(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00287     <font class="keyword">static</font> <font class="keywordtype">bool</font> isPlainContentChar(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00288     <font class="keyword">static</font> <font class="keywordtype">bool</font> isSpecialStartTagChar(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00289     <font class="keyword">static</font> <font class="keywordtype">bool</font> isXMLChar(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00290     <font class="keyword">static</font> <font class="keywordtype">bool</font> isWhitespace(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00291     <font class="keyword">static</font> <font class="keywordtype">bool</font> isControlChar(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00292 
+00293     <font class="keyword">static</font> <font class="keywordtype">bool</font> isPublicIdChar(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2 = 0);
+00294 
+00295 <font class="keyword">private</font>:
+00296     <font class="comment">// -----------------------------------------------------------------------</font>
+00297     <font class="comment">//  Unimplemented constructors and operators</font>
+00298     <font class="comment">// -----------------------------------------------------------------------</font>
+00299     XMLChar1_1();
+00300 
+00301     <font class="comment">// -----------------------------------------------------------------------</font>
+00302     <font class="comment">//  Static data members</font>
+00303     <font class="comment">//</font>
+00304     <font class="comment">//  fgCharCharsTable1_1</font>
+00305     <font class="comment">//      The character characteristics table. Bits in each byte, represent</font>
+00306     <font class="comment">//      the characteristics of each character. It is generated via some</font>
+00307     <font class="comment">//      code and then hard coded into the cpp file for speed.</font>
+00308     <font class="comment">//</font>
+00309     <font class="comment">// -----------------------------------------------------------------------</font>
+00310     <font class="keyword">static</font> <a class="code" href="XercesDefs_8hpp.html#a16">XMLByte</a>  fgCharCharsTable1_1[0x10000];
+00311 
+<a name="l00312"></a><a class="code" href="classXMLChar1__1.html#l0">00312</a>     <font class="keyword">friend</font> <font class="keyword">class </font>XMLReader;
+00313 };
+00314 
+00315 
+00316 <font class="comment">// ---------------------------------------------------------------------------</font>
+00317 <font class="comment">//  XMLReader: Public, static methods</font>
+00318 <font class="comment">// ---------------------------------------------------------------------------</font>
+<a name="l00319"></a><a class="code" href="classXMLChar1__1.html#d6">00319</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__1.html#d6">XMLChar1_1::isXMLLetter</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00320 {
+00321     <font class="keywordflow">if</font> (!toCheck2)
+00322         <font class="keywordflow">return</font> ((fgCharCharsTable1_1[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a1">gLetterCharMask</a>) != 0);
+00323     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00324 }
+00325 
+<a name="l00326"></a><a class="code" href="classXMLChar1__1.html#d7">00326</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__1.html#d7">XMLChar1_1::isFirstNameChar</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00327 {
+00328     <font class="keywordflow">if</font> (!toCheck2)
+00329         <font class="keywordflow">return</font> ((fgCharCharsTable1_1[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a2">gFirstNameCharMask</a>) != 0);
+00330     <font class="keywordflow">else</font> {
+00331         <font class="keywordflow">if</font> ((toCheck &gt;= 0xD800) &amp;&amp; (toCheck &lt;= 0xDB7F))
+00332            <font class="keywordflow">if</font> ((toCheck2 &gt;= 0xDC00) &amp;&amp; (toCheck2 &lt;= 0xDFFF))
+00333                <font class="keywordflow">return</font> <font class="keyword">true</font>;
+00334     }
+00335     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00336 }
+00337 
+<a name="l00338"></a><a class="code" href="classXMLChar1__1.html#d8">00338</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__1.html#d8">XMLChar1_1::isNameChar</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00339 {
+00340     <font class="keywordflow">if</font> (!toCheck2)
+00341         <font class="keywordflow">return</font> ((fgCharCharsTable1_1[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a3">gNameCharMask</a>) != 0);
+00342     <font class="keywordflow">else</font> {
+00343         <font class="keywordflow">if</font> ((toCheck &gt;= 0xD800) &amp;&amp; (toCheck &lt;= 0xDB7F))
+00344            <font class="keywordflow">if</font> ((toCheck2 &gt;= 0xDC00) &amp;&amp; (toCheck2 &lt;= 0xDFFF))
+00345                <font class="keywordflow">return</font> <font class="keyword">true</font>;
+00346     }
+00347     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00348 }
+00349 
+<a name="l00350"></a><a class="code" href="classXMLChar1__1.html#d9">00350</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__1.html#d9">XMLChar1_1::isPlainContentChar</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00351 {
+00352     <font class="keywordflow">if</font> (!toCheck2)
+00353         <font class="keywordflow">return</font> ((fgCharCharsTable1_1[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a4">gPlainContentCharMask</a>) != 0);
+00354     <font class="keywordflow">else</font> {
+00355         <font class="keywordflow">if</font> ((toCheck &gt;= 0xD800) &amp;&amp; (toCheck &lt;= 0xDBFF))
+00356            <font class="keywordflow">if</font> ((toCheck2 &gt;= 0xDC00) &amp;&amp; (toCheck2 &lt;= 0xDFFF))
+00357                <font class="keywordflow">return</font> <font class="keyword">true</font>;
+00358     }
+00359     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00360 }
+00361 
+00362 
+<a name="l00363"></a><a class="code" href="classXMLChar1__1.html#d10">00363</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__1.html#d10">XMLChar1_1::isSpecialStartTagChar</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00364 {
+00365     <font class="keywordflow">if</font> (!toCheck2)
+00366         <font class="keywordflow">return</font> ((fgCharCharsTable1_1[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a5">gSpecialStartTagCharMask</a>) != 0);
+00367     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00368 }
+00369 
+<a name="l00370"></a><a class="code" href="classXMLChar1__1.html#d11">00370</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__1.html#d11">XMLChar1_1::isXMLChar</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00371 {
+00372     <font class="keywordflow">if</font> (!toCheck2)
+00373         <font class="keywordflow">return</font> ((fgCharCharsTable1_1[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a7">gXMLCharMask</a>) != 0);
+00374     <font class="keywordflow">else</font> {
+00375         <font class="keywordflow">if</font> ((toCheck &gt;= 0xD800) &amp;&amp; (toCheck &lt;= 0xDBFF))
+00376            <font class="keywordflow">if</font> ((toCheck2 &gt;= 0xDC00) &amp;&amp; (toCheck2 &lt;= 0xDFFF))
+00377                <font class="keywordflow">return</font> <font class="keyword">true</font>;
+00378     }
+00379     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00380 }
+00381 
+<a name="l00382"></a><a class="code" href="classXMLChar1__1.html#d12">00382</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__1.html#d12">XMLChar1_1::isWhitespace</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00383 {
+00384     <font class="keywordflow">if</font> (!toCheck2)
+00385         <font class="keywordflow">return</font> ((fgCharCharsTable1_1[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a8">gWhitespaceCharMask</a>) != 0);
+00386     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00387 }
+00388 
+<a name="l00389"></a><a class="code" href="classXMLChar1__1.html#d13">00389</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLChar1__1.html#d13">XMLChar1_1::isControlChar</a>(<font class="keyword">const</font> XMLCh toCheck, <font class="keyword">const</font> XMLCh toCheck2)
+00390 {
+00391     <font class="keywordflow">if</font> (!toCheck2)
+00392         <font class="keywordflow">return</font> ((fgCharCharsTable1_1[toCheck] &amp; <a class="code" href="XMLChar_8hpp.html#a6">gControlCharMask</a>) != 0);
+00393     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00394 }
+00395 
+00396 
+00397 <a class="code" href="XercesDefs_8hpp.html#a3">XERCES_CPP_NAMESPACE_END</a>
+00398 
+00399 <font class="preprocessor">#endif</font>
+</pre></div>    </FONT></TD></TR></TABLE><BR>
+</TD></TR></TABLE></TD></TR></TABLE><BR><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD bgcolor="#0086b2"><IMG height="1" src="images/dot.gif" width="1" alt=""></TD></TR><TR><TD align="center"><FONT color="#0086b2" size="-1"><I>
+              Copyright &copy; 1994-2004 The Apache Software Foundation.
+              All Rights Reserved.
+            </I></FONT></TD></TR></TABLE></BODY></HTML>

@@ -1,0 +1,53 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libBitFlood", "libBitFlood.vcproj", "{535FB9F7-8394-44DE-B99A-4DFA1C95D9DC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{152CE948-F659-4206-A50A-1D2B9658EF96} = {152CE948-F659-4206-A50A-1D2B9658EF96}
+		{0C631599-B4C6-4EBF-BCB1-D1D0A4E2E502} = {0C631599-B4C6-4EBF-BCB1-D1D0A4E2E502}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cryptlib", "extern\crypto++\5.2.1\cryptlib.vcproj", "{0C631599-B4C6-4EBF-BCB1-D1D0A4E2E502}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XercesLib", "extern\xercesc++\2.6.0\Projects\Win32\VC7\xerces-all\XercesLib\XercesLib.vcproj", "{152CE948-F659-4206-A50A-1D2B9658EF96}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		DLL-Import Debug = DLL-Import Debug
+		DLL-Import Release = DLL-Import Release
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{535FB9F7-8394-44DE-B99A-4DFA1C95D9DC}.Debug.ActiveCfg = Debug|Win32
+		{535FB9F7-8394-44DE-B99A-4DFA1C95D9DC}.Debug.Build.0 = Debug|Win32
+		{535FB9F7-8394-44DE-B99A-4DFA1C95D9DC}.DLL-Import Debug.ActiveCfg = Debug|Win32
+		{535FB9F7-8394-44DE-B99A-4DFA1C95D9DC}.DLL-Import Debug.Build.0 = Debug|Win32
+		{535FB9F7-8394-44DE-B99A-4DFA1C95D9DC}.DLL-Import Release.ActiveCfg = Release|Win32
+		{535FB9F7-8394-44DE-B99A-4DFA1C95D9DC}.DLL-Import Release.Build.0 = Release|Win32
+		{535FB9F7-8394-44DE-B99A-4DFA1C95D9DC}.Release.ActiveCfg = Release|Win32
+		{535FB9F7-8394-44DE-B99A-4DFA1C95D9DC}.Release.Build.0 = Release|Win32
+		{0C631599-B4C6-4EBF-BCB1-D1D0A4E2E502}.Debug.ActiveCfg = Debug|Win32
+		{0C631599-B4C6-4EBF-BCB1-D1D0A4E2E502}.Debug.Build.0 = Debug|Win32
+		{0C631599-B4C6-4EBF-BCB1-D1D0A4E2E502}.DLL-Import Debug.ActiveCfg = DLL-Import Debug|Win32
+		{0C631599-B4C6-4EBF-BCB1-D1D0A4E2E502}.DLL-Import Debug.Build.0 = DLL-Import Debug|Win32
+		{0C631599-B4C6-4EBF-BCB1-D1D0A4E2E502}.DLL-Import Release.ActiveCfg = DLL-Import Release|Win32
+		{0C631599-B4C6-4EBF-BCB1-D1D0A4E2E502}.DLL-Import Release.Build.0 = DLL-Import Release|Win32
+		{0C631599-B4C6-4EBF-BCB1-D1D0A4E2E502}.Release.ActiveCfg = Release|Win32
+		{0C631599-B4C6-4EBF-BCB1-D1D0A4E2E502}.Release.Build.0 = Release|Win32
+		{152CE948-F659-4206-A50A-1D2B9658EF96}.Debug.ActiveCfg = Debug|Win32
+		{152CE948-F659-4206-A50A-1D2B9658EF96}.Debug.Build.0 = Debug|Win32
+		{152CE948-F659-4206-A50A-1D2B9658EF96}.DLL-Import Debug.ActiveCfg = Debug|Win32
+		{152CE948-F659-4206-A50A-1D2B9658EF96}.DLL-Import Debug.Build.0 = Debug|Win32
+		{152CE948-F659-4206-A50A-1D2B9658EF96}.DLL-Import Release.ActiveCfg = Release|Win32
+		{152CE948-F659-4206-A50A-1D2B9658EF96}.DLL-Import Release.Build.0 = Release|Win32
+		{152CE948-F659-4206-A50A-1D2B9658EF96}.Release.ActiveCfg = Release|Win32
+		{152CE948-F659-4206-A50A-1D2B9658EF96}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

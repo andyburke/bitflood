@@ -1,0 +1,338 @@
+<HTML><HEAD><SCRIPT language="JavaScript" src="../resources/script.js" type="text/javascript"></SCRIPT><TITLE>XMLURL.hpp Source File</TITLE><link href="XercesApi.css" rel="stylesheet" type="text/css"></HEAD><BODY alink="#ff0000" bgcolor="#ffffff" leftmargin="4" link="#0000ff" marginheight="4" marginwidth="4" text="#000000" topmargin="4" vlink="#0000aa"><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" height="60" rowspan="3" valign="top" width="135"><IMG border="0" height="60" hspace="0" src="../resources/logo.gif" vspace="0" width="135"></TD><TD align="left" colspan="4" height="5" valign="top" width="456"><IMG border="0" height="5" hspace="0" src="../resources/line.gif" vspace="0" width="456"></TD><TD align="left" height="60" rowspan="3" valign="top" width="29"><IMG border="0" height="60" hspace="0" src="../resources/right.gif" vspace="0" width="29"></TD></TR><TR><TD align="left" bgcolor="#0086b2" colspan="4" height="35" valign="top" width="456"><IMG alt="" border="0" height="35" hspace="0" src="../graphics/api-header.jpg" vspace="0" width="456"></TD></TR><TR><TD align="left" height="20" valign="top" width="168"><IMG border="0" height="20" hspace="0" src="../resources/bottom.gif" vspace="0" width="168"></TD><TD align="left" height="20" valign="top" width="96"><A href="http://xml.apache.org/" onMouseOut="rolloverOff('xml');" onMouseOver="rolloverOn('xml');" target="new"><IMG alt="http://xml.apache.org/" border="0" height="20" hspace="0" name="xml" onLoad="rolloverLoad('xml','../resources/button-xml-hi.gif','../resources/button-xml-lo.gif');" src="../resources/button-xml-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.apache.org/" onMouseOut="rolloverOff('asf');" onMouseOver="rolloverOn('asf');" target="new"><IMG alt="http://www.apache.org/" border="0" height="20" hspace="0" name="asf" onLoad="rolloverLoad('asf','../resources/button-asf-hi.gif','../resources/button-asf-lo.gif');" src="../resources/button-asf-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.w3.org/" onMouseOut="rolloverOff('w3c');" onMouseOver="rolloverOn('w3c');" target="new"><IMG alt="http://www.w3.org/" border="0" height="20" hspace="0" name="w3c" onLoad="rolloverLoad('w3c','../resources/button-w3c-hi.gif','../resources/button-w3c-lo.gif');" src="../resources/button-w3c-lo.gif" vspace="0" width="96"></A></TD></TR></TABLE><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" valign="top" width="120"><IMG border="0" height="14" hspace="0" src="../resources/join.gif" vspace="0" width="120"><BR>
+  <A href="../../index.html" onMouseOut="rolloverOff('side-ext-2');" onMouseOver="rolloverOn('side-ext-2');"><IMG alt="Home" border="0" height="12" hspace="0" name="side-ext-2" onLoad="rolloverLoad('side-ext-2','../graphics/ext-2-label-2.jpg','../graphics/ext-2-label-3.jpg');" src="../graphics/ext-2-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="../index.html" onMouseOut="rolloverOff('side-index');" onMouseOver="rolloverOn('side-index');"><IMG alt="Readme" border="0" height="12" hspace="0" name="side-index" onLoad="rolloverLoad('side-index','../graphics/index-label-2.jpg','../graphics/index-label-3.jpg');" src="../graphics/index-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../releases.html" onMouseOut="rolloverOff('side-releases');" onMouseOver="rolloverOn('side-releases');"><IMG alt="Release Info" border="0" height="12" hspace="0" name="side-releases" onLoad="rolloverLoad('side-releases','../graphics/releases-label-2.jpg','../graphics/releases-label-3.jpg');" src="../graphics/releases-label-3.jpg" vspace="0" width="120"></A><BR>
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+  <A href="../install.html" onMouseOut="rolloverOff('side-install');" onMouseOver="rolloverOn('side-install');"><IMG alt="Installation" border="0" height="12" hspace="0" name="side-install" onLoad="rolloverLoad('side-install','../graphics/install-label-2.jpg','../graphics/install-label-3.jpg');" src="../graphics/install-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="http://xml.apache.org/dist/xerces-c/" onMouseOut="rolloverOff('side-ext-18');" onMouseOver="rolloverOn('side-ext-18');"><IMG alt="Download" border="0" height="12" hspace="0" name="side-ext-18" onLoad="rolloverLoad('side-ext-18','../graphics/ext-18-label-2.jpg','../graphics/ext-18-label-3.jpg');" src="../graphics/ext-18-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../build.html" onMouseOut="rolloverOff('side-build');" onMouseOver="rolloverOn('side-build');"><IMG alt="Build" border="0" height="12" hspace="0" name="side-build" onLoad="rolloverLoad('side-build','../graphics/build-label-2.jpg','../graphics/build-label-3.jpg');" src="../graphics/build-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+  <A href="../faqs.html" onMouseOut="rolloverOff('side-faqs');" onMouseOver="rolloverOn('side-faqs');"><IMG alt="FAQs" border="0" height="12" hspace="0" name="side-faqs" onLoad="rolloverLoad('side-faqs','../graphics/faqs-label-2.jpg','../graphics/faqs-label-3.jpg');" src="../graphics/faqs-label-3.jpg" vspace="0" width="120"></A><BR>  
+  <A href="../samples.html" onMouseOut="rolloverOff('side-samples');" onMouseOver="rolloverOn('side-samples');"><IMG alt="Samples" border="0" height="12" hspace="0" name="side-samples" onLoad="rolloverLoad('side-samples','../graphics/samples-label-2.jpg','../graphics/samples-label-3.jpg');" src="../graphics/samples-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../api.html" onMouseOut="rolloverOff('side-api');" onMouseOver="rolloverOn('side-api');"><IMG alt="API Docs" border="0" height="12" hspace="0" name="side-api" onLoad="rolloverLoad('side-api','../graphics/api-label-2.jpg','../graphics/api-label-3.jpg');" src="../graphics/api-label-3.jpg" vspace="0" width="120"></A><BR>  
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>  
+  <A href="../ApacheDOMC++Binding.html" onMouseOut="rolloverOff('side-ext-68');" onMouseOver="rolloverOn('side-ext-68');"><IMG alt="DOM C++ Binding" border="0" height="12" hspace="0" name="side-ext-68" onLoad="rolloverLoad('side-ext-68','../graphics/ext-68-label-2.jpg','../graphics/ext-68-label-3.jpg');" src="../graphics/ext-68-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <A href="../program.html" onMouseOut="rolloverOff('side-program');" onMouseOver="rolloverOn('side-program');"><IMG alt="Programming" border="0" height="12" hspace="0" name="side-program" onLoad="rolloverLoad('side-program','../graphics/program-label-2.jpg','../graphics/program-label-3.jpg');" src="../graphics/program-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../migrate.html" onMouseOut="rolloverOff('side-migrate');" onMouseOver="rolloverOn('side-migrate');"><IMG alt="Migration Guide" border="0" height="12" hspace="0" name="side-migrate" onLoad="rolloverLoad('side-migrate','../graphics/migrate-label-2.jpg','../graphics/migrate-label-3.jpg');" src="../graphics/migrate-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="../feedback.html" onMouseOut="rolloverOff('side-feedback');" onMouseOver="rolloverOn('side-feedback');"><IMG alt="Feedback" border="0" height="12" hspace="0" name="side-feedback" onLoad="rolloverLoad('side-feedback','../graphics/feedback-label-2.jpg','../graphics/feedback-label-3.jpg');" src="../graphics/feedback-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../bug-report.html" onMouseOut="rolloverOff('side-bug-report');" onMouseOver="rolloverOn('side-bug-report');"><IMG alt="Bug-Reporting" border="0" height="12" hspace="0" name="side-bug-report" onLoad="rolloverLoad('side-bug-report','../graphics/bug-report-label-2.jpg','../graphics/bug-report-label-3.jpg');" src="../graphics/bug-report-label-3.jpg" vspace="0" width="120"></A><BR>  
+  <A href="../pdf.html" onMouseOut="rolloverOff('side-pdf');" onMouseOver="rolloverOn('side-pdf');"><IMG alt="PDF Document" border="0" height="12" hspace="0" name="side-pdf" onLoad="rolloverLoad('side-pdf','../graphics/pdf-label-2.jpg','../graphics/pdf-label-3.jpg');" src="../graphics/pdf-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="http://xml.apache.org/websrc/cvsweb.cgi/xml-xerces/c/" onMouseOut="rolloverOff('side-ext-100');" onMouseOver="rolloverOn('side-ext-100');"><IMG alt="CVS Repository" border="0" height="12" hspace="0" name="side-ext-100" onLoad="rolloverLoad('side-ext-100','../graphics/ext-100-label-2.jpg','../graphics/ext-100-label-3.jpg');" src="../graphics/ext-100-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <A href="http://marc.theaimsgroup.com/?l=xerces-c-dev" onMouseOut="rolloverOff('side-ext-102');" onMouseOver="rolloverOn('side-ext-102');"><IMG alt="Mail Archive" border="0" height="12" hspace="0" name="side-ext-102" onLoad="rolloverLoad('side-ext-102','../graphics/ext-102-label-2.jpg','../graphics/ext-102-label-3.jpg');" src="../graphics/ext-102-label-3.jpg" vspace="0" width="120"></A><BR>
+
+
+<IMG border="0" height="14" hspace="0" src="../resources/close.gif" vspace="0" width="120"><BR></TD><TD align="left" valign="top" width="500"><TABLE border="0" cellpadding="3" cellspacing="0"><TR><TD>
+    <TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#FFFFFF" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="../resources/void.gif" vspace="0" width="2"><B>API Docs for SAX and DOM</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+	    <P>
+<!-- Generated by Doxygen 1.2.14 -->
+<center>
+<a class="qindex" href="index.html">Main Page</a> &nbsp; <a class="qindex" href="hierarchy.html">Class Hierarchy</a> &nbsp; <a class="qindex" href="classes.html">Alphabetical List</a> &nbsp; <a class="qindex" href="annotated.html">Compound List</a> &nbsp; <a class="qindex" href="files.html">File List</a> &nbsp; <a class="qindex" href="functions.html">Compound Members</a> &nbsp; <a class="qindex" href="globals.html">File Members</a> &nbsp; </center>
+<hr><h1>XMLURL.hpp</h1><a href="XMLURL_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><pre>00001 <font class="comment">/*</font>
+00002 <font class="comment"> * Copyright 1999-2004 The Apache Software Foundation.</font>
+00003 <font class="comment"> * </font>
+00004 <font class="comment"> * Licensed under the Apache License, Version 2.0 (the "License");</font>
+00005 <font class="comment"> * you may not use this file except in compliance with the License.</font>
+00006 <font class="comment"> * You may obtain a copy of the License at</font>
+00007 <font class="comment"> * </font>
+00008 <font class="comment"> *      http://www.apache.org/licenses/LICENSE-2.0</font>
+00009 <font class="comment"> * </font>
+00010 <font class="comment"> * Unless required by applicable law or agreed to in writing, software</font>
+00011 <font class="comment"> * distributed under the License is distributed on an "AS IS" BASIS,</font>
+00012 <font class="comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</font>
+00013 <font class="comment"> * See the License for the specific language governing permissions and</font>
+00014 <font class="comment"> * limitations under the License.</font>
+00015 <font class="comment"> */</font>
+00016 
+00017 <font class="comment">/*</font>
+00018 <font class="comment"> * $Id: XMLURL.hpp,v 1.13 2004/09/08 13:56:24 peiyongz Exp $</font>
+00019 <font class="comment"> */</font>
+00020 
+00021 <font class="preprocessor">#if !defined(XMLURL_HPP)</font>
+<a name="l00022"></a><a class="code" href="XMLURL_8hpp.html#a0">00022</a> <font class="preprocessor"></font><font class="preprocessor">#define XMLURL_HPP</font>
+00023 <font class="preprocessor"></font>
+00024 <font class="preprocessor">#include &lt;<a class="code" href="PlatformUtils_8hpp.html">xercesc/util/PlatformUtils.hpp</a>&gt;</font>
+00025 
+00026 <a class="code" href="XercesDefs_8hpp.html#a2">XERCES_CPP_NAMESPACE_BEGIN</a>
+00027 
+<a name="l00028"></a><a class="code" href="XMLURL_8hpp.html#a1">00028</a> <font class="keyword">class </font><a class="code" href="classBinInputStream.html">BinInputStream</a>;
+00029 
+00030 <font class="comment">//</font>
+00031 <font class="comment">//  This class supports file, http, and ftp style URLs. All others are</font>
+00032 <font class="comment">//  rejected</font>
+00033 <font class="comment">//</font>
+<a name="l00034"></a><a class="code" href="classXMLURL.html">00034</a> <font class="keyword">class </font><a class="code" href="XercesDefs_8hpp.html#a8"></a> <a class="code" href="classXMLURL.html">XMLURL</a> : <font class="keyword">public</font> <a class="code" href="classXMemory.html">XMemory</a>
+00035 {
+00036 <font class="keyword">public</font>:
+00037     <font class="comment">// -----------------------------------------------------------------------</font>
+00038     <font class="comment">//  Class types</font>
+00039     <font class="comment">//</font>
+00040     <font class="comment">//  And they must remain in this order because they are indexes into an</font>
+00041     <font class="comment">//  array internally!</font>
+00042     <font class="comment">// -----------------------------------------------------------------------</font>
+<a name="l00043"></a><a class="code" href="classXMLURL.html#s5">00043</a>     <font class="keyword">enum</font> Protocols
+00044     {
+00045         File
+00046         , HTTP
+00047         , FTP
+00048 
+00049         , Protocols_Count
+00050         , Unknown
+00051     };
+00052 
+00053 
+00054     <font class="comment">// -----------------------------------------------------------------------</font>
+00055     <font class="comment">//  Public static methods</font>
+00056     <font class="comment">// -----------------------------------------------------------------------</font>
+00057     <font class="keyword">static</font> Protocols lookupByName(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> protoName);
+00058     <font class="keyword">static</font> <font class="keywordtype">bool</font> parse(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> urlText, <a class="code" href="classXMLURL.html">XMLURL</a>&amp; xmlURL);
+00059 
+00060     <font class="comment">// -----------------------------------------------------------------------</font>
+00061     <font class="comment">//  Constructors and Destructor</font>
+00062     <font class="comment">// -----------------------------------------------------------------------</font>
+00063     <a class="code" href="classXMLURL.html">XMLURL</a>(<a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font> manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>);
+00064     <a class="code" href="classXMLURL.html">XMLURL</a>
+00065     (
+00066         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    baseURL
+00067         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    relativeURL
+00068         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font> manager  = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00069     );
+00070     <a class="code" href="classXMLURL.html">XMLURL</a>
+00071     (
+00072         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    baseURL
+00073         , <font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font>     relativeURL
+00074         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font> manager  = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00075     );
+00076     <a class="code" href="classXMLURL.html">XMLURL</a>
+00077     (
+00078         <font class="keyword">const</font>   <a class="code" href="classXMLURL.html">XMLURL</a>&amp;         baseURL
+00079         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    relativeURL
+00080     );
+00081     <a class="code" href="classXMLURL.html">XMLURL</a>
+00082     (
+00083         <font class="keyword">const</font>   <a class="code" href="classXMLURL.html">XMLURL</a>&amp;         baseURL
+00084         , <font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font>     relativeURL
+00085     );
+00086     <a class="code" href="classXMLURL.html">XMLURL</a>
+00087     (
+00088         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    urlText
+00089         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font> manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00090     );
+00091     <a class="code" href="classXMLURL.html">XMLURL</a>
+00092     (
+00093         <font class="keyword">const</font>   <font class="keywordtype">char</font>* <font class="keyword">const</font>     urlText
+00094         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font> manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00095     );
+00096     <a class="code" href="classXMLURL.html">XMLURL</a>(<font class="keyword">const</font> <a class="code" href="classXMLURL.html">XMLURL</a>&amp; toCopy);
+00097     <font class="keyword">virtual</font> ~<a class="code" href="classXMLURL.html">XMLURL</a>();
+00098 
+00099 
+00100     <font class="comment">// -----------------------------------------------------------------------</font>
+00101     <font class="comment">//  Operators</font>
+00102     <font class="comment">// -----------------------------------------------------------------------</font>
+00103     <a class="code" href="classXMLURL.html">XMLURL</a>&amp; operator=(<font class="keyword">const</font> <a class="code" href="classXMLURL.html">XMLURL</a>&amp; toAssign);
+00104     <font class="keywordtype">bool</font> operator==(<font class="keyword">const</font> <a class="code" href="classXMLURL.html">XMLURL</a>&amp; toCompare) <font class="keyword">const</font>;
+00105     <font class="keywordtype">bool</font> operator!=(<font class="keyword">const</font> <a class="code" href="classXMLURL.html">XMLURL</a>&amp; toCompare) <font class="keyword">const</font>;
+00106 
+00107 
+00108     <font class="comment">// -----------------------------------------------------------------------</font>
+00109     <font class="comment">//  Getter methods</font>
+00110     <font class="comment">// -----------------------------------------------------------------------</font>
+00111     <font class="keyword">const</font> XMLCh* getFragment() <font class="keyword">const</font>;
+00112     <font class="keyword">const</font> XMLCh* getHost() <font class="keyword">const</font>;
+00113     <font class="keyword">const</font> XMLCh* getPassword() <font class="keyword">const</font>;
+00114     <font class="keyword">const</font> XMLCh* getPath() <font class="keyword">const</font>;
+00115     <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> getPortNum() <font class="keyword">const</font>;
+00116     Protocols getProtocol() <font class="keyword">const</font>;
+00117     <font class="keyword">const</font> XMLCh* getProtocolName() <font class="keyword">const</font>;
+00118     <font class="keyword">const</font> XMLCh* getQuery() <font class="keyword">const</font>;
+00119     <font class="keyword">const</font> XMLCh* getURLText() <font class="keyword">const</font>;
+00120     <font class="keyword">const</font> XMLCh* getUser() <font class="keyword">const</font>;
+00121     <a class="code" href="classMemoryManager.html">MemoryManager</a>* getMemoryManager() <font class="keyword">const</font>;
+00122 
+00123 
+00124     <font class="comment">// -----------------------------------------------------------------------</font>
+00125     <font class="comment">//  Setter methods</font>
+00126     <font class="comment">// -----------------------------------------------------------------------</font>
+00127     <font class="keywordtype">void</font> setURL(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> urlText);
+00128     <font class="keywordtype">void</font> setURL
+00129     (
+00130         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    baseURL
+00131         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    relativeURL
+00132     );
+00133     <font class="keywordtype">void</font> setURL
+00134     (
+00135         <font class="keyword">const</font>   <a class="code" href="classXMLURL.html">XMLURL</a>&amp;         baseURL
+00136         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    relativeURL
+00137     );
+00138     <font class="comment">// a version of setURL that doesn't throw malformed url exceptions</font>
+00139     <font class="keywordtype">bool</font> setURL(
+00140         <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    baseURL
+00141         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    relativeURL
+00142         , <a class="code" href="classXMLURL.html">XMLURL</a>&amp; xmlURL);
+00143     <font class="comment">// -----------------------------------------------------------------------</font>
+00144     <font class="comment">//  Miscellaneous methods</font>
+00145     <font class="comment">// -----------------------------------------------------------------------</font>
+00146     <font class="keywordtype">bool</font> isRelative() <font class="keyword">const</font>;
+00147     <font class="keywordtype">bool</font> hasInvalidChar() <font class="keyword">const</font>;
+00148     <a class="code" href="classBinInputStream.html">BinInputStream</a>* makeNewStream() <font class="keyword">const</font>;
+00149     <font class="keywordtype">void</font> makeRelativeTo(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> baseURLText);
+00150     <font class="keywordtype">void</font> makeRelativeTo(<font class="keyword">const</font> <a class="code" href="classXMLURL.html">XMLURL</a>&amp; baseURL);
+00151 
+00152 
+00153 <font class="keyword">private</font>:
+00154     <font class="comment">// -----------------------------------------------------------------------</font>
+00155     <font class="comment">//  Private helper methods</font>
+00156     <font class="comment">// -----------------------------------------------------------------------</font>
+00157     <font class="keywordtype">void</font> buildFullText();
+00158     <font class="keywordtype">void</font> cleanup();
+00159     <font class="keywordtype">bool</font> conglomerateWithBase(<font class="keyword">const</font> <a class="code" href="classXMLURL.html">XMLURL</a>&amp; baseURL, <font class="keywordtype">bool</font> useExceptions=<font class="keyword">true</font>);
+00160     <font class="keywordtype">void</font> parse
+00161     (
+00162         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    urlText
+00163     );
+00164 
+00165 
+00166     <font class="comment">// -----------------------------------------------------------------------</font>
+00167     <font class="comment">//  Data members</font>
+00168     <font class="comment">//</font>
+00169     <font class="comment">//  fFragment</font>
+00170     <font class="comment">//      The fragment part of the URL, if any. If none, its a null.</font>
+00171     <font class="comment">//</font>
+00172     <font class="comment">//  fHost</font>
+00173     <font class="comment">//      The host part of the URL that was parsed out. This one will often</font>
+00174     <font class="comment">//      be null (or "localhost", which also means the current machine.)</font>
+00175     <font class="comment">//</font>
+00176     <font class="comment">//  fPassword</font>
+00177     <font class="comment">//      The password found, if any. If none then its a null.</font>
+00178     <font class="comment">//</font>
+00179     <font class="comment">//  fPath</font>
+00180     <font class="comment">//      The path part of the URL that was parsed out, if any. If none,</font>
+00181     <font class="comment">//      then its a null.</font>
+00182     <font class="comment">//</font>
+00183     <font class="comment">//  fPortNum</font>
+00184     <font class="comment">//      The port that was indicated in the URL. If no port was provided</font>
+00185     <font class="comment">//      explicitly, then its left zero.</font>
+00186     <font class="comment">//</font>
+00187     <font class="comment">//  fProtocol</font>
+00188     <font class="comment">//      Indicates the type of the URL's source. The text of the prefix</font>
+00189     <font class="comment">//      can be gotten from this.</font>
+00190     <font class="comment">//</font>
+00191     <font class="comment">//  fQuery</font>
+00192     <font class="comment">//      The query part of the URL, if any. If none, then its a null.</font>
+00193     <font class="comment">//</font>
+00194     <font class="comment">//  fUser</font>
+00195     <font class="comment">//      The username found, if any. If none, then its a null.</font>
+00196     <font class="comment">//</font>
+00197     <font class="comment">//  fURLText</font>
+00198     <font class="comment">//      This is a copy of the URL text, after it has been taken apart,</font>
+00199     <font class="comment">//      made relative if needed, canonicalized, and then put back</font>
+00200     <font class="comment">//      together. Its only created upon demand.</font>
+00201     <font class="comment">//</font>
+00202     <font class="comment">//  fHasInvalidChar</font>
+00203     <font class="comment">//      This indicates if the URL Text contains invalid characters as per</font>
+00204     <font class="comment">//      RFC 2396 standard.</font>
+00205     <font class="comment">// -----------------------------------------------------------------------</font>
+00206     <a class="code" href="classMemoryManager.html">MemoryManager</a>*  fMemoryManager;
+00207     XMLCh*          fFragment;
+00208     XMLCh*          fHost;
+00209     XMLCh*          fPassword;
+00210     XMLCh*          fPath;
+00211     <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    fPortNum;
+00212     Protocols       fProtocol;
+00213     XMLCh*          fQuery;
+00214     XMLCh*          fUser;
+00215     XMLCh*          fURLText;
+00216     <font class="keywordtype">bool</font>            fHasInvalidChar;
+00217 };
+00218 
+00219 
+00220 <font class="comment">// ---------------------------------------------------------------------------</font>
+00221 <font class="comment">//  XMLURL: Public operators</font>
+00222 <font class="comment">// ---------------------------------------------------------------------------</font>
+<a name="l00223"></a><a class="code" href="classXMLURL.html#a11">00223</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLURL.html#a11">XMLURL::operator!=</a>(<font class="keyword">const</font> <a class="code" href="classXMLURL.html">XMLURL</a>&amp; toCompare)<font class="keyword"> const</font>
+00224 <font class="keyword"></font>{
+00225     <font class="keywordflow">return</font> !<a class="code" href="classXMLURL.html#a10">operator==</a>(toCompare);
+00226 }
+00227 
+00228 
+00229 <font class="comment">// ---------------------------------------------------------------------------</font>
+00230 <font class="comment">//  XMLURL: Getter methods</font>
+00231 <font class="comment">// ---------------------------------------------------------------------------</font>
+<a name="l00232"></a><a class="code" href="classXMLURL.html#a12">00232</a> <font class="keyword">inline</font> <font class="keyword">const</font> XMLCh* <a class="code" href="classXMLURL.html#a12">XMLURL::getFragment</a>()<font class="keyword"> const</font>
+00233 <font class="keyword"></font>{
+00234     <font class="keywordflow">return</font> fFragment;
+00235 }
+00236 
+<a name="l00237"></a><a class="code" href="classXMLURL.html#a13">00237</a> <font class="keyword">inline</font> <font class="keyword">const</font> XMLCh* <a class="code" href="classXMLURL.html#a13">XMLURL::getHost</a>()<font class="keyword"> const</font>
+00238 <font class="keyword"></font>{
+00239     <font class="keywordflow">return</font> fHost;
+00240 }
+00241 
+<a name="l00242"></a><a class="code" href="classXMLURL.html#a14">00242</a> <font class="keyword">inline</font> <font class="keyword">const</font> XMLCh* <a class="code" href="classXMLURL.html#a14">XMLURL::getPassword</a>()<font class="keyword"> const</font>
+00243 <font class="keyword"></font>{
+00244     <font class="keywordflow">return</font> fPassword;
+00245 }
+00246 
+<a name="l00247"></a><a class="code" href="classXMLURL.html#a15">00247</a> <font class="keyword">inline</font> <font class="keyword">const</font> XMLCh* <a class="code" href="classXMLURL.html#a15">XMLURL::getPath</a>()<font class="keyword"> const</font>
+00248 <font class="keyword"></font>{
+00249     <font class="keywordflow">return</font> fPath;
+00250 }
+00251 
+<a name="l00252"></a><a class="code" href="classXMLURL.html#a17">00252</a> <font class="keyword">inline</font> <a class="code" href="classXMLURL.html#s5">XMLURL::Protocols</a> <a class="code" href="classXMLURL.html#a17">XMLURL::getProtocol</a>()<font class="keyword"> const</font>
+00253 <font class="keyword"></font>{
+00254     <font class="keywordflow">return</font> fProtocol;
+00255 }
+00256 
+<a name="l00257"></a><a class="code" href="classXMLURL.html#a19">00257</a> <font class="keyword">inline</font> <font class="keyword">const</font> XMLCh* <a class="code" href="classXMLURL.html#a19">XMLURL::getQuery</a>()<font class="keyword"> const</font>
+00258 <font class="keyword"></font>{
+00259     <font class="keywordflow">return</font> fQuery;
+00260 }
+00261 
+<a name="l00262"></a><a class="code" href="classXMLURL.html#a21">00262</a> <font class="keyword">inline</font> <font class="keyword">const</font> XMLCh* <a class="code" href="classXMLURL.html#a21">XMLURL::getUser</a>()<font class="keyword"> const</font>
+00263 <font class="keyword"></font>{
+00264     <font class="keywordflow">return</font> fUser;
+00265 }
+00266 
+<a name="l00267"></a><a class="code" href="classXMLURL.html#a20">00267</a> <font class="keyword">inline</font> <font class="keyword">const</font> XMLCh* <a class="code" href="classXMLURL.html#a20">XMLURL::getURLText</a>()<font class="keyword"> const</font>
+00268 <font class="keyword"></font>{
+00269     <font class="comment">//</font>
+00270     <font class="comment">//  Fault it in if not already. Since this is a const method and we</font>
+00271     <font class="comment">//  can't use mutable members due the compilers we have to support,</font>
+00272     <font class="comment">//  we have to cast off the constness.</font>
+00273     <font class="comment">//</font>
+00274     <font class="keywordflow">if</font> (!fURLText)
+00275         ((<a class="code" href="classXMLURL.html">XMLURL</a>*)<font class="keyword">this</font>)-&gt;buildFullText();
+00276 
+00277     <font class="keywordflow">return</font> fURLText;
+00278 }
+00279 
+<a name="l00280"></a><a class="code" href="classXMLURL.html#a22">00280</a> <font class="keyword">inline</font> <a class="code" href="classMemoryManager.html">MemoryManager</a>* <a class="code" href="classXMLURL.html#a22">XMLURL::getMemoryManager</a>()<font class="keyword"> const</font>
+00281 <font class="keyword"></font>{
+00282     <font class="keywordflow">return</font> fMemoryManager;
+00283 }
+00284 
+00285 <a class="code" href="XMLException_8hpp.html#a1">MakeXMLException</a>(MalformedURLException, <a class="code" href="XercesDefs_8hpp.html#a8"></a>)
+00286 
+00287 <a class="code" href="XercesDefs_8hpp.html#a3">XERCES_CPP_NAMESPACE_END</a>
+00288 
+00289 
+00290 <font class="preprocessor">#endif</font>
+</pre></div>    </FONT></TD></TR></TABLE><BR>
+</TD></TR></TABLE></TD></TR></TABLE><BR><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD bgcolor="#0086b2"><IMG height="1" src="images/dot.gif" width="1" alt=""></TD></TR><TR><TD align="center"><FONT color="#0086b2" size="-1"><I>
+              Copyright &copy; 1994-2004 The Apache Software Foundation.
+              All Rights Reserved.
+            </I></FONT></TD></TR></TABLE></BODY></HTML>

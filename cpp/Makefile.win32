@@ -1,0 +1,92 @@
+# TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
+
+!IF "$(CFG)" == ""
+CFG=libBitFlood - Win32 Debug
+!MESSAGE No configuration specified.  Defaulting to libBitFlood - Win32 Debug.
+!ENDIF 
+
+!IF "$(CFG)" != "libBitFlood - Win32 Debug"
+!MESSAGE Invalid configuration "$(CFG)" specified.
+!MESSAGE You can specify a configuration when running NMAKE on this makefile
+!MESSAGE by defining the macro CFG on the command line.  For example:
+!MESSAGE 
+!MESSAGE NMAKE /f "Makefile.win32" CFG="libBitFlood - Win32 Debug"
+!MESSAGE 
+!MESSAGE Possible choices for configuration are:
+!MESSAGE 
+!MESSAGE "libBitFlood - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE 
+!ERROR An invalid configuration is specified.
+!ENDIF 
+
+!IF "$(OS)" == "Windows_NT"
+NULL=
+!ELSE 
+NULL=nul
+!ENDIF 
+################################################################################
+# Begin Project
+# PROP Target_Last_Scanned "libBitFlood - Win32 Debug"
+
+!IF  "$(CFG)" == "libBitFlood - Win32 Debug"
+
+OUTDIR=.\build\Debug
+INTDIR=.\build\Debug
+
+ALL : ".\build\Debug\libBitFlood.dll"
+
+CLEAN : 
+	-@erase ".\build\Debug\libBitFlood.dll"
+	-@erase ".\build\Debug\libBitFlood.ilk"
+	-@erase ".\build\Debug\libBitFlood.exp"
+	-@erase ".\build\Debug\libBitFlood.lib"
+	-@erase ".\build\Debug\libBitFlood.map"
+	-@erase ".\build\Debug\libBitFlood.pdb"
+	-@erase ".\build\Debug\Encoder.obj"
+
+"$(OUTDIR)" :
+    if not exist "$(OUTDIR)" mkdir "$(OUTDIR)"
+
+CPP=cl.exe
+CPP_PROJ=/nologo /MDd /W3 /Gm /GX /Zi /Od /I include /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /FR"$(INTDIR)" \
+         /Fp"$(INTDIR)\libBitFlood.pch" /YX /Fo"$(INTDIR)" /Fd"$(INTDIR)" /c 
+CPP_OBJS=.\build\Debug\
+
+{$(CPP_OBJS)}.obj:
+   $(CPP) $(CPP_PROJ) $<  
+
+LINK32=link.exe
+LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib\
+ advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib\
+ odbccp32.lib /nologo /subsystem:windows /dll /incremental:yes\
+ /pdb:"$(OUTDIR)/libBitFlood.pdb" /map:"$(INTDIR)/libBitFlood.map" /debug /machine:I386\
+ /out:"$(OUTDIR)/libBitFlood.dll" /implib:"$(OUTDIR)/libBitFlood.lib" 
+LINK32_OBJS= \
+	".\build\Debug\Encoder.obj"
+
+".\build\Debug\libBitFlood.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
+    $(LINK32) @<<
+  $(LINK32_FLAGS) $(LINK32_OBJS)
+<<
+
+!ENDIF
+
+################################################################################
+# Begin Source File
+
+SOURCE=.\src\Encoder.cpp
+
+!IF "$(CFG)" == "libBitFlood - Win32 Debug"
+
+DEP_CPP_WIN32=\
+	".\src\Encoder.H"\
+	
+
+".\build\Debug\Encoder.obj" : $(SOURCE) $(DEP_CPP_WIN32) "$(INTDIR)"
+
+!ENDIF 
+
+# End Source File
+# End Target
+# End Project
+################################################################################

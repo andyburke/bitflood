@@ -1,0 +1,310 @@
+<HTML><HEAD><SCRIPT language="JavaScript" src="../resources/script.js" type="text/javascript"></SCRIPT><TITLE>XercesDOMParser.hpp Source File</TITLE><link href="XercesApi.css" rel="stylesheet" type="text/css"></HEAD><BODY alink="#ff0000" bgcolor="#ffffff" leftmargin="4" link="#0000ff" marginheight="4" marginwidth="4" text="#000000" topmargin="4" vlink="#0000aa"><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" height="60" rowspan="3" valign="top" width="135"><IMG border="0" height="60" hspace="0" src="../resources/logo.gif" vspace="0" width="135"></TD><TD align="left" colspan="4" height="5" valign="top" width="456"><IMG border="0" height="5" hspace="0" src="../resources/line.gif" vspace="0" width="456"></TD><TD align="left" height="60" rowspan="3" valign="top" width="29"><IMG border="0" height="60" hspace="0" src="../resources/right.gif" vspace="0" width="29"></TD></TR><TR><TD align="left" bgcolor="#0086b2" colspan="4" height="35" valign="top" width="456"><IMG alt="" border="0" height="35" hspace="0" src="../graphics/api-header.jpg" vspace="0" width="456"></TD></TR><TR><TD align="left" height="20" valign="top" width="168"><IMG border="0" height="20" hspace="0" src="../resources/bottom.gif" vspace="0" width="168"></TD><TD align="left" height="20" valign="top" width="96"><A href="http://xml.apache.org/" onMouseOut="rolloverOff('xml');" onMouseOver="rolloverOn('xml');" target="new"><IMG alt="http://xml.apache.org/" border="0" height="20" hspace="0" name="xml" onLoad="rolloverLoad('xml','../resources/button-xml-hi.gif','../resources/button-xml-lo.gif');" src="../resources/button-xml-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.apache.org/" onMouseOut="rolloverOff('asf');" onMouseOver="rolloverOn('asf');" target="new"><IMG alt="http://www.apache.org/" border="0" height="20" hspace="0" name="asf" onLoad="rolloverLoad('asf','../resources/button-asf-hi.gif','../resources/button-asf-lo.gif');" src="../resources/button-asf-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.w3.org/" onMouseOut="rolloverOff('w3c');" onMouseOver="rolloverOn('w3c');" target="new"><IMG alt="http://www.w3.org/" border="0" height="20" hspace="0" name="w3c" onLoad="rolloverLoad('w3c','../resources/button-w3c-hi.gif','../resources/button-w3c-lo.gif');" src="../resources/button-w3c-lo.gif" vspace="0" width="96"></A></TD></TR></TABLE><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" valign="top" width="120"><IMG border="0" height="14" hspace="0" src="../resources/join.gif" vspace="0" width="120"><BR>
+  <A href="../../index.html" onMouseOut="rolloverOff('side-ext-2');" onMouseOver="rolloverOn('side-ext-2');"><IMG alt="Home" border="0" height="12" hspace="0" name="side-ext-2" onLoad="rolloverLoad('side-ext-2','../graphics/ext-2-label-2.jpg','../graphics/ext-2-label-3.jpg');" src="../graphics/ext-2-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="../index.html" onMouseOut="rolloverOff('side-index');" onMouseOver="rolloverOn('side-index');"><IMG alt="Readme" border="0" height="12" hspace="0" name="side-index" onLoad="rolloverLoad('side-index','../graphics/index-label-2.jpg','../graphics/index-label-3.jpg');" src="../graphics/index-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../releases.html" onMouseOut="rolloverOff('side-releases');" onMouseOver="rolloverOn('side-releases');"><IMG alt="Release Info" border="0" height="12" hspace="0" name="side-releases" onLoad="rolloverLoad('side-releases','../graphics/releases-label-2.jpg','../graphics/releases-label-3.jpg');" src="../graphics/releases-label-3.jpg" vspace="0" width="120"></A><BR>
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+  <A href="../install.html" onMouseOut="rolloverOff('side-install');" onMouseOver="rolloverOn('side-install');"><IMG alt="Installation" border="0" height="12" hspace="0" name="side-install" onLoad="rolloverLoad('side-install','../graphics/install-label-2.jpg','../graphics/install-label-3.jpg');" src="../graphics/install-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="http://xml.apache.org/dist/xerces-c/" onMouseOut="rolloverOff('side-ext-18');" onMouseOver="rolloverOn('side-ext-18');"><IMG alt="Download" border="0" height="12" hspace="0" name="side-ext-18" onLoad="rolloverLoad('side-ext-18','../graphics/ext-18-label-2.jpg','../graphics/ext-18-label-3.jpg');" src="../graphics/ext-18-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../build.html" onMouseOut="rolloverOff('side-build');" onMouseOver="rolloverOn('side-build');"><IMG alt="Build" border="0" height="12" hspace="0" name="side-build" onLoad="rolloverLoad('side-build','../graphics/build-label-2.jpg','../graphics/build-label-3.jpg');" src="../graphics/build-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+  <A href="../faqs.html" onMouseOut="rolloverOff('side-faqs');" onMouseOver="rolloverOn('side-faqs');"><IMG alt="FAQs" border="0" height="12" hspace="0" name="side-faqs" onLoad="rolloverLoad('side-faqs','../graphics/faqs-label-2.jpg','../graphics/faqs-label-3.jpg');" src="../graphics/faqs-label-3.jpg" vspace="0" width="120"></A><BR>  
+  <A href="../samples.html" onMouseOut="rolloverOff('side-samples');" onMouseOver="rolloverOn('side-samples');"><IMG alt="Samples" border="0" height="12" hspace="0" name="side-samples" onLoad="rolloverLoad('side-samples','../graphics/samples-label-2.jpg','../graphics/samples-label-3.jpg');" src="../graphics/samples-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../api.html" onMouseOut="rolloverOff('side-api');" onMouseOver="rolloverOn('side-api');"><IMG alt="API Docs" border="0" height="12" hspace="0" name="side-api" onLoad="rolloverLoad('side-api','../graphics/api-label-2.jpg','../graphics/api-label-3.jpg');" src="../graphics/api-label-3.jpg" vspace="0" width="120"></A><BR>  
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>  
+  <A href="../ApacheDOMC++Binding.html" onMouseOut="rolloverOff('side-ext-68');" onMouseOver="rolloverOn('side-ext-68');"><IMG alt="DOM C++ Binding" border="0" height="12" hspace="0" name="side-ext-68" onLoad="rolloverLoad('side-ext-68','../graphics/ext-68-label-2.jpg','../graphics/ext-68-label-3.jpg');" src="../graphics/ext-68-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <A href="../program.html" onMouseOut="rolloverOff('side-program');" onMouseOver="rolloverOn('side-program');"><IMG alt="Programming" border="0" height="12" hspace="0" name="side-program" onLoad="rolloverLoad('side-program','../graphics/program-label-2.jpg','../graphics/program-label-3.jpg');" src="../graphics/program-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../migrate.html" onMouseOut="rolloverOff('side-migrate');" onMouseOver="rolloverOn('side-migrate');"><IMG alt="Migration Guide" border="0" height="12" hspace="0" name="side-migrate" onLoad="rolloverLoad('side-migrate','../graphics/migrate-label-2.jpg','../graphics/migrate-label-3.jpg');" src="../graphics/migrate-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="../feedback.html" onMouseOut="rolloverOff('side-feedback');" onMouseOver="rolloverOn('side-feedback');"><IMG alt="Feedback" border="0" height="12" hspace="0" name="side-feedback" onLoad="rolloverLoad('side-feedback','../graphics/feedback-label-2.jpg','../graphics/feedback-label-3.jpg');" src="../graphics/feedback-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../bug-report.html" onMouseOut="rolloverOff('side-bug-report');" onMouseOver="rolloverOn('side-bug-report');"><IMG alt="Bug-Reporting" border="0" height="12" hspace="0" name="side-bug-report" onLoad="rolloverLoad('side-bug-report','../graphics/bug-report-label-2.jpg','../graphics/bug-report-label-3.jpg');" src="../graphics/bug-report-label-3.jpg" vspace="0" width="120"></A><BR>  
+  <A href="../pdf.html" onMouseOut="rolloverOff('side-pdf');" onMouseOver="rolloverOn('side-pdf');"><IMG alt="PDF Document" border="0" height="12" hspace="0" name="side-pdf" onLoad="rolloverLoad('side-pdf','../graphics/pdf-label-2.jpg','../graphics/pdf-label-3.jpg');" src="../graphics/pdf-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="http://xml.apache.org/websrc/cvsweb.cgi/xml-xerces/c/" onMouseOut="rolloverOff('side-ext-100');" onMouseOver="rolloverOn('side-ext-100');"><IMG alt="CVS Repository" border="0" height="12" hspace="0" name="side-ext-100" onLoad="rolloverLoad('side-ext-100','../graphics/ext-100-label-2.jpg','../graphics/ext-100-label-3.jpg');" src="../graphics/ext-100-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <A href="http://marc.theaimsgroup.com/?l=xerces-c-dev" onMouseOut="rolloverOff('side-ext-102');" onMouseOver="rolloverOn('side-ext-102');"><IMG alt="Mail Archive" border="0" height="12" hspace="0" name="side-ext-102" onLoad="rolloverLoad('side-ext-102','../graphics/ext-102-label-2.jpg','../graphics/ext-102-label-3.jpg');" src="../graphics/ext-102-label-3.jpg" vspace="0" width="120"></A><BR>
+
+
+<IMG border="0" height="14" hspace="0" src="../resources/close.gif" vspace="0" width="120"><BR></TD><TD align="left" valign="top" width="500"><TABLE border="0" cellpadding="3" cellspacing="0"><TR><TD>
+    <TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#FFFFFF" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="../resources/void.gif" vspace="0" width="2"><B>API Docs for SAX and DOM</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+	    <P>
+<!-- Generated by Doxygen 1.2.14 -->
+<center>
+<a class="qindex" href="index.html">Main Page</a> &nbsp; <a class="qindex" href="hierarchy.html">Class Hierarchy</a> &nbsp; <a class="qindex" href="classes.html">Alphabetical List</a> &nbsp; <a class="qindex" href="annotated.html">Compound List</a> &nbsp; <a class="qindex" href="files.html">File List</a> &nbsp; <a class="qindex" href="functions.html">Compound Members</a> &nbsp; <a class="qindex" href="globals.html">File Members</a> &nbsp; </center>
+<hr><h1>XercesDOMParser.hpp</h1><a href="XercesDOMParser_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><pre>00001 <font class="comment">/*</font>
+00002 <font class="comment"> * Copyright 2001-2002,2004 The Apache Software Foundation.</font>
+00003 <font class="comment"> * </font>
+00004 <font class="comment"> * Licensed under the Apache License, Version 2.0 (the "License");</font>
+00005 <font class="comment"> * you may not use this file except in compliance with the License.</font>
+00006 <font class="comment"> * You may obtain a copy of the License at</font>
+00007 <font class="comment"> * </font>
+00008 <font class="comment"> *      http://www.apache.org/licenses/LICENSE-2.0</font>
+00009 <font class="comment"> * </font>
+00010 <font class="comment"> * Unless required by applicable law or agreed to in writing, software</font>
+00011 <font class="comment"> * distributed under the License is distributed on an "AS IS" BASIS,</font>
+00012 <font class="comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</font>
+00013 <font class="comment"> * See the License for the specific language governing permissions and</font>
+00014 <font class="comment"> * limitations under the License.</font>
+00015 <font class="comment"> */</font>
+00016 
+00017 <font class="comment">/*</font>
+00018 <font class="comment"> * $Id: XercesDOMParser.hpp,v 1.20 2004/09/08 13:56:18 peiyongz Exp $</font>
+00019 <font class="comment"> *</font>
+00020 <font class="comment"> */</font>
+00021 
+00022 <font class="preprocessor">#if !defined(XercesDOMParser_HPP)</font>
+<a name="l00023"></a><a class="code" href="XercesDOMParser_8hpp.html#a0">00023</a> <font class="preprocessor"></font><font class="preprocessor">#define XercesDOMParser_HPP</font>
+00024 <font class="preprocessor"></font>
+00025 
+00026 <font class="preprocessor">#include &lt;<a class="code" href="AbstractDOMParser_8hpp.html">xercesc/parsers/AbstractDOMParser.hpp</a>&gt;</font>
+00027 
+00028 <a class="code" href="XercesDefs_8hpp.html#a2">XERCES_CPP_NAMESPACE_BEGIN</a>
+00029 
+00030 
+<a name="l00031"></a><a class="code" href="XercesDOMParser_8hpp.html#a1">00031</a> <font class="keyword">class </font><a class="code" href="classEntityResolver.html">EntityResolver</a>;
+00032 <font class="keyword">class </font><a class="code" href="classErrorHandler.html">ErrorHandler</a>;
+00033 <font class="keyword">class </font>Grammar;
+00034 <font class="keyword">class </font><a class="code" href="classXMLEntityResolver.html">XMLEntityResolver</a>;
+00035 <font class="keyword">class </font><a class="code" href="classXMLResourceIdentifier.html">XMLResourceIdentifier</a>;
+00036 
+<a name="l00047"></a><a class="code" href="classXercesDOMParser.html">00047</a> <font class="keyword">class </font><a class="code" href="XercesDefs_8hpp.html#a14"></a> <a class="code" href="classXercesDOMParser.html">XercesDOMParser</a> : <font class="keyword">public</font> <a class="code" href="classAbstractDOMParser.html">AbstractDOMParser</a>
+00048 {
+00049 <font class="keyword">public</font> :
+00050     <font class="comment">// -----------------------------------------------------------------------</font>
+00051     <font class="comment">//  Constructors and Detructor</font>
+00052     <font class="comment">// -----------------------------------------------------------------------</font>
+00053 
+00071     <a class="code" href="classXercesDOMParser.html">XercesDOMParser</a>
+00072     (
+00073           <a class="code" href="classXMLValidator.html">XMLValidator</a>* <font class="keyword">const</font>   valToAdopt = 0
+00074         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00075         , <a class="code" href="classXMLGrammarPool.html">XMLGrammarPool</a>* <font class="keyword">const</font> gramPool = 0        
+00076     );
+00077 
+00081     <font class="keyword">virtual</font> ~<a class="code" href="classXercesDOMParser.html">XercesDOMParser</a>();
+00082 
+00084 
+00085 
+00086     <font class="comment">// -----------------------------------------------------------------------</font>
+00087     <font class="comment">//  Getter methods</font>
+00088     <font class="comment">// -----------------------------------------------------------------------</font>
+00089 
+00092 
+00100     <a class="code" href="classErrorHandler.html">ErrorHandler</a>* getErrorHandler();
+00101 
+00109     <font class="keyword">const</font> <a class="code" href="classErrorHandler.html">ErrorHandler</a>* getErrorHandler() <font class="keyword">const</font>;
+00110 
+00118     <a class="code" href="classEntityResolver.html">EntityResolver</a>* getEntityResolver();
+00119 
+00127     <font class="keyword">const</font> <a class="code" href="classEntityResolver.html">EntityResolver</a>* getEntityResolver() <font class="keyword">const</font>;
+00128 
+00137     <a class="code" href="classXMLEntityResolver.html">XMLEntityResolver</a>* getXMLEntityResolver();
+00138  
+00147     <font class="keyword">const</font> <a class="code" href="classXMLEntityResolver.html">XMLEntityResolver</a>* getXMLEntityResolver() <font class="keyword">const</font>;
+00148 
+00159     <font class="keywordtype">bool</font> isCachingGrammarFromParse() <font class="keyword">const</font>;
+00160 
+00171     <font class="keywordtype">bool</font> isUsingCachedGrammarInParse() <font class="keyword">const</font>;
+00172 
+00179     Grammar* getGrammar(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> nameSpaceKey);
+00180 
+00186     Grammar* getRootGrammar();
+00187 
+00194     <font class="keyword">const</font> XMLCh* getURIText(<font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> uriId) <font class="keyword">const</font>;
+00195 
+00201     <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> getSrcOffset() <font class="keyword">const</font>;
+00202 
+00204 
+00205 
+00206     <font class="comment">// -----------------------------------------------------------------------</font>
+00207     <font class="comment">//  Setter methods</font>
+00208     <font class="comment">// -----------------------------------------------------------------------</font>
+00209 
+00212 
+00226     <font class="keywordtype">void</font> setErrorHandler(<a class="code" href="classErrorHandler.html">ErrorHandler</a>* <font class="keyword">const</font> handler);
+00227 
+00244     <font class="keywordtype">void</font> setEntityResolver(<a class="code" href="classEntityResolver.html">EntityResolver</a>* <font class="keyword">const</font> handler);
+00245 
+00263     <font class="keywordtype">void</font> setXMLEntityResolver(<a class="code" href="classXMLEntityResolver.html">XMLEntityResolver</a>* <font class="keyword">const</font> handler);
+00264 
+00282     <font class="keywordtype">void</font> cacheGrammarFromParse(<font class="keyword">const</font> <font class="keywordtype">bool</font> newState);
+00283 
+00302     <font class="keywordtype">void</font> useCachedGrammarInParse(<font class="keyword">const</font> <font class="keywordtype">bool</font> newState);
+00303 
+00305 
+00306     <font class="comment">// -----------------------------------------------------------------------</font>
+00307     <font class="comment">//  Utility methods</font>
+00308     <font class="comment">// -----------------------------------------------------------------------</font>
+00309 
+00335     <font class="keywordtype">void</font> resetDocumentPool();
+00336 
+00338 
+00339     <font class="comment">// -----------------------------------------------------------------------</font>
+00340     <font class="comment">//  Implementation of the XMLErrorReporter interface.</font>
+00341     <font class="comment">// -----------------------------------------------------------------------</font>
+00342 
+00345 
+00370     <font class="keyword">virtual</font> <font class="keywordtype">void</font> error
+00371     (
+00372         <font class="keyword">const</font>   <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>                errCode
+00373         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>                msgDomain
+00374         , <font class="keyword">const</font> <a class="code" href="classXMLErrorReporter.html#s4">XMLErrorReporter::ErrTypes</a>  errType
+00375         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>                errorText
+00376         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>                systemId
+00377         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>                publicId
+00378         , <font class="keyword">const</font> XMLSSize_t                  lineNum
+00379         , <font class="keyword">const</font> XMLSSize_t                  colNum
+00380     );
+00381 
+00390     <font class="keyword">virtual</font> <font class="keywordtype">void</font> <a class="code" href="classXMLErrorReporter.html#z277_1">resetErrors</a>();
+00392 
+00393 
+00394     <font class="comment">// -----------------------------------------------------------------------</font>
+00395     <font class="comment">//  Implementation of the XMLEntityHandler interface.</font>
+00396     <font class="comment">// -----------------------------------------------------------------------</font>
+00397 
+00400 
+00413     <font class="keyword">virtual</font> <font class="keywordtype">void</font> <a class="code" href="classXMLEntityHandler.html#z274_0">endInputSource</a>(<font class="keyword">const</font> <a class="code" href="classInputSource.html">InputSource</a>&amp; inputSource);
+00414 
+00430     <font class="keyword">virtual</font> <font class="keywordtype">bool</font> expandSystemId
+00431     (
+00432         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    systemId
+00433         ,       XMLBuffer&amp;      toFill
+00434     );
+00435 
+00444     <font class="keyword">virtual</font> <font class="keywordtype">void</font> <a class="code" href="classXMLEntityHandler.html#z274_2">resetEntities</a>();
+00445 
+00469     <font class="keyword">virtual</font> <a class="code" href="classInputSource.html">InputSource</a>* resolveEntity
+00470     (
+00471         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    publicId
+00472         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    systemId
+00473         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    baseURI = 0
+00474     );
+00475 
+00492     <font class="keyword">virtual</font> <a class="code" href="classInputSource.html">InputSource</a>* resolveEntity
+00493     (
+00494         <a class="code" href="classXMLResourceIdentifier.html">XMLResourceIdentifier</a>* resourceIdentifier
+00495     );
+00496 
+00509     <font class="keyword">virtual</font> <font class="keywordtype">void</font> <a class="code" href="classXMLEntityHandler.html#z274_5">startInputSource</a>(<font class="keyword">const</font> <a class="code" href="classInputSource.html">InputSource</a>&amp; inputSource);
+00510 
+00512 
+00513     <font class="comment">// -----------------------------------------------------------------------</font>
+00514     <font class="comment">//  Grammar preparsing interface</font>
+00515     <font class="comment">// -----------------------------------------------------------------------</font>
+00516 
+00546     Grammar* loadGrammar(<font class="keyword">const</font> <a class="code" href="classInputSource.html">InputSource</a>&amp; source,
+00547                          <font class="keyword">const</font> <font class="keywordtype">short</font> grammarType,
+00548                          <font class="keyword">const</font> <font class="keywordtype">bool</font> toCache = <font class="keyword">false</font>);
+00549 
+00575     Grammar* loadGrammar(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> systemId,
+00576                          <font class="keyword">const</font> <font class="keywordtype">short</font> grammarType,
+00577                          <font class="keyword">const</font> <font class="keywordtype">bool</font> toCache = <font class="keyword">false</font>);
+00578 
+00603     Grammar* loadGrammar(<font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font> systemId,
+00604                          <font class="keyword">const</font> <font class="keywordtype">short</font> grammarType,
+00605                          <font class="keyword">const</font> <font class="keywordtype">bool</font> toCache = <font class="keyword">false</font>);
+00606 
+00610     <font class="keywordtype">void</font> resetCachedGrammarPool();
+00611 
+00613 
+00614 
+00615 <font class="keyword">private</font> :
+00616     <font class="comment">// -----------------------------------------------------------------------</font>
+00617     <font class="comment">//  Unimplemented constructors and operators</font>
+00618     <font class="comment">// -----------------------------------------------------------------------</font>
+00619     <a class="code" href="classXercesDOMParser.html">XercesDOMParser</a>(<font class="keyword">const</font> <a class="code" href="classXercesDOMParser.html">XercesDOMParser</a>&amp;);
+00620     <a class="code" href="classXercesDOMParser.html">XercesDOMParser</a>&amp; operator=(<font class="keyword">const</font> <a class="code" href="classXercesDOMParser.html">XercesDOMParser</a>&amp;);
+00621 
+00622     <font class="comment">// -----------------------------------------------------------------------</font>
+00623     <font class="comment">//  Private data members</font>
+00624     <font class="comment">//</font>
+00625     <font class="comment">//  fEntityResolver</font>
+00626     <font class="comment">//      The installed SAX entity resolver, if any. Null if none.</font>
+00627     <font class="comment">//</font>
+00628     <font class="comment">//  fErrorHandler</font>
+00629     <font class="comment">//      The installed SAX error handler, if any. Null if none.</font>
+00630     <font class="comment">//-----------------------------------------------------------------------</font>
+00631     <a class="code" href="classEntityResolver.html">EntityResolver</a>*          fEntityResolver;
+00632     <a class="code" href="classXMLEntityResolver.html">XMLEntityResolver</a>*       fXMLEntityResolver;
+00633     <a class="code" href="classErrorHandler.html">ErrorHandler</a>*            fErrorHandler;
+00634 };
+00635 
+00636 
+00637 
+00638 <font class="comment">// ---------------------------------------------------------------------------</font>
+00639 <font class="comment">//  XercesDOMParser: Handlers for the XMLEntityHandler interface</font>
+00640 <font class="comment">// ---------------------------------------------------------------------------</font>
+<a name="l00641"></a><a class="code" href="classXercesDOMParser.html#z479_0">00641</a> <font class="keyword">inline</font> <font class="keywordtype">void</font> <a class="code" href="classXercesDOMParser.html#z479_0">XercesDOMParser::endInputSource</a>(<font class="keyword">const</font> <a class="code" href="classInputSource.html">InputSource</a>&amp;)
+00642 {
+00643     <font class="comment">// The DOM entity resolver doesn't handle this</font>
+00644 }
+00645 
+<a name="l00646"></a><a class="code" href="classXercesDOMParser.html#z479_1">00646</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXercesDOMParser.html#z479_1">XercesDOMParser::expandSystemId</a>(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font>, XMLBuffer&amp;)
+00647 {
+00648     <font class="comment">// The DOM entity resolver doesn't handle this</font>
+00649     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+00650 }
+00651 
+<a name="l00652"></a><a class="code" href="classXercesDOMParser.html#z479_2">00652</a> <font class="keyword">inline</font> <font class="keywordtype">void</font> <a class="code" href="classXercesDOMParser.html#z479_2">XercesDOMParser::resetEntities</a>()
+00653 {
+00654     <font class="comment">// Nothing to do on this one</font>
+00655 }
+00656 
+<a name="l00657"></a><a class="code" href="classXercesDOMParser.html#z479_5">00657</a> <font class="keyword">inline</font> <font class="keywordtype">void</font> <a class="code" href="classXercesDOMParser.html#z479_5">XercesDOMParser::startInputSource</a>(<font class="keyword">const</font> <a class="code" href="classInputSource.html">InputSource</a>&amp;)
+00658 {
+00659     <font class="comment">// The DOM entity resolver doesn't handle this</font>
+00660 }
+00661 
+00662 
+00663 <font class="comment">// ---------------------------------------------------------------------------</font>
+00664 <font class="comment">//  XercesDOMParser: Getter methods</font>
+00665 <font class="comment">// ---------------------------------------------------------------------------</font>
+<a name="l00666"></a><a class="code" href="classXercesDOMParser.html#z475_0">00666</a> <font class="keyword">inline</font> <a class="code" href="classErrorHandler.html">ErrorHandler</a>* <a class="code" href="classXercesDOMParser.html#z475_0">XercesDOMParser::getErrorHandler</a>()
+00667 {
+00668     <font class="keywordflow">return</font> fErrorHandler;
+00669 }
+00670 
+<a name="l00671"></a><a class="code" href="classXercesDOMParser.html#z475_1">00671</a> <font class="keyword">inline</font> <font class="keyword">const</font> <a class="code" href="classErrorHandler.html">ErrorHandler</a>* <a class="code" href="classXercesDOMParser.html#z475_0">XercesDOMParser::getErrorHandler</a>()<font class="keyword"> const</font>
+00672 <font class="keyword"></font>{
+00673     <font class="keywordflow">return</font> fErrorHandler;
+00674 }
+00675 
+<a name="l00676"></a><a class="code" href="classXercesDOMParser.html#z475_2">00676</a> <font class="keyword">inline</font> <a class="code" href="classEntityResolver.html">EntityResolver</a>* <a class="code" href="classXercesDOMParser.html#z475_2">XercesDOMParser::getEntityResolver</a>()
+00677 {
+00678     <font class="keywordflow">return</font> fEntityResolver;
+00679 }
+00680 
+<a name="l00681"></a><a class="code" href="classXercesDOMParser.html#z475_3">00681</a> <font class="keyword">inline</font> <font class="keyword">const</font> <a class="code" href="classEntityResolver.html">EntityResolver</a>* <a class="code" href="classXercesDOMParser.html#z475_2">XercesDOMParser::getEntityResolver</a>()<font class="keyword"> const</font>
+00682 <font class="keyword"></font>{
+00683     <font class="keywordflow">return</font> fEntityResolver;
+00684 }
+00685 
+<a name="l00686"></a><a class="code" href="classXercesDOMParser.html#z475_4">00686</a> <font class="keyword">inline</font> <a class="code" href="classXMLEntityResolver.html">XMLEntityResolver</a>* <a class="code" href="classXercesDOMParser.html#z475_4">XercesDOMParser::getXMLEntityResolver</a>()
+00687 {
+00688     <font class="keywordflow">return</font> fXMLEntityResolver;
+00689 }
+00690 
+<a name="l00691"></a><a class="code" href="classXercesDOMParser.html#z475_5">00691</a> <font class="keyword">inline</font> <font class="keyword">const</font> <a class="code" href="classXMLEntityResolver.html">XMLEntityResolver</a>* <a class="code" href="classXercesDOMParser.html#z475_4">XercesDOMParser::getXMLEntityResolver</a>()<font class="keyword"> const</font>
+00692 <font class="keyword"></font>{
+00693     <font class="keywordflow">return</font> fXMLEntityResolver;
+00694 }
+00695 
+00696 <a class="code" href="XercesDefs_8hpp.html#a3">XERCES_CPP_NAMESPACE_END</a>
+00697 
+00698 <font class="preprocessor">#endif</font>
+</pre></div>    </FONT></TD></TR></TABLE><BR>
+</TD></TR></TABLE></TD></TR></TABLE><BR><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD bgcolor="#0086b2"><IMG height="1" src="images/dot.gif" width="1" alt=""></TD></TR><TR><TD align="center"><FONT color="#0086b2" size="-1"><I>
+              Copyright &copy; 1994-2004 The Apache Software Foundation.
+              All Rights Reserved.
+            </I></FONT></TD></TR></TABLE></BODY></HTML>

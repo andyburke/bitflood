@@ -1,0 +1,937 @@
+<HTML><HEAD><SCRIPT language="JavaScript" src="../resources/script.js" type="text/javascript"></SCRIPT><TITLE>XMLString.hpp Source File</TITLE><link href="XercesApi.css" rel="stylesheet" type="text/css"></HEAD><BODY alink="#ff0000" bgcolor="#ffffff" leftmargin="4" link="#0000ff" marginheight="4" marginwidth="4" text="#000000" topmargin="4" vlink="#0000aa"><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" height="60" rowspan="3" valign="top" width="135"><IMG border="0" height="60" hspace="0" src="../resources/logo.gif" vspace="0" width="135"></TD><TD align="left" colspan="4" height="5" valign="top" width="456"><IMG border="0" height="5" hspace="0" src="../resources/line.gif" vspace="0" width="456"></TD><TD align="left" height="60" rowspan="3" valign="top" width="29"><IMG border="0" height="60" hspace="0" src="../resources/right.gif" vspace="0" width="29"></TD></TR><TR><TD align="left" bgcolor="#0086b2" colspan="4" height="35" valign="top" width="456"><IMG alt="" border="0" height="35" hspace="0" src="../graphics/api-header.jpg" vspace="0" width="456"></TD></TR><TR><TD align="left" height="20" valign="top" width="168"><IMG border="0" height="20" hspace="0" src="../resources/bottom.gif" vspace="0" width="168"></TD><TD align="left" height="20" valign="top" width="96"><A href="http://xml.apache.org/" onMouseOut="rolloverOff('xml');" onMouseOver="rolloverOn('xml');" target="new"><IMG alt="http://xml.apache.org/" border="0" height="20" hspace="0" name="xml" onLoad="rolloverLoad('xml','../resources/button-xml-hi.gif','../resources/button-xml-lo.gif');" src="../resources/button-xml-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.apache.org/" onMouseOut="rolloverOff('asf');" onMouseOver="rolloverOn('asf');" target="new"><IMG alt="http://www.apache.org/" border="0" height="20" hspace="0" name="asf" onLoad="rolloverLoad('asf','../resources/button-asf-hi.gif','../resources/button-asf-lo.gif');" src="../resources/button-asf-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.w3.org/" onMouseOut="rolloverOff('w3c');" onMouseOver="rolloverOn('w3c');" target="new"><IMG alt="http://www.w3.org/" border="0" height="20" hspace="0" name="w3c" onLoad="rolloverLoad('w3c','../resources/button-w3c-hi.gif','../resources/button-w3c-lo.gif');" src="../resources/button-w3c-lo.gif" vspace="0" width="96"></A></TD></TR></TABLE><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" valign="top" width="120"><IMG border="0" height="14" hspace="0" src="../resources/join.gif" vspace="0" width="120"><BR>
+  <A href="../../index.html" onMouseOut="rolloverOff('side-ext-2');" onMouseOver="rolloverOn('side-ext-2');"><IMG alt="Home" border="0" height="12" hspace="0" name="side-ext-2" onLoad="rolloverLoad('side-ext-2','../graphics/ext-2-label-2.jpg','../graphics/ext-2-label-3.jpg');" src="../graphics/ext-2-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="../index.html" onMouseOut="rolloverOff('side-index');" onMouseOver="rolloverOn('side-index');"><IMG alt="Readme" border="0" height="12" hspace="0" name="side-index" onLoad="rolloverLoad('side-index','../graphics/index-label-2.jpg','../graphics/index-label-3.jpg');" src="../graphics/index-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../releases.html" onMouseOut="rolloverOff('side-releases');" onMouseOver="rolloverOn('side-releases');"><IMG alt="Release Info" border="0" height="12" hspace="0" name="side-releases" onLoad="rolloverLoad('side-releases','../graphics/releases-label-2.jpg','../graphics/releases-label-3.jpg');" src="../graphics/releases-label-3.jpg" vspace="0" width="120"></A><BR>
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+  <A href="../install.html" onMouseOut="rolloverOff('side-install');" onMouseOver="rolloverOn('side-install');"><IMG alt="Installation" border="0" height="12" hspace="0" name="side-install" onLoad="rolloverLoad('side-install','../graphics/install-label-2.jpg','../graphics/install-label-3.jpg');" src="../graphics/install-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="http://xml.apache.org/dist/xerces-c/" onMouseOut="rolloverOff('side-ext-18');" onMouseOver="rolloverOn('side-ext-18');"><IMG alt="Download" border="0" height="12" hspace="0" name="side-ext-18" onLoad="rolloverLoad('side-ext-18','../graphics/ext-18-label-2.jpg','../graphics/ext-18-label-3.jpg');" src="../graphics/ext-18-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../build.html" onMouseOut="rolloverOff('side-build');" onMouseOver="rolloverOn('side-build');"><IMG alt="Build" border="0" height="12" hspace="0" name="side-build" onLoad="rolloverLoad('side-build','../graphics/build-label-2.jpg','../graphics/build-label-3.jpg');" src="../graphics/build-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+  <A href="../faqs.html" onMouseOut="rolloverOff('side-faqs');" onMouseOver="rolloverOn('side-faqs');"><IMG alt="FAQs" border="0" height="12" hspace="0" name="side-faqs" onLoad="rolloverLoad('side-faqs','../graphics/faqs-label-2.jpg','../graphics/faqs-label-3.jpg');" src="../graphics/faqs-label-3.jpg" vspace="0" width="120"></A><BR>  
+  <A href="../samples.html" onMouseOut="rolloverOff('side-samples');" onMouseOver="rolloverOn('side-samples');"><IMG alt="Samples" border="0" height="12" hspace="0" name="side-samples" onLoad="rolloverLoad('side-samples','../graphics/samples-label-2.jpg','../graphics/samples-label-3.jpg');" src="../graphics/samples-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../api.html" onMouseOut="rolloverOff('side-api');" onMouseOver="rolloverOn('side-api');"><IMG alt="API Docs" border="0" height="12" hspace="0" name="side-api" onLoad="rolloverLoad('side-api','../graphics/api-label-2.jpg','../graphics/api-label-3.jpg');" src="../graphics/api-label-3.jpg" vspace="0" width="120"></A><BR>  
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>  
+  <A href="../ApacheDOMC++Binding.html" onMouseOut="rolloverOff('side-ext-68');" onMouseOver="rolloverOn('side-ext-68');"><IMG alt="DOM C++ Binding" border="0" height="12" hspace="0" name="side-ext-68" onLoad="rolloverLoad('side-ext-68','../graphics/ext-68-label-2.jpg','../graphics/ext-68-label-3.jpg');" src="../graphics/ext-68-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <A href="../program.html" onMouseOut="rolloverOff('side-program');" onMouseOver="rolloverOn('side-program');"><IMG alt="Programming" border="0" height="12" hspace="0" name="side-program" onLoad="rolloverLoad('side-program','../graphics/program-label-2.jpg','../graphics/program-label-3.jpg');" src="../graphics/program-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../migrate.html" onMouseOut="rolloverOff('side-migrate');" onMouseOver="rolloverOn('side-migrate');"><IMG alt="Migration Guide" border="0" height="12" hspace="0" name="side-migrate" onLoad="rolloverLoad('side-migrate','../graphics/migrate-label-2.jpg','../graphics/migrate-label-3.jpg');" src="../graphics/migrate-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="../feedback.html" onMouseOut="rolloverOff('side-feedback');" onMouseOver="rolloverOn('side-feedback');"><IMG alt="Feedback" border="0" height="12" hspace="0" name="side-feedback" onLoad="rolloverLoad('side-feedback','../graphics/feedback-label-2.jpg','../graphics/feedback-label-3.jpg');" src="../graphics/feedback-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../bug-report.html" onMouseOut="rolloverOff('side-bug-report');" onMouseOver="rolloverOn('side-bug-report');"><IMG alt="Bug-Reporting" border="0" height="12" hspace="0" name="side-bug-report" onLoad="rolloverLoad('side-bug-report','../graphics/bug-report-label-2.jpg','../graphics/bug-report-label-3.jpg');" src="../graphics/bug-report-label-3.jpg" vspace="0" width="120"></A><BR>  
+  <A href="../pdf.html" onMouseOut="rolloverOff('side-pdf');" onMouseOver="rolloverOn('side-pdf');"><IMG alt="PDF Document" border="0" height="12" hspace="0" name="side-pdf" onLoad="rolloverLoad('side-pdf','../graphics/pdf-label-2.jpg','../graphics/pdf-label-3.jpg');" src="../graphics/pdf-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="http://xml.apache.org/websrc/cvsweb.cgi/xml-xerces/c/" onMouseOut="rolloverOff('side-ext-100');" onMouseOver="rolloverOn('side-ext-100');"><IMG alt="CVS Repository" border="0" height="12" hspace="0" name="side-ext-100" onLoad="rolloverLoad('side-ext-100','../graphics/ext-100-label-2.jpg','../graphics/ext-100-label-3.jpg');" src="../graphics/ext-100-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <A href="http://marc.theaimsgroup.com/?l=xerces-c-dev" onMouseOut="rolloverOff('side-ext-102');" onMouseOver="rolloverOn('side-ext-102');"><IMG alt="Mail Archive" border="0" height="12" hspace="0" name="side-ext-102" onLoad="rolloverLoad('side-ext-102','../graphics/ext-102-label-2.jpg','../graphics/ext-102-label-3.jpg');" src="../graphics/ext-102-label-3.jpg" vspace="0" width="120"></A><BR>
+
+
+<IMG border="0" height="14" hspace="0" src="../resources/close.gif" vspace="0" width="120"><BR></TD><TD align="left" valign="top" width="500"><TABLE border="0" cellpadding="3" cellspacing="0"><TR><TD>
+    <TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#FFFFFF" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="../resources/void.gif" vspace="0" width="2"><B>API Docs for SAX and DOM</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+	    <P>
+<!-- Generated by Doxygen 1.2.14 -->
+<center>
+<a class="qindex" href="index.html">Main Page</a> &nbsp; <a class="qindex" href="hierarchy.html">Class Hierarchy</a> &nbsp; <a class="qindex" href="classes.html">Alphabetical List</a> &nbsp; <a class="qindex" href="annotated.html">Compound List</a> &nbsp; <a class="qindex" href="files.html">File List</a> &nbsp; <a class="qindex" href="functions.html">Compound Members</a> &nbsp; <a class="qindex" href="globals.html">File Members</a> &nbsp; </center>
+<hr><h1>XMLString.hpp</h1><a href="XMLString_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><pre>00001 <font class="comment">/*</font>
+00002 <font class="comment"> * Copyright 1999-2004 The Apache Software Foundation.</font>
+00003 <font class="comment"> * </font>
+00004 <font class="comment"> * Licensed under the Apache License, Version 2.0 (the "License");</font>
+00005 <font class="comment"> * you may not use this file except in compliance with the License.</font>
+00006 <font class="comment"> * You may obtain a copy of the License at</font>
+00007 <font class="comment"> * </font>
+00008 <font class="comment"> *      http://www.apache.org/licenses/LICENSE-2.0</font>
+00009 <font class="comment"> * </font>
+00010 <font class="comment"> * Unless required by applicable law or agreed to in writing, software</font>
+00011 <font class="comment"> * distributed under the License is distributed on an "AS IS" BASIS,</font>
+00012 <font class="comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</font>
+00013 <font class="comment"> * See the License for the specific language governing permissions and</font>
+00014 <font class="comment"> * limitations under the License.</font>
+00015 <font class="comment"> */</font>
+00016 
+00017 <font class="comment">/*</font>
+00018 <font class="comment"> * $Log: XMLString.hpp,v $</font>
+00019 <font class="comment"> * Revision 1.28  2004/09/08 13:56:24  peiyongz</font>
+00020 <font class="comment"> * Apache License Version 2.0</font>
+00021 <font class="comment"> *</font>
+00022 <font class="comment"> * Revision 1.27  2004/09/02 19:08:09  cargilld</font>
+00023 <font class="comment"> * Fix API Doc warning message</font>
+00024 <font class="comment"> *</font>
+00025 <font class="comment"> * Revision 1.26  2004/08/11 16:07:27  peiyongz</font>
+00026 <font class="comment"> * isValidNOTATION</font>
+00027 <font class="comment"> *</font>
+00028 <font class="comment"> * Revision 1.25  2004/05/25 18:11:32  peiyongz</font>
+00029 <font class="comment"> * removeChar() added</font>
+00030 <font class="comment"> *</font>
+00031 <font class="comment"> * Revision 1.24  2004/03/10 17:35:17  amassari</font>
+00032 <font class="comment"> * Fix documentation for binToText (bug# 9207)</font>
+00033 <font class="comment"> *</font>
+00034 <font class="comment"> * Revision 1.23  2003/12/24 15:24:13  cargilld</font>
+00035 <font class="comment"> * More updates to memory management so that the static memory manager.</font>
+00036 <font class="comment"> *</font>
+00037 <font class="comment"> * Revision 1.22  2003/12/17 20:00:49  cargilld</font>
+00038 <font class="comment"> * Update for memory management so that the static memory manager (one</font>
+00039 <font class="comment"> * used to call Initialize) is only for static data.</font>
+00040 <font class="comment"> *</font>
+00041 <font class="comment"> * Revision 1.21  2003/12/17 00:18:35  cargilld</font>
+00042 <font class="comment"> * Update to memory management so that the static memory manager (one used to call Initialize) is only for static data.</font>
+00043 <font class="comment"> *</font>
+00044 <font class="comment"> * Revision 1.20  2003/10/02 11:07:26  gareth</font>
+00045 <font class="comment"> * Made the non-memory manager version of replicate not inlined. Updated the documentation for the memory manager versions so they don't tell you you should call release.</font>
+00046 <font class="comment"> *</font>
+00047 <font class="comment"> * Revision 1.19  2003/10/01 00:22:20  knoaman</font>
+00048 <font class="comment"> * Add a lastIndexOf method that takes the string length as one of the params.</font>
+00049 <font class="comment"> *</font>
+00050 <font class="comment"> * Revision 1.18  2003/08/25 20:39:47  neilg</font>
+00051 <font class="comment"> * fix XMLString::findAny(...) docs so that they match what the method actually does (and has done since time immemorial)</font>
+00052 <font class="comment"> *</font>
+00053 <font class="comment"> * Revision 1.17  2003/05/18 14:02:05  knoaman</font>
+00054 <font class="comment"> * Memory manager implementation: pass per instance manager.</font>
+00055 <font class="comment"> *</font>
+00056 <font class="comment"> * Revision 1.16  2003/05/15 19:07:46  knoaman</font>
+00057 <font class="comment"> * Partial implementation of the configurable memory manager.</font>
+00058 <font class="comment"> *</font>
+00059 <font class="comment"> * Revision 1.15  2003/04/21 20:07:05  knoaman</font>
+00060 <font class="comment"> * Performance: use memcpy in moveChars and replicate.</font>
+00061 <font class="comment"> *</font>
+00062 <font class="comment"> * Revision 1.14  2003/02/25 16:42:31  tng</font>
+00063 <font class="comment"> * [Bug 7072] Documentation for XMLString::transcode states invalid return value.</font>
+00064 <font class="comment"> *</font>
+00065 <font class="comment"> * Revision 1.13  2003/02/05 18:50:56  tng</font>
+00066 <font class="comment"> * [Bug 11915] Utility for freeing memory.</font>
+00067 <font class="comment"> *</font>
+00068 <font class="comment"> * Revision 1.12  2003/01/24 23:16:33  peiyongz</font>
+00069 <font class="comment"> * removeWS() added;</font>
+00070 <font class="comment"> *</font>
+00071 <font class="comment"> * Revision 1.11  2002/12/20 22:10:21  tng</font>
+00072 <font class="comment"> * XML 1.1</font>
+00073 <font class="comment"> *</font>
+00074 <font class="comment"> * Revision 1.10  2002/12/18 14:17:54  gareth</font>
+00075 <font class="comment"> * Fix to bug #13438. When you eant a vector that calls delete[] on its members you should use RefArrayVectorOf.</font>
+00076 <font class="comment"> *</font>
+00077 <font class="comment"> * Revision 1.9  2002/12/04 02:32:43  knoaman</font>
+00078 <font class="comment"> * #include cleanup.</font>
+00079 <font class="comment"> *</font>
+00080 <font class="comment"> * Revision 1.8  2002/11/05 17:42:39  peiyongz</font>
+00081 <font class="comment"> * equals( const char* const, const char* const)</font>
+00082 <font class="comment"> *</font>
+00083 <font class="comment"> * Revision 1.7  2002/11/04 15:22:05  tng</font>
+00084 <font class="comment"> * C++ Namespace Support.</font>
+00085 <font class="comment"> *</font>
+00086 <font class="comment"> * Revision 1.6  2002/10/01 19:45:22  tng</font>
+00087 <font class="comment"> * Performance in XMLString::equals, only need to check one string for null as they are equal already.</font>
+00088 <font class="comment"> *</font>
+00089 <font class="comment"> * Revision 1.5  2002/09/24 19:41:21  tng</font>
+00090 <font class="comment"> * New inline function equals that is modified from compareString but simply return true or false.</font>
+00091 <font class="comment"> *</font>
+00092 <font class="comment"> * Revision 1.4  2002/09/23 18:42:18  tng</font>
+00093 <font class="comment"> * DOM L3: Support baseURI.   Add utility fixURI to transform an absolute path filename to standard URI form.</font>
+00094 <font class="comment"> *</font>
+00095 <font class="comment"> * Revision 1.3  2002/08/27 19:24:43  peiyongz</font>
+00096 <font class="comment"> * Bug#12087: patch from Thomas Ford (tom@decisionsoft.com)</font>
+00097 <font class="comment"> *</font>
+00098 <font class="comment"> * Revision 1.2  2002/02/20 18:17:02  tng</font>
+00099 <font class="comment"> * [Bug 5977] Warnings on generating apiDocs.</font>
+00100 <font class="comment"> *</font>
+00101 <font class="comment"> * Revision 1.1.1.1  2002/02/01 22:22:16  peiyongz</font>
+00102 <font class="comment"> * sane_include</font>
+00103 <font class="comment"> *</font>
+00104 <font class="comment"> * Revision 1.26  2001/08/10 16:23:06  peiyongz</font>
+00105 <font class="comment"> * isHex(), isAlphaNum(), isAllWhiteSpace() and patternMatch() Added</font>
+00106 <font class="comment"> *</font>
+00107 <font class="comment"> * Revision 1.25  2001/07/06 20:27:57  peiyongz</font>
+00108 <font class="comment"> * isValidaQName()</font>
+00109 <font class="comment"> *</font>
+00110 <font class="comment"> * Revision 1.24  2001/07/04 14:38:20  peiyongz</font>
+00111 <font class="comment"> * IDDatatypeValidator: created</font>
+00112 <font class="comment"> * DatatypeValidatorFactory: IDDTV enabled</font>
+00113 <font class="comment"> * XMLString:isValidName(): to validate Name (XML [4][5])</font>
+00114 <font class="comment"> *</font>
+00115 <font class="comment"> * Revision 1.23  2001/06/13 14:07:55  peiyongz</font>
+00116 <font class="comment"> * isValidaEncName() to validate an encoding name (EncName)</font>
+00117 <font class="comment"> *</font>
+00118 <font class="comment"> * Revision 1.22  2001/05/23 15:44:51  tng</font>
+00119 <font class="comment"> * Schema: NormalizedString fix.  By Pei Yong Zhang.</font>
+00120 <font class="comment"> *</font>
+00121 <font class="comment"> * Revision 1.21  2001/05/11 13:26:31  tng</font>
+00122 <font class="comment"> * Copyright update.</font>
+00123 <font class="comment"> *</font>
+00124 <font class="comment"> * Revision 1.20  2001/05/09 18:43:30  tng</font>
+00125 <font class="comment"> * Add StringDatatypeValidator and BooleanDatatypeValidator.  By Pei Yong Zhang.</font>
+00126 <font class="comment"> *</font>
+00127 <font class="comment"> * Revision 1.19  2001/05/03 20:34:35  tng</font>
+00128 <font class="comment"> * Schema: SchemaValidator update</font>
+00129 <font class="comment"> *</font>
+00130 <font class="comment"> * Revision 1.18  2001/05/03 19:17:35  knoaman</font>
+00131 <font class="comment"> * TraverseSchema Part II.</font>
+00132 <font class="comment"> *</font>
+00133 <font class="comment"> * Revision 1.17  2001/03/21 21:56:13  tng</font>
+00134 <font class="comment"> * Schema: Add Schema Grammar, Schema Validator, and split the DTDValidator into DTDValidator, DTDScanner, and DTDGrammar.</font>
+00135 <font class="comment"> *</font>
+00136 <font class="comment"> * Revision 1.16  2001/03/02 20:52:46  knoaman</font>
+00137 <font class="comment"> * Schema: Regular expression - misc. updates for error messages,</font>
+00138 <font class="comment"> * and additions of new functions to XMLString class.</font>
+00139 <font class="comment"> *</font>
+00140 <font class="comment"> * Revision 1.15  2001/01/15 21:26:34  tng</font>
+00141 <font class="comment"> * Performance Patches by David Bertoni.</font>
+00142 <font class="comment"> *</font>
+00143 <font class="comment"> * Details: (see xerces-c-dev mailing Jan 14)</font>
+00144 <font class="comment"> * XMLRecognizer.cpp: the internal encoding string XMLUni::fgXMLChEncodingString</font>
+00145 <font class="comment"> * was going through this function numerous times.  As a result, the top hot-spot</font>
+00146 <font class="comment"> * for the parse was _wcsicmp().  The real problem is that the Microsofts wide string</font>
+00147 <font class="comment"> * functions are unbelievably slow.  For things like encodings, it might be</font>
+00148 <font class="comment"> * better to use a special comparison function that only considers a-z and</font>
+00149 <font class="comment"> * A-Z as characters with case.  This works since the character set for</font>
+00150 <font class="comment"> * encodings is limit to printable ASCII characters.</font>
+00151 <font class="comment"> *</font>
+00152 <font class="comment"> *  XMLScanner2.cpp: This also has some case-sensitive vs. insensitive compares.</font>
+00153 <font class="comment"> * They are also much faster.  The other tweak is to only make a copy of an attribute</font>
+00154 <font class="comment"> * string if it needs to be split.  And then, the strategy is to try to use a</font>
+00155 <font class="comment"> * stack-based buffer, rather than a dynamically-allocated one.</font>
+00156 <font class="comment"> *</font>
+00157 <font class="comment"> * SAX2XMLReaderImpl.cpp: Again, more case-sensitive vs. insensitive comparisons.</font>
+00158 <font class="comment"> *</font>
+00159 <font class="comment"> * KVStringPair.cpp &amp; hpp: By storing the size of the allocation, the storage can</font>
+00160 <font class="comment"> * likely be re-used many times, cutting down on dynamic memory allocations.</font>
+00161 <font class="comment"> *</font>
+00162 <font class="comment"> * XMLString.hpp: a more efficient implementation of stringLen().</font>
+00163 <font class="comment"> *</font>
+00164 <font class="comment"> * DTDValidator.cpp: another case of using a stack-based buffer when possible</font>
+00165 <font class="comment"> *</font>
+00166 <font class="comment"> * These patches made a big difference in parse time in some of our test</font>
+00167 <font class="comment"> * files, especially the ones are very attribute-heavy.</font>
+00168 <font class="comment"> *</font>
+00169 <font class="comment"> * Revision 1.14  2000/10/13 22:47:57  andyh</font>
+00170 <font class="comment"> * Fix bug (failure to null-terminate result) in XMLString::trim().</font>
+00171 <font class="comment"> * Patch contributed by Nadav Aharoni</font>
+00172 <font class="comment"> *</font>
+00173 <font class="comment"> * Revision 1.13  2000/04/12 18:42:15  roddey</font>
+00174 <font class="comment"> * Improved docs in terms of what 'max chars' means in the method</font>
+00175 <font class="comment"> * parameters.</font>
+00176 <font class="comment"> *</font>
+00177 <font class="comment"> * Revision 1.12  2000/04/06 19:42:51  rahulj</font>
+00178 <font class="comment"> * Clarified how big the target buffer should be in the API</font>
+00179 <font class="comment"> * documentation.</font>
+00180 <font class="comment"> *</font>
+00181 <font class="comment"> * Revision 1.11  2000/03/23 01:02:38  roddey</font>
+00182 <font class="comment"> * Updates to the XMLURL class to correct a lot of parsing problems</font>
+00183 <font class="comment"> * and to add support for the port number. Updated the URL tests</font>
+00184 <font class="comment"> * to test some of this new stuff.</font>
+00185 <font class="comment"> *</font>
+00186 <font class="comment"> * Revision 1.10  2000/03/20 23:00:46  rahulj</font>
+00187 <font class="comment"> * Moved the inline definition of stringLen before the first</font>
+00188 <font class="comment"> * use. This satisfied the HP CC compiler.</font>
+00189 <font class="comment"> *</font>
+00190 <font class="comment"> * Revision 1.9  2000/03/02 19:54:49  roddey</font>
+00191 <font class="comment"> * This checkin includes many changes done while waiting for the</font>
+00192 <font class="comment"> * 1.1.0 code to be finished. I can't list them all here, but a list is</font>
+00193 <font class="comment"> * available elsewhere.</font>
+00194 <font class="comment"> *</font>
+00195 <font class="comment"> * Revision 1.8  2000/02/24 20:05:26  abagchi</font>
+00196 <font class="comment"> * Swat for removing Log from API docs</font>
+00197 <font class="comment"> *</font>
+00198 <font class="comment"> * Revision 1.7  2000/02/16 18:51:52  roddey</font>
+00199 <font class="comment"> * Fixed some facts in the docs and reformatted the docs to stay within</font>
+00200 <font class="comment"> * a reasonable line width.</font>
+00201 <font class="comment"> *</font>
+00202 <font class="comment"> * Revision 1.6  2000/02/16 17:07:07  abagchi</font>
+00203 <font class="comment"> * Added API docs</font>
+00204 <font class="comment"> *</font>
+00205 <font class="comment"> * Revision 1.5  2000/02/06 07:48:06  rahulj</font>
+00206 <font class="comment"> * Year 2K copyright swat.</font>
+00207 <font class="comment"> *</font>
+00208 <font class="comment"> * Revision 1.4  2000/01/12 00:16:23  roddey</font>
+00209 <font class="comment"> * Changes to deal with multiply nested, relative pathed, entities and to deal</font>
+00210 <font class="comment"> * with the new URL class changes.</font>
+00211 <font class="comment"> *</font>
+00212 <font class="comment"> * Revision 1.3  1999/12/18 00:18:10  roddey</font>
+00213 <font class="comment"> * More changes to support the new, completely orthagonal support for</font>
+00214 <font class="comment"> * intrinsic encodings.</font>
+00215 <font class="comment"> *</font>
+00216 <font class="comment"> * Revision 1.2  1999/12/15 19:41:28  roddey</font>
+00217 <font class="comment"> * Support for the new transcoder system, where even intrinsic encodings are</font>
+00218 <font class="comment"> * done via the same transcoder abstraction as external ones.</font>
+00219 <font class="comment"> *</font>
+00220 <font class="comment"> * Revision 1.1.1.1  1999/11/09 01:05:52  twl</font>
+00221 <font class="comment"> * Initial checkin</font>
+00222 <font class="comment"> *</font>
+00223 <font class="comment"> * Revision 1.2  1999/11/08 20:45:21  rahul</font>
+00224 <font class="comment"> * Swat for adding in Product name and CVS comment log variable.</font>
+00225 <font class="comment"> *</font>
+00226 <font class="comment"> */</font>
+00227 
+00228 <font class="preprocessor">#if !defined(XMLSTRING_HPP)</font>
+<a name="l00229"></a><a class="code" href="XMLString_8hpp.html#a0">00229</a> <font class="preprocessor"></font><font class="preprocessor">#define XMLSTRING_HPP</font>
+00230 <font class="preprocessor"></font>
+00231 <font class="preprocessor">#include &lt;xercesc/util/BaseRefVectorOf.hpp&gt;</font>
+00232 <font class="preprocessor">#include &lt;xercesc/framework/XMLBuffer.hpp&gt;</font>
+00233 <font class="preprocessor">#include &lt;<a class="code" href="MemoryManager_8hpp.html">xercesc/framework/MemoryManager.hpp</a>&gt;</font>
+00234 <font class="preprocessor">#include &lt;string.h&gt;</font>
+00235 
+00236 <a class="code" href="XercesDefs_8hpp.html#a2">XERCES_CPP_NAMESPACE_BEGIN</a>
+00237 
+<a name="l00238"></a><a class="code" href="XMLString_8hpp.html#a1">00238</a> <font class="keyword">class </font><a class="code" href="classXMLLCPTranscoder.html">XMLLCPTranscoder</a>;
+<a name="l00250"></a><a class="code" href="classXMLString.html">00250</a> <font class="keyword">class </font><a class="code" href="XercesDefs_8hpp.html#a8"></a> <a class="code" href="classXMLString.html">XMLString</a>
+00251 {
+00252 <font class="keyword">public</font>:
+00253     <font class="comment">/* Static methods for native character mode string manipulation */</font>
+00254 
+00255 
+00272     <font class="keyword">static</font> <font class="keywordtype">void</font> catString
+00273     (
+00274                 <font class="keywordtype">char</font>* <font class="keyword">const</font>     target
+00275         , <font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font>     src
+00276     );
+00277 
+00290     <font class="keyword">static</font> <font class="keywordtype">void</font> catString
+00291     (
+00292                 XMLCh* <font class="keyword">const</font>    target
+00293         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    src
+00294     );
+00296 
+00310     <font class="keyword">static</font> <font class="keywordtype">int</font> compareIString
+00311     (
+00312         <font class="keyword">const</font>   <font class="keywordtype">char</font>* <font class="keyword">const</font>     str1
+00313         , <font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font>     str2
+00314     );
+00315 
+00326     <font class="keyword">static</font> <font class="keywordtype">int</font> compareIString
+00327     (
+00328         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    str1
+00329         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    str2
+00330     );
+00331 
+00332 
+00346     <font class="keyword">static</font> <font class="keywordtype">int</font> compareNString
+00347     (
+00348         <font class="keyword">const</font>   <font class="keywordtype">char</font>* <font class="keyword">const</font>     str1
+00349         , <font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font>     str2
+00350         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+00351     );
+00352 
+00366     <font class="keyword">static</font> <font class="keywordtype">int</font> compareNString
+00367     (
+00368         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    str1
+00369         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    str2
+00370         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+00371     );
+00372 
+00373 
+00387     <font class="keyword">static</font> <font class="keywordtype">int</font> compareNIString
+00388     (
+00389         <font class="keyword">const</font>   <font class="keywordtype">char</font>* <font class="keyword">const</font>     str1
+00390         , <font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font>     str2
+00391         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+00392     );
+00393 
+00408     <font class="keyword">static</font> <font class="keywordtype">int</font> compareNIString
+00409     (
+00410         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    str1
+00411         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    str2
+00412         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+00413     );
+00414 
+00427     <font class="keyword">static</font> <font class="keywordtype">int</font> compareString
+00428     (
+00429         <font class="keyword">const</font>   <font class="keywordtype">char</font>* <font class="keyword">const</font>     str1
+00430         , <font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font>     str2
+00431     );
+00432 
+00444     <font class="keyword">static</font> <font class="keywordtype">int</font> compareString
+00445     (
+00446         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    str1
+00447         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    str2
+00448     );
+00449 
+00458     <font class="keyword">static</font> <font class="keywordtype">bool</font> equals
+00459     (
+00460           <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    str1
+00461         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    str2
+00462     );
+00463 
+00464     <font class="keyword">static</font> <font class="keywordtype">bool</font> equals
+00465     (
+00466           <font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font>    str1
+00467         , <font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font>    str2
+00468     );
+00469 
+00496     <font class="keyword">static</font> <font class="keywordtype">bool</font> regionMatches
+00497     (
+00498         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    str1
+00499         , <font class="keyword">const</font> <font class="keywordtype">int</font>             offset1
+00500         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    str2
+00501         , <font class="keyword">const</font> <font class="keywordtype">int</font>             offset2
+00502         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    charCount
+00503     );
+00504 
+00532     <font class="keyword">static</font> <font class="keywordtype">bool</font> regionIMatches
+00533     (
+00534         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    str1
+00535         , <font class="keyword">const</font> <font class="keywordtype">int</font>             offset1
+00536         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    str2
+00537         , <font class="keyword">const</font> <font class="keywordtype">int</font>             offset2
+00538         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    charCount
+00539     );
+00541 
+00554     <font class="keyword">static</font> <font class="keywordtype">void</font> copyString
+00555     (
+00556                 <font class="keywordtype">char</font>* <font class="keyword">const</font>     target
+00557         , <font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font>     src
+00558     );
+00559 
+00570     <font class="keyword">static</font> <font class="keywordtype">void</font> copyString
+00571     (
+00572                 XMLCh* <font class="keyword">const</font>    target
+00573         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    src
+00574     );
+00575 
+00588     <font class="keyword">static</font> <font class="keywordtype">bool</font> copyNString
+00589     (
+00590                 XMLCh* <font class="keyword">const</font>    target
+00591         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    src
+00592         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    maxChars
+00593     );
+00595 
+00605     <font class="keyword">static</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> hash
+00606     (
+00607         <font class="keyword">const</font>   <font class="keywordtype">char</font>* <font class="keyword">const</font>     toHash
+00608         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    hashModulus
+00609         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00610     );
+00611 
+00619     <font class="keyword">static</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> hash
+00620     (
+00621         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toHash
+00622         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    hashModulus
+00623         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00624     );
+00625 
+00635     <font class="keyword">static</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> hashN
+00636     (
+00637         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toHash
+00638         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    numChars
+00639         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    hashModulus
+00640         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font> manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00641     );
+00642 
+00644 
+00655     <font class="keyword">static</font> <font class="keywordtype">int</font> indexOf(<font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font> toSearch, <font class="keyword">const</font> <font class="keywordtype">char</font> ch);
+00656 
+00665     <font class="keyword">static</font> <font class="keywordtype">int</font> indexOf(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> toSearch, <font class="keyword">const</font> XMLCh ch);
+00666 
+00678     <font class="keyword">static</font> <font class="keywordtype">int</font> indexOf
+00679     (
+00680         <font class="keyword">const</font>   <font class="keywordtype">char</font>* <font class="keyword">const</font>     toSearch
+00681         , <font class="keyword">const</font> <font class="keywordtype">char</font>            chToFind
+00682         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    fromIndex
+00683         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00684     );
+00685 
+00697     <font class="keyword">static</font> <font class="keywordtype">int</font> indexOf
+00698     (
+00699         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toSearch
+00700         , <font class="keyword">const</font> XMLCh           chToFind
+00701         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    fromIndex
+00702         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00703     );
+00704 
+00713     <font class="keyword">static</font> <font class="keywordtype">int</font> lastIndexOf(<font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font> toSearch, <font class="keyword">const</font> <font class="keywordtype">char</font> ch);
+00714 
+00723     <font class="keyword">static</font> <font class="keywordtype">int</font> lastIndexOf(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> toSearch, <font class="keyword">const</font> XMLCh ch);
+00724 
+00734     <font class="keyword">static</font> <font class="keywordtype">int</font> lastIndexOf
+00735     (
+00736         <font class="keyword">const</font> XMLCh ch
+00737         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font> toSearch
+00738         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> toSearchLen
+00739     );
+00740 
+00752     <font class="keyword">static</font> <font class="keywordtype">int</font> lastIndexOf
+00753     (
+00754         <font class="keyword">const</font>   <font class="keywordtype">char</font>* <font class="keyword">const</font>     toSearch
+00755         , <font class="keyword">const</font> <font class="keywordtype">char</font>            chToFind
+00756         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    fromIndex
+00757         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00758     );
+00759 
+00771     <font class="keyword">static</font> <font class="keywordtype">int</font> lastIndexOf
+00772     (
+00773         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toSearch
+00774         , <font class="keyword">const</font> XMLCh           ch
+00775         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    fromIndex
+00776         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00777     );
+00779 
+00787     <font class="keyword">static</font> <font class="keywordtype">void</font> moveChars
+00788     (
+00789                 XMLCh* <font class="keyword">const</font>    targetStr
+00790         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    srcStr
+00791         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+00792     );
+00793 
+00795 
+00807     <font class="keyword">static</font> <font class="keywordtype">void</font> subString
+00808     (
+00809                 <font class="keywordtype">char</font>* <font class="keyword">const</font>    targetStr
+00810         , <font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font>    srcStr
+00811         , <font class="keyword">const</font> <font class="keywordtype">int</font>            startIndex
+00812         , <font class="keyword">const</font> <font class="keywordtype">int</font>            endIndex
+00813         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font> manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00814     );
+00815 
+00825     <font class="keyword">static</font> <font class="keywordtype">void</font> subString
+00826     (
+00827                 XMLCh* <font class="keyword">const</font>    targetStr
+00828         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    srcStr
+00829         , <font class="keyword">const</font> <font class="keywordtype">int</font>             startIndex
+00830         , <font class="keyword">const</font> <font class="keywordtype">int</font>             endIndex
+00831         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00832     );
+00833 
+00835 
+00847     <font class="keyword">static</font> <font class="keywordtype">char</font>* replicate(<font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font> toRep);
+00848 
+00857     <font class="keyword">static</font> <font class="keywordtype">char</font>* replicate(<font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font> toRep,
+00858                            <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font> manager);
+00859 
+00869     <font class="keyword">static</font> XMLCh* replicate(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> toRep);
+00870 
+00879     <font class="keyword">static</font> XMLCh* replicate(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> toRep,
+00880                             <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font> manager);
+00881 
+00883 
+00892     <font class="keyword">static</font> <font class="keywordtype">bool</font> startsWith
+00893     (
+00894         <font class="keyword">const</font>   <font class="keywordtype">char</font>* <font class="keyword">const</font>     toTest
+00895         , <font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font>     prefix
+00896     );
+00897 
+00904     <font class="keyword">static</font> <font class="keywordtype">bool</font> startsWith
+00905     (
+00906         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toTest
+00907         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    prefix
+00908     );
+00909 
+00918     <font class="keyword">static</font> <font class="keywordtype">bool</font> startsWithI
+00919     (
+00920         <font class="keyword">const</font>   <font class="keywordtype">char</font>* <font class="keyword">const</font>     toTest
+00921         , <font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font>     prefix
+00922     );
+00923 
+00933     <font class="keyword">static</font> <font class="keywordtype">bool</font> startsWithI
+00934     (
+00935         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toTest
+00936         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    prefix
+00937     );
+00938 
+00945     <font class="keyword">static</font> <font class="keywordtype">bool</font> endsWith
+00946     (
+00947         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toTest
+00948         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    suffix
+00949     );
+00950 
+00951 
+00960     <font class="keyword">static</font> <font class="keyword">const</font> XMLCh* findAny
+00961     (
+00962         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toSearch
+00963         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    searchList
+00964     );
+00965 
+00974     <font class="keyword">static</font> XMLCh* findAny
+00975     (
+00976                 XMLCh* <font class="keyword">const</font>    toSearch
+00977         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    searchList
+00978     );
+00979 
+00986     <font class="keyword">static</font> <font class="keywordtype">int</font> patternMatch
+00987     (
+00988           <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    toSearch
+00989         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    pattern
+00990     );
+00991 
+00996     <font class="keyword">static</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> stringLen(<font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font> src);
+00997 
+01002     <font class="keyword">static</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> stringLen(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> src);
+01003 
+01011     <font class="keyword">static</font> <font class="keywordtype">bool</font> isValidNOTATION(<font class="keyword">const</font> XMLCh*         <font class="keyword">const</font> name
+01012                               ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font> manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>);
+01013 
+01021     <font class="keyword">static</font> <font class="keywordtype">bool</font> isValidNCName(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> name);
+01022 
+01030     <font class="keyword">static</font> <font class="keywordtype">bool</font> isValidName(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> name);
+01031 
+01037     <font class="keyword">static</font> <font class="keywordtype">bool</font> isValidEncName(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> name);
+01038 
+01046     <font class="keyword">static</font> <font class="keywordtype">bool</font> isValidQName(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> name);
+01047 
+01054     <font class="keyword">static</font> <font class="keywordtype">bool</font> isAlpha(XMLCh <font class="keyword">const</font> theChar);
+01055 
+01061     <font class="keyword">static</font> <font class="keywordtype">bool</font> isDigit(XMLCh <font class="keyword">const</font> theChar);
+01062 
+01068     <font class="keyword">static</font> <font class="keywordtype">bool</font> isAlphaNum(XMLCh <font class="keyword">const</font> theChar);
+01069 
+01075     <font class="keyword">static</font> <font class="keywordtype">bool</font> isHex(XMLCh <font class="keyword">const</font> theChar);
+01076 
+01084     <font class="keyword">static</font> <font class="keywordtype">bool</font> isAllWhiteSpace(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> toCheck);
+01085 
+01091     <font class="keyword">static</font> <font class="keywordtype">bool</font> isInList(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> toFind, <font class="keyword">const</font> XMLCh* <font class="keyword">const</font> enumList);
+01092 
+01094 
+01097 
+01109     <font class="keyword">static</font> <font class="keywordtype">void</font> binToText
+01110     (
+01111         <font class="keyword">const</font>   <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    toFormat
+01112         ,       <font class="keywordtype">char</font>* <font class="keyword">const</font>     toFill
+01113         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    maxChars
+01114         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    radix
+01115         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+01116     );
+01117 
+01129     <font class="keyword">static</font> <font class="keywordtype">void</font> binToText
+01130     (
+01131         <font class="keyword">const</font>   <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    toFormat
+01132         ,       XMLCh* <font class="keyword">const</font>    toFill
+01133         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    maxChars
+01134         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    radix
+01135         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+01136     );
+01137 
+01149     <font class="keyword">static</font> <font class="keywordtype">void</font> binToText
+01150     (
+01151         <font class="keyword">const</font>   <font class="keywordtype">unsigned</font> <font class="keywordtype">long</font>   toFormat
+01152         ,       <font class="keywordtype">char</font>* <font class="keyword">const</font>     toFill
+01153         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    maxChars
+01154         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    radix
+01155         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+01156     );
+01157 
+01169     <font class="keyword">static</font> <font class="keywordtype">void</font> binToText
+01170     (
+01171         <font class="keyword">const</font>   <font class="keywordtype">unsigned</font> <font class="keywordtype">long</font>   toFormat
+01172         ,       XMLCh* <font class="keyword">const</font>    toFill
+01173         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    maxChars
+01174         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    radix
+01175         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+01176     );
+01177 
+01189     <font class="keyword">static</font> <font class="keywordtype">void</font> binToText
+01190     (
+01191         <font class="keyword">const</font>   <font class="keywordtype">long</font>            toFormat
+01192         ,       <font class="keywordtype">char</font>* <font class="keyword">const</font>     toFill
+01193         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    maxChars
+01194         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    radix
+01195         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+01196     );
+01197 
+01209     <font class="keyword">static</font> <font class="keywordtype">void</font> binToText
+01210     (
+01211         <font class="keyword">const</font>   <font class="keywordtype">long</font>            toFormat
+01212         ,       XMLCh* <font class="keyword">const</font>    toFill
+01213         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    maxChars
+01214         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    radix
+01215         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+01216     );
+01217 
+01229     <font class="keyword">static</font> <font class="keywordtype">void</font> binToText
+01230     (
+01231         <font class="keyword">const</font>   <font class="keywordtype">int</font>             toFormat
+01232         ,       <font class="keywordtype">char</font>* <font class="keyword">const</font>     toFill
+01233         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    maxChars
+01234         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    radix
+01235         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+01236     );
+01237 
+01249     <font class="keyword">static</font> <font class="keywordtype">void</font> binToText
+01250     (
+01251         <font class="keyword">const</font>   <font class="keywordtype">int</font>             toFormat
+01252         ,       XMLCh* <font class="keyword">const</font>    toFill
+01253         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    maxChars
+01254         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    radix
+01255         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+01256     );
+01257 
+01269     <font class="keyword">static</font> <font class="keywordtype">bool</font> textToBin
+01270     (
+01271         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toConvert
+01272         ,       <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>&amp;   toFill
+01273         ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>*  <font class="keyword">const</font> manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+01274     );
+01275 
+01289     <font class="keyword">static</font> <font class="keywordtype">int</font> parseInt
+01290     (
+01291         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toConvert
+01292       , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>    manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+01293     );
+01294 
+01300     <font class="keyword">static</font> <font class="keywordtype">void</font> cut
+01301     (
+01302                 XMLCh* <font class="keyword">const</font>    toCutFrom
+01303         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    count
+01304     );
+01305 
+01316     <font class="keyword">static</font> <font class="keywordtype">char</font>* transcode
+01317     (
+01318         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toTranscode
+01319     );
+01320     <font class="keyword">static</font> <font class="keywordtype">char</font>* transcode
+01321     (
+01322         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>         toTranscode
+01323         ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font> manager
+01324     );
+01325 
+01341     <font class="keyword">static</font> <font class="keywordtype">bool</font> transcode
+01342     (
+01343         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toTranscode
+01344         ,       <font class="keywordtype">char</font>* <font class="keyword">const</font>     toFill
+01345         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    maxChars
+01346         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+01347     );
+01348 
+01359     <font class="keyword">static</font> XMLCh* transcode
+01360     (
+01361         <font class="keyword">const</font>   <font class="keywordtype">char</font>* <font class="keyword">const</font>     toTranscode
+01362     );
+01363     <font class="keyword">static</font> XMLCh* transcode
+01364     (
+01365         <font class="keyword">const</font>   <font class="keywordtype">char</font>* <font class="keyword">const</font>          toTranscode
+01366         ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font> manager
+01367     );
+01368 
+01379     <font class="keyword">static</font> <font class="keywordtype">bool</font> transcode
+01380     (
+01381         <font class="keyword">const</font>   <font class="keywordtype">char</font>* <font class="keyword">const</font>     toTranscode
+01382         ,       XMLCh* <font class="keyword">const</font>    toFill
+01383         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    maxChars
+01384         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+01385     );
+01386 
+01392     <font class="keyword">static</font> <font class="keywordtype">void</font> trim(<font class="keywordtype">char</font>* <font class="keyword">const</font> toTrim);
+01393 
+01399     <font class="keyword">static</font> <font class="keywordtype">void</font> trim(XMLCh* <font class="keyword">const</font> toTrim);
+01400 
+01408     <font class="keyword">static</font> BaseRefVectorOf&lt;XMLCh&gt;* tokenizeString(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> tokenizeSrc
+01409                                         , <a class="code" href="classMemoryManager.html">MemoryManager</a>*       <font class="keyword">const</font> manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>);
+01410 
+01412 
+01423     <font class="keyword">static</font> XMLCh* makeUName
+01424     (
+01425         <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    pszURI
+01426         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    pszName      
+01427     );
+01428 
+01445     <font class="keyword">static</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> replaceTokens
+01446     (
+01447                 XMLCh* <font class="keyword">const</font>    errText
+01448         , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>    maxChars
+01449         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    text1
+01450         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    text2
+01451         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    text3
+01452         , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    text4
+01453         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+01454     );
+01455 
+01460     <font class="keyword">static</font> <font class="keywordtype">void</font> upperCase(XMLCh* <font class="keyword">const</font> toUpperCase);
+01461 
+01466     <font class="keyword">static</font> <font class="keywordtype">void</font> lowerCase(XMLCh* <font class="keyword">const</font> toLowerCase);
+01467 
+01471     <font class="keyword">static</font> <font class="keywordtype">bool</font> isWSReplaced(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> toCheck);
+01472 
+01476     <font class="keyword">static</font> <font class="keywordtype">bool</font> isWSCollapsed(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> toCheck);
+01477 
+01483     <font class="keyword">static</font> <font class="keywordtype">void</font> replaceWS(XMLCh* <font class="keyword">const</font> toConvert
+01484         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>);
+01485 
+01491     <font class="keyword">static</font> <font class="keywordtype">void</font> collapseWS(XMLCh* <font class="keyword">const</font> toConvert
+01492         , <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>);
+01493 
+01499     <font class="keyword">static</font> <font class="keywordtype">void</font> removeWS(XMLCh* <font class="keyword">const</font> toConvert
+01500     , <a class="code" href="classMemoryManager.html">MemoryManager</a>*       <font class="keyword">const</font> manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>);
+01501 
+01502 
+01508     <font class="keyword">static</font> <font class="keywordtype">void</font> removeChar(<font class="keyword">const</font> XMLCh*     <font class="keyword">const</font> srcString
+01509                          , <font class="keyword">const</font> XMLCh&amp;           toRemove
+01510                          ,       XMLBuffer&amp;       dstBuffer);
+01511 
+01519     <font class="keyword">static</font> <font class="keywordtype">void</font> fixURI(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> str, XMLCh* <font class="keyword">const</font> target);
+01520 
+01522 
+01530     <font class="keyword">static</font> <font class="keywordtype">void</font> release(<font class="keywordtype">char</font>** buf);
+01531 
+01538     <font class="keyword">static</font> <font class="keywordtype">void</font> release(XMLCh** buf);
+01539 
+01546     <font class="keyword">static</font> <font class="keywordtype">void</font> release(<a class="code" href="XercesDefs_8hpp.html#a16">XMLByte</a>** buf);
+01547 
+01549 
+01550 
+01551 <font class="keyword">private</font> :
+01552 
+01556     <a class="code" href="classXMLString.html">XMLString</a>();
+01558     ~<a class="code" href="classXMLString.html">XMLString</a>();
+01560 
+01561 
+01565     <font class="keyword">static</font> <font class="keywordtype">void</font> initString(<a class="code" href="classXMLLCPTranscoder.html">XMLLCPTranscoder</a>* <font class="keyword">const</font> defToUse,
+01566                            <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font> manager);
+01567     <font class="keyword">static</font> <font class="keywordtype">void</font> termString();
+01569 
+01574     <font class="keyword">static</font> <font class="keywordtype">bool</font> validateRegion(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> str1, <font class="keyword">const</font> <font class="keywordtype">int</font> offset1,
+01575                         <font class="keyword">const</font> XMLCh* <font class="keyword">const</font> str2, <font class="keyword">const</font> <font class="keywordtype">int</font> offset2,
+01576                         <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> charCount);
+01577 
+01578     <font class="keyword">static</font> <a class="code" href="classMemoryManager.html">MemoryManager</a>* fgMemoryManager;
+01579 
+<a name="l01580"></a><a class="code" href="classXMLString.html#l0">01580</a>     <font class="keyword">friend</font> <font class="keyword">class </font><a class="code" href="classXMLPlatformUtils.html">XMLPlatformUtils</a>;
+01581 };
+01582 
+01583 
+01584 <font class="comment">// ---------------------------------------------------------------------------</font>
+01585 <font class="comment">//  Inline some methods that are either just passthroughs to other string</font>
+01586 <font class="comment">//  methods, or which are key for performance.</font>
+01587 <font class="comment">// ---------------------------------------------------------------------------</font>
+<a name="l01588"></a><a class="code" href="classXMLString.html#z516_0">01588</a> <font class="keyword">inline</font> <font class="keywordtype">void</font> <a class="code" href="classXMLString.html#z516_0">XMLString::moveChars</a>(       XMLCh* <font class="keyword">const</font> targetStr
+01589                                 , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font> srcStr
+01590                                 , <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> count)
+01591 {
+01592     memcpy(targetStr, srcStr, count * <font class="keyword">sizeof</font>(XMLCh));
+01593 }
+01594 
+<a name="l01595"></a><a class="code" href="classXMLString.html#z519_9">01595</a> <font class="keyword">inline</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> <a class="code" href="classXMLString.html#z519_8">XMLString::stringLen</a>(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> src)
+01596 {
+01597     <font class="keywordflow">if</font> (src == 0 || *src == 0)
+01598     {
+01599         <font class="keywordflow">return</font> 0;
+01600    }
+01601     <font class="keywordflow">else</font>
+01602    {
+01603         <font class="keyword">const</font> XMLCh* pszTmp = src + 1;
+01604 
+01605         <font class="keywordflow">while</font> (*pszTmp)
+01606             ++pszTmp;
+01607 
+01608         <font class="keywordflow">return</font> (<font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>)(pszTmp - src);
+01609     }
+01610 }
+01611 
+<a name="l01612"></a><a class="code" href="classXMLString.html#z518_3">01612</a> <font class="keyword">inline</font> XMLCh* <a class="code" href="classXMLString.html#z518_0">XMLString::replicate</a>(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> toRep,
+01613                                    <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font> manager)
+01614 {
+01615     <font class="comment">// If a null string, return a null string!</font>
+01616     XMLCh* ret = 0;
+01617     <font class="keywordflow">if</font> (toRep)
+01618     {
+01619         <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> len = <a class="code" href="classXMLString.html#z519_8">stringLen</a>(toRep);
+01620         ret = (XMLCh*) manager-&gt;<a class="code" href="classMemoryManager.html#z221_0">allocate</a>((len+1) * <font class="keyword">sizeof</font>(XMLCh)); <font class="comment">//new XMLCh[len + 1];</font>
+01621         memcpy(ret, toRep, (len + 1) * <font class="keyword">sizeof</font>(XMLCh));
+01622     }
+01623     <font class="keywordflow">return</font> ret;
+01624 }
+01625 
+<a name="l01626"></a><a class="code" href="classXMLString.html#z519_1">01626</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLString.html#z519_0">XMLString::startsWith</a>(  <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toTest
+01627                                     , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    prefix)
+01628 {
+01629     <font class="keywordflow">return</font> (<a class="code" href="classXMLString.html#z512_2">compareNString</a>(toTest, prefix, <a class="code" href="classXMLString.html#z519_8">stringLen</a>(prefix)) == 0);
+01630 }
+01631 
+<a name="l01632"></a><a class="code" href="classXMLString.html#z519_3">01632</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLString.html#z519_2">XMLString::startsWithI</a>( <font class="keyword">const</font>   XMLCh* <font class="keyword">const</font>    toTest
+01633                                     , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    prefix)
+01634 {
+01635     <font class="keywordflow">return</font> (<a class="code" href="classXMLString.html#z512_4">compareNIString</a>(toTest, prefix, <a class="code" href="classXMLString.html#z519_8">stringLen</a>(prefix)) == 0);
+01636 }
+01637 
+<a name="l01638"></a><a class="code" href="classXMLString.html#z519_4">01638</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLString.html#z519_4">XMLString::endsWith</a>(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> toTest,
+01639                                 <font class="keyword">const</font> XMLCh* <font class="keyword">const</font> suffix)
+01640 {
+01641 
+01642     <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> suffixLen = <a class="code" href="classXMLString.html#z519_8">XMLString::stringLen</a>(suffix);
+01643 
+01644     <font class="keywordflow">return</font> <a class="code" href="classXMLString.html#z512_10">regionMatches</a>(toTest, <a class="code" href="classXMLString.html#z519_8">XMLString::stringLen</a>(toTest) - suffixLen,
+01645                          suffix, 0, suffixLen);
+01646 }
+01647 
+01648 <font class="keyword">inline</font> <font class="keywordtype">bool</font> XMLString::validateRegion(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> str1,
+01649                                       <font class="keyword">const</font> <font class="keywordtype">int</font> offset1,
+01650                                       <font class="keyword">const</font> XMLCh* <font class="keyword">const</font> str2,
+01651                                       <font class="keyword">const</font> <font class="keywordtype">int</font> offset2,
+01652                                       <font class="keyword">const</font> <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font> charCount)
+01653 {
+01654 
+01655     <font class="keywordflow">if</font> (offset1 &lt; 0 || offset2 &lt; 0 ||
+01656         (offset1 + charCount) &gt; <a class="code" href="classXMLString.html#z519_8">XMLString::stringLen</a>(str1) ||
+01657         (offset2 + charCount) &gt; <a class="code" href="classXMLString.html#z519_8">XMLString::stringLen</a>(str2) )
+01658         <font class="keywordflow">return</font> <font class="keyword">false</font>;
+01659 
+01660     <font class="keywordflow">return</font> <font class="keyword">true</font>;
+01661 }
+01662 
+<a name="l01663"></a><a class="code" href="classXMLString.html#z512_8">01663</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLString.html#z512_8">XMLString::equals</a>(   <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    str1
+01664                                , <font class="keyword">const</font> XMLCh* <font class="keyword">const</font>    str2)
+01665 {
+01666     <font class="keyword">const</font> XMLCh* psz1 = str1;
+01667     <font class="keyword">const</font> XMLCh* psz2 = str2;
+01668 
+01669     <font class="keywordflow">if</font> (psz1 == 0 || psz2 == 0) {
+01670         <font class="keywordflow">if</font> ((psz1 != 0 &amp;&amp; *psz1) || (psz2 != 0 &amp;&amp; *psz2))
+01671             <font class="keywordflow">return</font> <font class="keyword">false</font>;
+01672         <font class="keywordflow">else</font>
+01673             <font class="keywordflow">return</font> <font class="keyword">true</font>;
+01674     }
+01675 
+01676     <font class="keywordflow">while</font> (*psz1 == *psz2)
+01677     {
+01678         <font class="comment">// If either has ended, then they both ended, so equal</font>
+01679         <font class="keywordflow">if</font> (!*psz1)
+01680             <font class="keywordflow">return</font> <font class="keyword">true</font>;
+01681 
+01682         <font class="comment">// Move upwards for the next round</font>
+01683         psz1++;
+01684         psz2++;
+01685     }
+01686     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+01687 }
+01688 
+<a name="l01689"></a><a class="code" href="classXMLString.html#z512_9">01689</a> <font class="keyword">inline</font> <font class="keywordtype">bool</font> <a class="code" href="classXMLString.html#z512_8">XMLString::equals</a>(   <font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font>    str1
+01690                                , <font class="keyword">const</font> <font class="keywordtype">char</font>* <font class="keyword">const</font>    str2)
+01691 {
+01692     <font class="keyword">const</font> <font class="keywordtype">char</font>* psz1 = str1;
+01693     <font class="keyword">const</font> <font class="keywordtype">char</font>* psz2 = str2;
+01694 
+01695     <font class="keywordflow">if</font> (psz1 == 0 || psz2 == 0) {
+01696         <font class="keywordflow">if</font> ((psz1 != 0 &amp;&amp; *psz1) || (psz2 != 0 &amp;&amp; *psz2))
+01697             <font class="keywordflow">return</font> <font class="keyword">false</font>;
+01698         <font class="keywordflow">else</font>
+01699             <font class="keywordflow">return</font> <font class="keyword">true</font>;
+01700     }
+01701 
+01702     <font class="keywordflow">while</font> (*psz1 == *psz2)
+01703     {
+01704         <font class="comment">// If either has ended, then they both ended, so equal</font>
+01705         <font class="keywordflow">if</font> (!*psz1)
+01706             <font class="keywordflow">return</font> <font class="keyword">true</font>;
+01707 
+01708         <font class="comment">// Move upwards for the next round</font>
+01709         psz1++;
+01710         psz2++;
+01711     }
+01712     <font class="keywordflow">return</font> <font class="keyword">false</font>;
+01713 }
+01714 
+<a name="l01715"></a><a class="code" href="classXMLString.html#z515_5">01715</a> <font class="keyword">inline</font> <font class="keywordtype">int</font> <a class="code" href="classXMLString.html#z515_4">XMLString::lastIndexOf</a>(<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> toSearch, <font class="keyword">const</font> XMLCh ch)
+01716 {
+01717     <font class="keywordflow">return</font> <a class="code" href="classXMLString.html#z515_4">XMLString::lastIndexOf</a>(ch, toSearch, <a class="code" href="classXMLString.html#z519_8">stringLen</a>(toSearch));
+01718 }
+01719 
+01720 <a class="code" href="XercesDefs_8hpp.html#a3">XERCES_CPP_NAMESPACE_END</a>
+01721 
+01722 <font class="preprocessor">#endif</font>
+</pre></div>    </FONT></TD></TR></TABLE><BR>
+</TD></TR></TABLE></TD></TR></TABLE><BR><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD bgcolor="#0086b2"><IMG height="1" src="images/dot.gif" width="1" alt=""></TD></TR><TR><TD align="center"><FONT color="#0086b2" size="-1"><I>
+              Copyright &copy; 1994-2004 The Apache Software Foundation.
+              All Rights Reserved.
+            </I></FONT></TD></TR></TABLE></BODY></HTML>

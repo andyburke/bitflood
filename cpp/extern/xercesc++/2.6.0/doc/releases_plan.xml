@@ -1,0 +1,47 @@
+<?xml version="1.0"  encoding="iso-8859-1" standalone="no"?>
+<!--
+ * Copyright 1999-2004 The Apache Software Foundation.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!DOCTYPE s1 SYSTEM "sbk:/style/dtd/document.dtd">
+
+<s1 title="Future Releases Plan">
+
+<s2 title="&XercesCName; Future Releases Plan">
+<p>This document highlights the release plan for &XercesCName;.</p>
+<s3 title="Current Status"><p>&XercesCName; 2.6.0 - released on September 29, 2004.</p></s3>
+<s3 title="Next Target Release"><p>&XercesCName; x.y.z - </p></s3>
+<s3 title="&XercesCName; Features list">
+<p> The following table lists the TODO items for &XercesCName; x.y.z.  It does not include fixing
+bugs that are opened in Jira; unless such Jira bug involves a major development
+effort and requires an architectural redesign, or is an enhancement suggestion.</p>
+
+<table>
+    <tr>
+        <th>Features</th>
+        <th>Development Volunteer</th>
+    </tr>
+
+   
+    <tr>
+        <td>XML Catalog Support</td>
+        <td>unassigned</td>       
+    </tr>            
+                                                                                                                                 
+</table>
+</s3>
+</s2>
+
+</s1>

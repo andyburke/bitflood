@@ -1,0 +1,431 @@
+<HTML><HEAD><SCRIPT language="JavaScript" src="../resources/script.js" type="text/javascript"></SCRIPT><TITLE>XSValue.hpp Source File</TITLE><link href="XercesApi.css" rel="stylesheet" type="text/css"></HEAD><BODY alink="#ff0000" bgcolor="#ffffff" leftmargin="4" link="#0000ff" marginheight="4" marginwidth="4" text="#000000" topmargin="4" vlink="#0000aa"><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" height="60" rowspan="3" valign="top" width="135"><IMG border="0" height="60" hspace="0" src="../resources/logo.gif" vspace="0" width="135"></TD><TD align="left" colspan="4" height="5" valign="top" width="456"><IMG border="0" height="5" hspace="0" src="../resources/line.gif" vspace="0" width="456"></TD><TD align="left" height="60" rowspan="3" valign="top" width="29"><IMG border="0" height="60" hspace="0" src="../resources/right.gif" vspace="0" width="29"></TD></TR><TR><TD align="left" bgcolor="#0086b2" colspan="4" height="35" valign="top" width="456"><IMG alt="" border="0" height="35" hspace="0" src="../graphics/api-header.jpg" vspace="0" width="456"></TD></TR><TR><TD align="left" height="20" valign="top" width="168"><IMG border="0" height="20" hspace="0" src="../resources/bottom.gif" vspace="0" width="168"></TD><TD align="left" height="20" valign="top" width="96"><A href="http://xml.apache.org/" onMouseOut="rolloverOff('xml');" onMouseOver="rolloverOn('xml');" target="new"><IMG alt="http://xml.apache.org/" border="0" height="20" hspace="0" name="xml" onLoad="rolloverLoad('xml','../resources/button-xml-hi.gif','../resources/button-xml-lo.gif');" src="../resources/button-xml-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.apache.org/" onMouseOut="rolloverOff('asf');" onMouseOver="rolloverOn('asf');" target="new"><IMG alt="http://www.apache.org/" border="0" height="20" hspace="0" name="asf" onLoad="rolloverLoad('asf','../resources/button-asf-hi.gif','../resources/button-asf-lo.gif');" src="../resources/button-asf-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.w3.org/" onMouseOut="rolloverOff('w3c');" onMouseOver="rolloverOn('w3c');" target="new"><IMG alt="http://www.w3.org/" border="0" height="20" hspace="0" name="w3c" onLoad="rolloverLoad('w3c','../resources/button-w3c-hi.gif','../resources/button-w3c-lo.gif');" src="../resources/button-w3c-lo.gif" vspace="0" width="96"></A></TD></TR></TABLE><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" valign="top" width="120"><IMG border="0" height="14" hspace="0" src="../resources/join.gif" vspace="0" width="120"><BR>
+  <A href="../../index.html" onMouseOut="rolloverOff('side-ext-2');" onMouseOver="rolloverOn('side-ext-2');"><IMG alt="Home" border="0" height="12" hspace="0" name="side-ext-2" onLoad="rolloverLoad('side-ext-2','../graphics/ext-2-label-2.jpg','../graphics/ext-2-label-3.jpg');" src="../graphics/ext-2-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="../index.html" onMouseOut="rolloverOff('side-index');" onMouseOver="rolloverOn('side-index');"><IMG alt="Readme" border="0" height="12" hspace="0" name="side-index" onLoad="rolloverLoad('side-index','../graphics/index-label-2.jpg','../graphics/index-label-3.jpg');" src="../graphics/index-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../releases.html" onMouseOut="rolloverOff('side-releases');" onMouseOver="rolloverOn('side-releases');"><IMG alt="Release Info" border="0" height="12" hspace="0" name="side-releases" onLoad="rolloverLoad('side-releases','../graphics/releases-label-2.jpg','../graphics/releases-label-3.jpg');" src="../graphics/releases-label-3.jpg" vspace="0" width="120"></A><BR>
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+  <A href="../install.html" onMouseOut="rolloverOff('side-install');" onMouseOver="rolloverOn('side-install');"><IMG alt="Installation" border="0" height="12" hspace="0" name="side-install" onLoad="rolloverLoad('side-install','../graphics/install-label-2.jpg','../graphics/install-label-3.jpg');" src="../graphics/install-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="http://xml.apache.org/dist/xerces-c/" onMouseOut="rolloverOff('side-ext-18');" onMouseOver="rolloverOn('side-ext-18');"><IMG alt="Download" border="0" height="12" hspace="0" name="side-ext-18" onLoad="rolloverLoad('side-ext-18','../graphics/ext-18-label-2.jpg','../graphics/ext-18-label-3.jpg');" src="../graphics/ext-18-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../build.html" onMouseOut="rolloverOff('side-build');" onMouseOver="rolloverOn('side-build');"><IMG alt="Build" border="0" height="12" hspace="0" name="side-build" onLoad="rolloverLoad('side-build','../graphics/build-label-2.jpg','../graphics/build-label-3.jpg');" src="../graphics/build-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+  <A href="../faqs.html" onMouseOut="rolloverOff('side-faqs');" onMouseOver="rolloverOn('side-faqs');"><IMG alt="FAQs" border="0" height="12" hspace="0" name="side-faqs" onLoad="rolloverLoad('side-faqs','../graphics/faqs-label-2.jpg','../graphics/faqs-label-3.jpg');" src="../graphics/faqs-label-3.jpg" vspace="0" width="120"></A><BR>  
+  <A href="../samples.html" onMouseOut="rolloverOff('side-samples');" onMouseOver="rolloverOn('side-samples');"><IMG alt="Samples" border="0" height="12" hspace="0" name="side-samples" onLoad="rolloverLoad('side-samples','../graphics/samples-label-2.jpg','../graphics/samples-label-3.jpg');" src="../graphics/samples-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../api.html" onMouseOut="rolloverOff('side-api');" onMouseOver="rolloverOn('side-api');"><IMG alt="API Docs" border="0" height="12" hspace="0" name="side-api" onLoad="rolloverLoad('side-api','../graphics/api-label-2.jpg','../graphics/api-label-3.jpg');" src="../graphics/api-label-3.jpg" vspace="0" width="120"></A><BR>  
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>  
+  <A href="../ApacheDOMC++Binding.html" onMouseOut="rolloverOff('side-ext-68');" onMouseOver="rolloverOn('side-ext-68');"><IMG alt="DOM C++ Binding" border="0" height="12" hspace="0" name="side-ext-68" onLoad="rolloverLoad('side-ext-68','../graphics/ext-68-label-2.jpg','../graphics/ext-68-label-3.jpg');" src="../graphics/ext-68-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <A href="../program.html" onMouseOut="rolloverOff('side-program');" onMouseOver="rolloverOn('side-program');"><IMG alt="Programming" border="0" height="12" hspace="0" name="side-program" onLoad="rolloverLoad('side-program','../graphics/program-label-2.jpg','../graphics/program-label-3.jpg');" src="../graphics/program-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../migrate.html" onMouseOut="rolloverOff('side-migrate');" onMouseOver="rolloverOn('side-migrate');"><IMG alt="Migration Guide" border="0" height="12" hspace="0" name="side-migrate" onLoad="rolloverLoad('side-migrate','../graphics/migrate-label-2.jpg','../graphics/migrate-label-3.jpg');" src="../graphics/migrate-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="../feedback.html" onMouseOut="rolloverOff('side-feedback');" onMouseOver="rolloverOn('side-feedback');"><IMG alt="Feedback" border="0" height="12" hspace="0" name="side-feedback" onLoad="rolloverLoad('side-feedback','../graphics/feedback-label-2.jpg','../graphics/feedback-label-3.jpg');" src="../graphics/feedback-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../bug-report.html" onMouseOut="rolloverOff('side-bug-report');" onMouseOver="rolloverOn('side-bug-report');"><IMG alt="Bug-Reporting" border="0" height="12" hspace="0" name="side-bug-report" onLoad="rolloverLoad('side-bug-report','../graphics/bug-report-label-2.jpg','../graphics/bug-report-label-3.jpg');" src="../graphics/bug-report-label-3.jpg" vspace="0" width="120"></A><BR>  
+  <A href="../pdf.html" onMouseOut="rolloverOff('side-pdf');" onMouseOver="rolloverOn('side-pdf');"><IMG alt="PDF Document" border="0" height="12" hspace="0" name="side-pdf" onLoad="rolloverLoad('side-pdf','../graphics/pdf-label-2.jpg','../graphics/pdf-label-3.jpg');" src="../graphics/pdf-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="http://xml.apache.org/websrc/cvsweb.cgi/xml-xerces/c/" onMouseOut="rolloverOff('side-ext-100');" onMouseOver="rolloverOn('side-ext-100');"><IMG alt="CVS Repository" border="0" height="12" hspace="0" name="side-ext-100" onLoad="rolloverLoad('side-ext-100','../graphics/ext-100-label-2.jpg','../graphics/ext-100-label-3.jpg');" src="../graphics/ext-100-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <A href="http://marc.theaimsgroup.com/?l=xerces-c-dev" onMouseOut="rolloverOff('side-ext-102');" onMouseOver="rolloverOn('side-ext-102');"><IMG alt="Mail Archive" border="0" height="12" hspace="0" name="side-ext-102" onLoad="rolloverLoad('side-ext-102','../graphics/ext-102-label-2.jpg','../graphics/ext-102-label-3.jpg');" src="../graphics/ext-102-label-3.jpg" vspace="0" width="120"></A><BR>
+
+
+<IMG border="0" height="14" hspace="0" src="../resources/close.gif" vspace="0" width="120"><BR></TD><TD align="left" valign="top" width="500"><TABLE border="0" cellpadding="3" cellspacing="0"><TR><TD>
+    <TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#FFFFFF" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="../resources/void.gif" vspace="0" width="2"><B>API Docs for SAX and DOM</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+	    <P>
+<!-- Generated by Doxygen 1.2.14 -->
+<center>
+<a class="qindex" href="index.html">Main Page</a> &nbsp; <a class="qindex" href="hierarchy.html">Class Hierarchy</a> &nbsp; <a class="qindex" href="classes.html">Alphabetical List</a> &nbsp; <a class="qindex" href="annotated.html">Compound List</a> &nbsp; <a class="qindex" href="files.html">File List</a> &nbsp; <a class="qindex" href="functions.html">Compound Members</a> &nbsp; <a class="qindex" href="globals.html">File Members</a> &nbsp; </center>
+<hr><h1>XSValue.hpp</h1><a href="XSValue_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><pre>00001 <font class="comment">/*</font>
+00002 <font class="comment"> * Copyright 2004,2004 The Apache Software Foundation.</font>
+00003 <font class="comment"> * </font>
+00004 <font class="comment"> * Licensed under the Apache License, Version 2.0 (the "License");</font>
+00005 <font class="comment"> * you may not use this file except in compliance with the License.</font>
+00006 <font class="comment"> * You may obtain a copy of the License at</font>
+00007 <font class="comment"> * </font>
+00008 <font class="comment"> *      http://www.apache.org/licenses/LICENSE-2.0</font>
+00009 <font class="comment"> * </font>
+00010 <font class="comment"> * Unless required by applicable law or agreed to in writing, software</font>
+00011 <font class="comment"> * distributed under the License is distributed on an "AS IS" BASIS,</font>
+00012 <font class="comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</font>
+00013 <font class="comment"> * See the License for the specific language governing permissions and</font>
+00014 <font class="comment"> * limitations under the License.</font>
+00015 <font class="comment"> */</font>
+00016 
+00017 <font class="comment">/*</font>
+00018 <font class="comment"> * $Log: XSValue.hpp,v $</font>
+00019 <font class="comment"> * Revision 1.12  2004/09/23 21:22:47  peiyongz</font>
+00020 <font class="comment"> * Documentation</font>
+00021 <font class="comment"> * st_noContent added</font>
+00022 <font class="comment"> * unused parameter removed</font>
+00023 <font class="comment"> *</font>
+00024 <font class="comment"> * Revision 1.11  2004/09/13 21:24:20  peiyongz</font>
+00025 <font class="comment"> * 1. returned data to contain datatype in addition to value</font>
+00026 <font class="comment"> * 2. registry to map type name (in string) to type name enum</font>
+00027 <font class="comment"> *</font>
+00028 <font class="comment"> * Revision 1.10  2004/09/09 20:08:31  peiyongz</font>
+00029 <font class="comment"> * Using new error code</font>
+00030 <font class="comment"> *</font>
+00031 <font class="comment"> * Revision 1.9  2004/09/08 19:56:05  peiyongz</font>
+00032 <font class="comment"> * Remove parameter toValidate from validation interface</font>
+00033 <font class="comment"> *</font>
+00034 <font class="comment"> * Revision 1.8  2004/09/08 13:56:09  peiyongz</font>
+00035 <font class="comment"> * Apache License Version 2.0</font>
+00036 <font class="comment"> *</font>
+00037 <font class="comment"> * Revision 1.7  2004/08/31 20:52:25  peiyongz</font>
+00038 <font class="comment"> * Return additional double value for decimal</font>
+00039 <font class="comment"> * remove tz_hh/tz_mm</font>
+00040 <font class="comment"> *</font>
+00041 <font class="comment"> * Revision 1.6  2004/08/31 15:14:47  peiyongz</font>
+00042 <font class="comment"> * remove XSValueContext</font>
+00043 <font class="comment"> *</font>
+00044 <font class="comment"> * Revision 1.5  2004/08/17 21:11:41  peiyongz</font>
+00045 <font class="comment"> * no more Unrepresentable</font>
+00046 <font class="comment"> *</font>
+00047 <font class="comment"> * Revision 1.4  2004/08/13 21:29:20  peiyongz</font>
+00048 <font class="comment"> * fMemAllocated</font>
+00049 <font class="comment"> *</font>
+00050 <font class="comment"> * Revision 1.3  2004/08/12 14:24:34  peiyongz</font>
+00051 <font class="comment"> * HP aCC A.03</font>
+00052 <font class="comment"> *</font>
+00053 <font class="comment"> * Revision 1.2  2004/08/11 17:06:44  peiyongz</font>
+00054 <font class="comment"> * Do not panic if can't create RegEx</font>
+00055 <font class="comment"> *</font>
+00056 <font class="comment"> * $Id: XSValue.hpp,v 1.12 2004/09/23 21:22:47 peiyongz Exp $</font>
+00057 <font class="comment"> */</font>
+00058 
+00059 <font class="preprocessor">#if !defined(XSVALUE_HPP)</font>
+<a name="l00060"></a><a class="code" href="XSValue_8hpp.html#a0">00060</a> <font class="preprocessor"></font><font class="preprocessor">#define XSVALUE_HPP</font>
+00061 <font class="preprocessor"></font>
+00062 <font class="preprocessor">#include &lt;<a class="code" href="PlatformUtils_8hpp.html">xercesc/util/PlatformUtils.hpp</a>&gt;</font>
+00063 <font class="preprocessor">#include &lt;xercesc/util/RefHashTableOf.hpp&gt;</font>
+00064 
+00065 <a class="code" href="XercesDefs_8hpp.html#a2">XERCES_CPP_NAMESPACE_BEGIN</a>
+00066 
+<a name="l00067"></a><a class="code" href="XSValue_8hpp.html#a1">00067</a> <font class="keyword">class </font><a class="code" href="XSValue_8hpp.html#a1">RegularExpression</a>;
+00068 
+<a name="l00069"></a><a class="code" href="classXSValue.html">00069</a> <font class="keyword">class </font><a class="code" href="XercesDefs_8hpp.html#a9"></a> <a class="code" href="classXSValue.html">XSValue</a> : <font class="keyword">public</font> <a class="code" href="classXMemory.html">XMemory</a>
+00070 {
+00071 <font class="keyword">public</font>:
+00072 
+<a name="l00073"></a><a class="code" href="classXSValue.html#s62">00073</a>     <font class="keyword">enum</font> DataType {
+00074               dt_string               = 0,
+00075               dt_boolean              = 1,
+00076               dt_decimal              = 2,
+00077               dt_float                = 3,
+00078               dt_double               = 4,
+00079               dt_duration             = 5,
+00080               dt_dateTime             = 6,
+00081               dt_time                 = 7,
+00082               dt_date                 = 8,
+00083               dt_gYearMonth           = 9,
+00084               dt_gYear                = 10,
+00085               dt_gMonthDay            = 11,
+00086               dt_gDay                 = 12,
+00087               dt_gMonth               = 13,
+00088               dt_hexBinary            = 14,
+00089               dt_base64Binary         = 15,
+00090               dt_anyURI               = 16,
+00091               dt_QName                = 17,
+00092               dt_NOTATION             = 18,
+00093               dt_normalizedString     = 19,
+00094               dt_token                = 20,
+00095               dt_language             = 21,
+00096               dt_NMTOKEN              = 22,
+00097               dt_NMTOKENS             = 23,
+00098               dt_Name                 = 24,
+00099               dt_NCName               = 25,
+00100               dt_ID                   = 26,
+00101               dt_IDREF                = 27,
+00102               dt_IDREFS               = 28,
+00103               dt_ENTITY               = 29,
+00104               dt_ENTITIES             = 30,
+00105               dt_integer              = 31,
+00106               dt_nonPositiveInteger   = 32,
+00107               dt_negativeInteger      = 33,
+00108               dt_long                 = 34,
+00109               dt_int                  = 35,
+00110               dt_short                = 36,
+00111               dt_byte                 = 37,
+00112               dt_nonNegativeInteger   = 38,
+00113               dt_unsignedLong         = 39,
+00114               dt_unsignedInt          = 40,
+00115               dt_unsignedShort        = 41,
+00116               dt_unsignedByte         = 42,
+00117               dt_positiveInteger      = 43,
+00118               dt_MAXCOUNT             = 44
+00119     };
+00120 
+<a name="l00121"></a><a class="code" href="classXSValue.html#s63">00121</a>     <font class="keyword">enum</font> XMLVersion {
+00122             ver_10,
+00123             ver_11
+00124     };
+00125 
+<a name="l00126"></a><a class="code" href="classXSValue.html#s64">00126</a>     <font class="keyword">enum</font> Status {
+00127             st_Init,
+00128             st_InvalidRange,
+00129             st_NoContent,
+00130             st_NoCanRep,
+00131             st_NoActVal,
+00132             st_NotSupported,
+00133             st_CantCreateRegEx,
+00134             st_FOCA0002,        <font class="comment">//invalid lexical value </font>
+00135             st_FOCA0001,        <font class="comment">//input value too large for decimal </font>
+00136             st_FOCA0003,        <font class="comment">//input value too large for integer </font>
+00137             st_FODT0003,        <font class="comment">//invalid timezone value </font>
+00138             st_UnknownType
+00139     };
+00140 
+<a name="l00141"></a><a class="code" href="classXSValue.html#s65">00141</a>     <font class="keyword">enum</font> DataGroup {
+00142             dg_numerics,
+00143             dg_datetimes,
+00144             dg_strings
+00145     };
+00146 
+00147     <font class="comment">//  Constructors and Destructor</font>
+00148     <font class="comment">// -----------------------------------------------------------------------</font>
+00151 <font class="comment"></font>    ~<a class="code" href="classXSValue.html">XSValue</a>();
+00153 
+00154     <font class="comment">//---------------------------------</font>
+00157 <font class="comment"></font>
+00167     <font class="keyword">static</font>
+00168     <font class="keywordtype">bool</font>     validate
+00169              (
+00170                 <font class="keyword">const</font> XMLCh*          <font class="keyword">const</font> content    
+00171               ,       DataType              datatype
+00172               ,       Status&amp;               status
+00173               ,       XMLVersion            version    = ver_10
+00174               ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>*  <font class="keyword">const</font> manager    = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00175              );
+00176 
+00188     <font class="keyword">static</font>
+00189     XMLCh*   getCanonicalRepresentation
+00190              (
+00191                 <font class="keyword">const</font> XMLCh*          <font class="keyword">const</font> content    
+00192               ,       DataType              datatype
+00193               ,       Status&amp;               status
+00194               ,       XMLVersion            version    = ver_10
+00195               ,       <font class="keywordtype">bool</font>                  toValidate = <font class="keyword">true</font> 
+00196               ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>*  <font class="keyword">const</font> manager    = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00197              );
+00198 
+00212     <font class="keyword">static</font>
+00213     <a class="code" href="classXSValue.html">XSValue</a>* getActualValue
+00214              (
+00215                 <font class="keyword">const</font> XMLCh*          <font class="keyword">const</font> content    
+00216               ,       DataType              datatype
+00217               ,       Status&amp;               status
+00218               ,       XMLVersion            version    = ver_10
+00219               ,       <font class="keywordtype">bool</font>                  toValidate = <font class="keyword">true</font> 
+00220               ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>*  <font class="keyword">const</font> manager    = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00221              );
+00222 
+00223     <font class="keyword">static</font>
+00224     DataType  getDataType  (<font class="keyword">const</font> XMLCh* <font class="keyword">const</font> dtString);
+00225 
+00227 
+00228     <font class="comment">//----------------------------------</font>
+00231 <font class="comment"></font>    <font class="keyword">struct </font>{
+00232 
+<a name="l00233"></a><a class="code" href="classXSValue.html#m0">00233</a>         DataType f_datatype;
+00234         
+00235         <font class="keyword">union </font>{
+<a name="l00236"></a><a class="code" href="classXSValue.html#m1">00236</a>                          <font class="keywordtype">bool</font>      f_bool;
+<a name="l00237"></a><a class="code" href="classXSValue.html#m2">00237</a>                          <font class="keywordtype">char</font>      f_char;                    
+<a name="l00238"></a><a class="code" href="classXSValue.html#m3">00238</a>                 <font class="keywordtype">unsigned</font> <font class="keywordtype">char</font>      f_uchar;
+<a name="l00239"></a><a class="code" href="classXSValue.html#m4">00239</a>                          <font class="keywordtype">short</font>     f_short;
+<a name="l00240"></a><a class="code" href="classXSValue.html#m5">00240</a>                 <font class="keywordtype">unsigned</font> <font class="keywordtype">short</font>     f_ushort;
+<a name="l00241"></a><a class="code" href="classXSValue.html#m6">00241</a>                          <font class="keywordtype">int</font>       f_int;
+<a name="l00242"></a><a class="code" href="classXSValue.html#m7">00242</a>                 <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>       f_uint;
+<a name="l00243"></a><a class="code" href="classXSValue.html#m8">00243</a>                          <font class="keywordtype">long</font>      f_long;
+<a name="l00244"></a><a class="code" href="classXSValue.html#m9">00244</a>                 <font class="keywordtype">unsigned</font> <font class="keywordtype">long</font>      f_ulong;
+<a name="l00245"></a><a class="code" href="classXSValue.html#m10">00245</a>                          <font class="keywordtype">float</font>     f_float;
+<a name="l00246"></a><a class="code" href="classXSValue.html#m11">00246</a>                          <font class="keywordtype">double</font>    f_double;
+<a name="l00247"></a><a class="code" href="classXSValue.html#m12">00247</a>                          XMLCh*    f_strVal;
+00248 
+00249                 <font class="keyword">struct </font>decimal {
+<a name="l00250"></a><a class="code" href="classXSValue.html#m13">00250</a>                                 <font class="keywordtype">int</font>              f_sign;
+<a name="l00251"></a><a class="code" href="classXSValue.html#m14">00251</a>                                 <font class="keywordtype">unsigned</font> <font class="keywordtype">int</font>     f_scale;  
+<a name="l00252"></a><a class="code" href="classXSValue.html#m15">00252</a>                                 <font class="keywordtype">unsigned</font> <font class="keywordtype">long</font>    f_integral;
+<a name="l00253"></a><a class="code" href="classXSValue.html#m16">00253</a>                                 <font class="keywordtype">unsigned</font> <font class="keywordtype">long</font>    f_fraction;
+<a name="l00254"></a><a class="code" href="classXSValue.html#m17">00254</a>                                 <font class="keywordtype">double</font>           f_dvalue;
+00255                 } f_decimal;
+00256 
+00257                 <font class="keyword">struct </font>datetime {
+<a name="l00258"></a><a class="code" href="classXSValue.html#m19">00258</a>                                 <font class="keywordtype">int</font>       f_year;
+<a name="l00259"></a><a class="code" href="classXSValue.html#m20">00259</a>                                 <font class="keywordtype">int</font>       f_month;
+<a name="l00260"></a><a class="code" href="classXSValue.html#m21">00260</a>                                 <font class="keywordtype">int</font>       f_day;
+<a name="l00261"></a><a class="code" href="classXSValue.html#m22">00261</a>                                 <font class="keywordtype">int</font>       f_hour;
+<a name="l00262"></a><a class="code" href="classXSValue.html#m23">00262</a>                                 <font class="keywordtype">int</font>       f_min;
+<a name="l00263"></a><a class="code" href="classXSValue.html#m24">00263</a>                                 <font class="keywordtype">int</font>       f_second;
+<a name="l00264"></a><a class="code" href="classXSValue.html#m25">00264</a>                                 <font class="keywordtype">double</font>    f_milisec;
+00265 
+00266                 } f_datetime;
+00267 
+00268         } fValue;
+00269 
+00270     } fData;
+00271 
+00272     <font class="keyword">static</font>
+00273     <font class="keywordtype">void</font> reinitMutex();
+00274 
+00275     <font class="keyword">static</font>
+00276     <font class="keywordtype">void</font> reinitRegEx();
+00277 
+00278     <font class="keyword">static</font>
+00279     <font class="keywordtype">void</font> reinitRegistry();
+00280 
+00281 <font class="keyword">private</font>:
+00282 
+00283     <font class="keyword">typedef</font> <font class="keyword">union</font>
+00284 <font class="keyword">    </font>{
+00285                 <font class="keywordtype">long</font>  f_long;
+00286        <font class="keywordtype">unsigned</font> <font class="keywordtype">long</font>  f_ulong;
+00287     } t_value;
+00288 
+00295     <a class="code" href="XMLDateTime_8hpp.html#a0">XSValue</a>(
+00296              DataType        <font class="keyword">const</font> dt
+00297            , <a class="code" href="classMemoryManager.html">MemoryManager</a>*  <font class="keyword">const</font> manager = <a class="code" href="classXMLPlatformUtils.html#z488_4">XMLPlatformUtils::fgMemoryManager</a>
+00298            );
+00299 
+00301 
+00302     <font class="comment">// -----------------------------------------------------------------------</font>
+00303     <font class="comment">//  Unimplemented constructors and operators</font>
+00304     <font class="comment">// -----------------------------------------------------------------------</font>
+00305     <a class="code" href="XMLDateTime_8hpp.html#a0">XSValue</a>(<font class="keyword">const</font> <a class="code" href="classXSValue.html">XSValue</a>&amp;);
+00306     <a class="code" href="classXSValue.html">XSValue</a> &amp; operator=(<font class="keyword">const</font> <a class="code" href="classXSValue.html">XSValue</a> &amp;);
+00307 
+00308     <font class="comment">//---------------------------------</font>
+00312 <font class="comment"></font>
+00313     <font class="keyword">static</font> <font class="keyword">const</font> <a class="code" href="classXSValue.html#s65">XSValue::DataGroup</a> inGroup[];
+00314 
+00316 
+00317     <font class="keyword">static</font>
+00318     <font class="keywordtype">bool</font>     validateNumerics
+00319              (
+00320                 <font class="keyword">const</font> XMLCh*          <font class="keyword">const</font> content    
+00321               ,       DataType              datatype
+00322               ,       Status&amp;               status
+00323               ,       XMLVersion            version
+00324               ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>*  <font class="keyword">const</font> manager
+00325              );
+00326 
+00327     <font class="keyword">static</font>
+00328     <font class="keywordtype">bool</font>     validateDateTimes
+00329              (
+00330                 <font class="keyword">const</font> XMLCh*          <font class="keyword">const</font> content    
+00331               ,       DataType              datatype
+00332               ,       Status&amp;               status
+00333               ,       XMLVersion            version
+00334               ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>*  <font class="keyword">const</font> manager
+00335              );
+00336 
+00337     <font class="keyword">static</font>
+00338     <font class="keywordtype">bool</font>     validateStrings
+00339              (
+00340                 <font class="keyword">const</font> XMLCh*          <font class="keyword">const</font> content    
+00341               ,       DataType              datatype
+00342               ,       Status&amp;               status
+00343               ,       XMLVersion            version
+00344               ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>*  <font class="keyword">const</font> manager
+00345              );
+00346 
+00347     <font class="keyword">static</font>
+00348     XMLCh*   getCanRepNumerics
+00349              (
+00350                 <font class="keyword">const</font> XMLCh*          <font class="keyword">const</font> content    
+00351               ,       DataType              datatype
+00352               ,       Status&amp;               status
+00353               ,       XMLVersion            version
+00354               ,       <font class="keywordtype">bool</font>                  toValidate
+00355               ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>*  <font class="keyword">const</font> manager
+00356              );
+00357 
+00358     <font class="keyword">static</font>
+00359     XMLCh*   getCanRepDateTimes
+00360              (
+00361                 <font class="keyword">const</font> XMLCh*          <font class="keyword">const</font> content    
+00362               ,       DataType              datatype
+00363               ,       Status&amp;               status
+00364               ,       XMLVersion            version
+00365               ,       <font class="keywordtype">bool</font>                  toValidate
+00366               ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>*  <font class="keyword">const</font> manager
+00367              );
+00368 
+00369     <font class="keyword">static</font>
+00370     XMLCh*   getCanRepStrings
+00371              (
+00372                 <font class="keyword">const</font> XMLCh*          <font class="keyword">const</font> content    
+00373               ,       DataType              datatype
+00374               ,       Status&amp;               status
+00375               ,       XMLVersion            version
+00376               ,       <font class="keywordtype">bool</font>                  toValidate
+00377               ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>*  <font class="keyword">const</font> manager
+00378              );
+00379 
+00380     <font class="keyword">static</font>
+00381     <a class="code" href="classXSValue.html">XSValue</a>*  getActValNumerics
+00382              (
+00383                 <font class="keyword">const</font> XMLCh*          <font class="keyword">const</font> content    
+00384               ,       DataType              datatype
+00385               ,       Status&amp;               status
+00386               ,       XMLVersion            version
+00387               ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>*  <font class="keyword">const</font> manager
+00388              );
+00389 
+00390     <font class="keyword">static</font>
+00391     <a class="code" href="classXSValue.html">XSValue</a>*  getActValDateTimes
+00392              (
+00393                 <font class="keyword">const</font> XMLCh*          <font class="keyword">const</font> content    
+00394               ,       DataType              datatype
+00395               ,       Status&amp;               status
+00396               ,       XMLVersion            version
+00397               ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>*  <font class="keyword">const</font> manager
+00398              );
+00399 
+00400     <font class="keyword">static</font>
+00401     <a class="code" href="classXSValue.html">XSValue</a>*  getActValStrings
+00402              (
+00403                 <font class="keyword">const</font> XMLCh*          <font class="keyword">const</font> content    
+00404               ,       DataType              datatype
+00405               ,       Status&amp;               status
+00406               ,       XMLVersion            version
+00407               ,       <font class="keywordtype">bool</font>                  toValidate
+00408               ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>*  <font class="keyword">const</font> manager
+00409              );
+00410 
+00411     <font class="keyword">static</font>
+00412     <font class="keywordtype">bool</font>      getActualValue
+00413               (
+00414                  <font class="keyword">const</font> XMLCh*         <font class="keyword">const</font> content
+00415                ,       Status&amp;               status
+00416                ,       XMLVersion            version    
+00417                ,       <font class="keywordtype">int</font>                   ct
+00418                ,       t_value&amp;              retVal               
+00419                ,       <font class="keywordtype">int</font>                   base
+00420                ,       <a class="code" href="classMemoryManager.html">MemoryManager</a>* <font class="keyword">const</font>  manager
+00421                );
+00422 
+00423     <font class="keyword">static</font> RefHashTableOf&lt;XSValue&gt;*    fDataTypeRegistry;
+00424 
+00425     <font class="comment">// -----------------------------------------------------------------------</font>
+00426     <font class="comment">//  data members</font>
+00427     <font class="comment">// -----------------------------------------------------------------------</font>
+00428     <font class="keywordtype">bool</font>                fMemAllocated;
+00429     <a class="code" href="classMemoryManager.html">MemoryManager</a>*      fMemoryManager;
+00430 
+00431 };
+00432 
+00433 <a class="code" href="XercesDefs_8hpp.html#a3">XERCES_CPP_NAMESPACE_END</a>
+00434 
+00435 <font class="preprocessor">#endif</font>
+</pre></div>    </FONT></TD></TR></TABLE><BR>
+</TD></TR></TABLE></TD></TR></TABLE><BR><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD bgcolor="#0086b2"><IMG height="1" src="images/dot.gif" width="1" alt=""></TD></TR><TR><TD align="center"><FONT color="#0086b2" size="-1"><I>
+              Copyright &copy; 1994-2004 The Apache Software Foundation.
+              All Rights Reserved.
+            </I></FONT></TD></TR></TABLE></BODY></HTML>

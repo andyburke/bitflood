@@ -1,0 +1,265 @@
+<HTML><HEAD><SCRIPT language="JavaScript" src="../resources/script.js" type="text/javascript"></SCRIPT><TITLE>DOMNode.hpp Source File</TITLE><link href="XercesApi.css" rel="stylesheet" type="text/css"></HEAD><BODY alink="#ff0000" bgcolor="#ffffff" leftmargin="4" link="#0000ff" marginheight="4" marginwidth="4" text="#000000" topmargin="4" vlink="#0000aa"><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" height="60" rowspan="3" valign="top" width="135"><IMG border="0" height="60" hspace="0" src="../resources/logo.gif" vspace="0" width="135"></TD><TD align="left" colspan="4" height="5" valign="top" width="456"><IMG border="0" height="5" hspace="0" src="../resources/line.gif" vspace="0" width="456"></TD><TD align="left" height="60" rowspan="3" valign="top" width="29"><IMG border="0" height="60" hspace="0" src="../resources/right.gif" vspace="0" width="29"></TD></TR><TR><TD align="left" bgcolor="#0086b2" colspan="4" height="35" valign="top" width="456"><IMG alt="" border="0" height="35" hspace="0" src="../graphics/api-header.jpg" vspace="0" width="456"></TD></TR><TR><TD align="left" height="20" valign="top" width="168"><IMG border="0" height="20" hspace="0" src="../resources/bottom.gif" vspace="0" width="168"></TD><TD align="left" height="20" valign="top" width="96"><A href="http://xml.apache.org/" onMouseOut="rolloverOff('xml');" onMouseOver="rolloverOn('xml');" target="new"><IMG alt="http://xml.apache.org/" border="0" height="20" hspace="0" name="xml" onLoad="rolloverLoad('xml','../resources/button-xml-hi.gif','../resources/button-xml-lo.gif');" src="../resources/button-xml-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.apache.org/" onMouseOut="rolloverOff('asf');" onMouseOver="rolloverOn('asf');" target="new"><IMG alt="http://www.apache.org/" border="0" height="20" hspace="0" name="asf" onLoad="rolloverLoad('asf','../resources/button-asf-hi.gif','../resources/button-asf-lo.gif');" src="../resources/button-asf-lo.gif" vspace="0" width="96"></A></TD><TD align="left" height="20" valign="top" width="96"><A href="http://www.w3.org/" onMouseOut="rolloverOff('w3c');" onMouseOver="rolloverOn('w3c');" target="new"><IMG alt="http://www.w3.org/" border="0" height="20" hspace="0" name="w3c" onLoad="rolloverLoad('w3c','../resources/button-w3c-hi.gif','../resources/button-w3c-lo.gif');" src="../resources/button-w3c-lo.gif" vspace="0" width="96"></A></TD></TR></TABLE><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD align="left" valign="top" width="120"><IMG border="0" height="14" hspace="0" src="../resources/join.gif" vspace="0" width="120"><BR>
+  <A href="../../index.html" onMouseOut="rolloverOff('side-ext-2');" onMouseOver="rolloverOn('side-ext-2');"><IMG alt="Home" border="0" height="12" hspace="0" name="side-ext-2" onLoad="rolloverLoad('side-ext-2','../graphics/ext-2-label-2.jpg','../graphics/ext-2-label-3.jpg');" src="../graphics/ext-2-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="../index.html" onMouseOut="rolloverOff('side-index');" onMouseOver="rolloverOn('side-index');"><IMG alt="Readme" border="0" height="12" hspace="0" name="side-index" onLoad="rolloverLoad('side-index','../graphics/index-label-2.jpg','../graphics/index-label-3.jpg');" src="../graphics/index-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../releases.html" onMouseOut="rolloverOff('side-releases');" onMouseOver="rolloverOn('side-releases');"><IMG alt="Release Info" border="0" height="12" hspace="0" name="side-releases" onLoad="rolloverLoad('side-releases','../graphics/releases-label-2.jpg','../graphics/releases-label-3.jpg');" src="../graphics/releases-label-3.jpg" vspace="0" width="120"></A><BR>
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+  <A href="../install.html" onMouseOut="rolloverOff('side-install');" onMouseOver="rolloverOn('side-install');"><IMG alt="Installation" border="0" height="12" hspace="0" name="side-install" onLoad="rolloverLoad('side-install','../graphics/install-label-2.jpg','../graphics/install-label-3.jpg');" src="../graphics/install-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="http://xml.apache.org/dist/xerces-c/" onMouseOut="rolloverOff('side-ext-18');" onMouseOver="rolloverOn('side-ext-18');"><IMG alt="Download" border="0" height="12" hspace="0" name="side-ext-18" onLoad="rolloverLoad('side-ext-18','../graphics/ext-18-label-2.jpg','../graphics/ext-18-label-3.jpg');" src="../graphics/ext-18-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../build.html" onMouseOut="rolloverOff('side-build');" onMouseOver="rolloverOn('side-build');"><IMG alt="Build" border="0" height="12" hspace="0" name="side-build" onLoad="rolloverLoad('side-build','../graphics/build-label-2.jpg','../graphics/build-label-3.jpg');" src="../graphics/build-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+  <A href="../faqs.html" onMouseOut="rolloverOff('side-faqs');" onMouseOver="rolloverOn('side-faqs');"><IMG alt="FAQs" border="0" height="12" hspace="0" name="side-faqs" onLoad="rolloverLoad('side-faqs','../graphics/faqs-label-2.jpg','../graphics/faqs-label-3.jpg');" src="../graphics/faqs-label-3.jpg" vspace="0" width="120"></A><BR>  
+  <A href="../samples.html" onMouseOut="rolloverOff('side-samples');" onMouseOver="rolloverOn('side-samples');"><IMG alt="Samples" border="0" height="12" hspace="0" name="side-samples" onLoad="rolloverLoad('side-samples','../graphics/samples-label-2.jpg','../graphics/samples-label-3.jpg');" src="../graphics/samples-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../api.html" onMouseOut="rolloverOff('side-api');" onMouseOver="rolloverOn('side-api');"><IMG alt="API Docs" border="0" height="12" hspace="0" name="side-api" onLoad="rolloverLoad('side-api','../graphics/api-label-2.jpg','../graphics/api-label-3.jpg');" src="../graphics/api-label-3.jpg" vspace="0" width="120"></A><BR>  
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>  
+  <A href="../ApacheDOMC++Binding.html" onMouseOut="rolloverOff('side-ext-68');" onMouseOver="rolloverOn('side-ext-68');"><IMG alt="DOM C++ Binding" border="0" height="12" hspace="0" name="side-ext-68" onLoad="rolloverLoad('side-ext-68','../graphics/ext-68-label-2.jpg','../graphics/ext-68-label-3.jpg');" src="../graphics/ext-68-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <A href="../program.html" onMouseOut="rolloverOff('side-program');" onMouseOver="rolloverOn('side-program');"><IMG alt="Programming" border="0" height="12" hspace="0" name="side-program" onLoad="rolloverLoad('side-program','../graphics/program-label-2.jpg','../graphics/program-label-3.jpg');" src="../graphics/program-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../migrate.html" onMouseOut="rolloverOff('side-migrate');" onMouseOver="rolloverOn('side-migrate');"><IMG alt="Migration Guide" border="0" height="12" hspace="0" name="side-migrate" onLoad="rolloverLoad('side-migrate','../graphics/migrate-label-2.jpg','../graphics/migrate-label-3.jpg');" src="../graphics/migrate-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="../feedback.html" onMouseOut="rolloverOff('side-feedback');" onMouseOver="rolloverOn('side-feedback');"><IMG alt="Feedback" border="0" height="12" hspace="0" name="side-feedback" onLoad="rolloverLoad('side-feedback','../graphics/feedback-label-2.jpg','../graphics/feedback-label-3.jpg');" src="../graphics/feedback-label-3.jpg" vspace="0" width="120"></A><BR>
+  <A href="../bug-report.html" onMouseOut="rolloverOff('side-bug-report');" onMouseOver="rolloverOn('side-bug-report');"><IMG alt="Bug-Reporting" border="0" height="12" hspace="0" name="side-bug-report" onLoad="rolloverLoad('side-bug-report','../graphics/bug-report-label-2.jpg','../graphics/bug-report-label-3.jpg');" src="../graphics/bug-report-label-3.jpg" vspace="0" width="120"></A><BR>  
+  <A href="../pdf.html" onMouseOut="rolloverOff('side-pdf');" onMouseOver="rolloverOn('side-pdf');"><IMG alt="PDF Document" border="0" height="12" hspace="0" name="side-pdf" onLoad="rolloverLoad('side-pdf','../graphics/pdf-label-2.jpg','../graphics/pdf-label-3.jpg');" src="../graphics/pdf-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <IMG border="0" height="6" hspace="0" src="../resources/separator.gif" vspace="0" width="120"><BR>
+
+  <A href="http://xml.apache.org/websrc/cvsweb.cgi/xml-xerces/c/" onMouseOut="rolloverOff('side-ext-100');" onMouseOver="rolloverOn('side-ext-100');"><IMG alt="CVS Repository" border="0" height="12" hspace="0" name="side-ext-100" onLoad="rolloverLoad('side-ext-100','../graphics/ext-100-label-2.jpg','../graphics/ext-100-label-3.jpg');" src="../graphics/ext-100-label-3.jpg" vspace="0" width="120"></A><BR>
+
+  <A href="http://marc.theaimsgroup.com/?l=xerces-c-dev" onMouseOut="rolloverOff('side-ext-102');" onMouseOver="rolloverOn('side-ext-102');"><IMG alt="Mail Archive" border="0" height="12" hspace="0" name="side-ext-102" onLoad="rolloverLoad('side-ext-102','../graphics/ext-102-label-2.jpg','../graphics/ext-102-label-3.jpg');" src="../graphics/ext-102-label-3.jpg" vspace="0" width="120"></A><BR>
+
+
+<IMG border="0" height="14" hspace="0" src="../resources/close.gif" vspace="0" width="120"><BR></TD><TD align="left" valign="top" width="500"><TABLE border="0" cellpadding="3" cellspacing="0"><TR><TD>
+    <TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#FFFFFF" colspan="2" width="494"><TABLE border="0" cellpadding="0" cellspacing="0" width="494"><TR><TD bgcolor="#039acc" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#039acc" height="1" width="492"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#039acc" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#0086b2" width="492"><FONT color="#ffffff" face="arial,helvetica,sanserif" size="+1"><IMG border="0" height="2" hspace="0" src="../resources/void.gif" vspace="0" width="2"><B>API Docs for SAX and DOM</B></FONT></TD><TD bgcolor="#017299" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR><TR><TD bgcolor="#0086b2" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD><TD bgcolor="#017299" height="1" width="492"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="492"></TD><TD bgcolor="#017299" height="1" width="1"><IMG border="0" height="1" hspace="0" src="../resources/void.gif" vspace="0" width="1"></TD></TR></TABLE></TD></TR><TR><TD width="10">&nbsp;</TD><TD width="484"><FONT color="#000000" face="arial,helvetica,sanserif">
+
+	    <P>
+<!-- Generated by Doxygen 1.2.14 -->
+<center>
+<a class="qindex" href="index.html">Main Page</a> &nbsp; <a class="qindex" href="hierarchy.html">Class Hierarchy</a> &nbsp; <a class="qindex" href="classes.html">Alphabetical List</a> &nbsp; <a class="qindex" href="annotated.html">Compound List</a> &nbsp; <a class="qindex" href="files.html">File List</a> &nbsp; <a class="qindex" href="functions.html">Compound Members</a> &nbsp; <a class="qindex" href="globals.html">File Members</a> &nbsp; </center>
+<hr><h1>DOMNode.hpp</h1><a href="DOMNode_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><pre>00001 <font class="preprocessor">#ifndef DOMNode_HEADER_GUARD_</font>
+00002 <font class="preprocessor"></font><font class="preprocessor">#define DOMNode_HEADER_GUARD_</font>
+00003 <font class="preprocessor"></font>
+00004 <font class="comment">/*</font>
+00005 <font class="comment"> * Copyright 2001-2002,2004 The Apache Software Foundation.</font>
+00006 <font class="comment"> * </font>
+00007 <font class="comment"> * Licensed under the Apache License, Version 2.0 (the "License");</font>
+00008 <font class="comment"> * you may not use this file except in compliance with the License.</font>
+00009 <font class="comment"> * You may obtain a copy of the License at</font>
+00010 <font class="comment"> * </font>
+00011 <font class="comment"> *      http://www.apache.org/licenses/LICENSE-2.0</font>
+00012 <font class="comment"> * </font>
+00013 <font class="comment"> * Unless required by applicable law or agreed to in writing, software</font>
+00014 <font class="comment"> * distributed under the License is distributed on an "AS IS" BASIS,</font>
+00015 <font class="comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</font>
+00016 <font class="comment"> * See the License for the specific language governing permissions and</font>
+00017 <font class="comment"> * limitations under the License.</font>
+00018 <font class="comment"> */</font>
+00019 
+00020 <font class="comment">/*</font>
+00021 <font class="comment"> * $Id: DOMNode.hpp,v 1.17 2004/09/08 13:55:39 peiyongz Exp $</font>
+00022 <font class="comment"> */</font>
+00023 
+00024 <font class="preprocessor">#include &lt;<a class="code" href="XercesDefs_8hpp.html">xercesc/util/XercesDefs.hpp</a>&gt;</font>
+00025 
+00026 <a class="code" href="XercesDefs_8hpp.html#a2">XERCES_CPP_NAMESPACE_BEGIN</a>
+00027 
+00028 
+<a name="l00029"></a><a class="code" href="DOMNode_8hpp.html#a4">00029</a> <font class="keyword">class </font><a class="code" href="classDOMDocument.html">DOMDocument</a>;
+00030 <font class="keyword">class </font><a class="code" href="classDOMNamedNodeMap.html">DOMNamedNodeMap</a>;
+00031 <font class="keyword">class </font><a class="code" href="classDOMNodeList.html">DOMNodeList</a>;
+00032 <font class="keyword">class </font><a class="code" href="classDOMUserDataHandler.html">DOMUserDataHandler</a>;
+00033 
+<a name="l00145"></a><a class="code" href="classDOMNode.html">00145</a> <font class="keyword">class  </font><a class="code" href="XercesDefs_8hpp.html#a12"></a> <a class="code" href="classDOMNode.html">DOMNode</a> {
+00146 <font class="keyword">protected</font>:
+00147     <font class="comment">// -----------------------------------------------------------------------</font>
+00148     <font class="comment">//  Hidden constructors</font>
+00149     <font class="comment">// -----------------------------------------------------------------------</font>
+<a name="l00152"></a><a class="code" href="classDOMNode.html#z109_0">00152</a> <font class="comment"></font>    <a class="code" href="XSAnnotation_8hpp.html#a1">DOMNode</a>() {};
+00154 
+00155 <font class="keyword">private</font>:    
+00156     <font class="comment">// -----------------------------------------------------------------------</font>
+00157     <font class="comment">// Unimplemented constructors and operators</font>
+00158     <font class="comment">// -----------------------------------------------------------------------</font>
+00161 <font class="comment"></font>    <a class="code" href="XSAnnotation_8hpp.html#a1">DOMNode</a>(<font class="keyword">const</font> <a class="code" href="classDOMNode.html">DOMNode</a> &amp;);
+00162     <a class="code" href="classDOMNode.html">DOMNode</a> &amp; operator = (<font class="keyword">const</font> <a class="code" href="classDOMNode.html">DOMNode</a> &amp;);
+00164 
+00165 <font class="keyword">public</font>:
+00166     <font class="comment">// -----------------------------------------------------------------------</font>
+00167     <font class="comment">//  All constructors are hidden, just the destructor is available</font>
+00168     <font class="comment">// -----------------------------------------------------------------------</font>
+<a name="l00175"></a><a class="code" href="classDOMNode.html#z111_0">00175</a> <font class="comment"></font>    <font class="keyword">virtual</font> ~<a class="code" href="classDOMNode.html">DOMNode</a>() {};
+00177 
+00178     <font class="comment">// -----------------------------------------------------------------------</font>
+00179     <font class="comment">//  Class Types</font>
+00180     <font class="comment">// -----------------------------------------------------------------------</font>
+<a name="l00188"></a><a class="code" href="classDOMNode.html#z112_0">00188</a> <font class="comment"></font>    <font class="keyword">enum</font> NodeType {
+00189         ELEMENT_NODE                = 1,
+00190         ATTRIBUTE_NODE              = 2,
+00191         TEXT_NODE                   = 3,
+00192         CDATA_SECTION_NODE          = 4,
+00193         ENTITY_REFERENCE_NODE       = 5,
+00194         ENTITY_NODE                 = 6,
+00195         PROCESSING_INSTRUCTION_NODE = 7,
+00196         COMMENT_NODE                = 8,
+00197         DOCUMENT_NODE               = 9,
+00198         DOCUMENT_TYPE_NODE          = 10,
+00199         DOCUMENT_FRAGMENT_NODE      = 11,
+00200         NOTATION_NODE               = 12
+00201     };
+00202 
+<a name="l00229"></a><a class="code" href="classDOMNode.html#z112_1">00229</a>     <font class="keyword">enum</font> DOMTreePosition {
+00230         TREE_POSITION_PRECEDING   = 0x01,
+00231         TREE_POSITION_FOLLOWING   = 0x02,
+00232         TREE_POSITION_ANCESTOR    = 0x04,
+00233         TREE_POSITION_DESCENDANT  = 0x08,
+00234         TREE_POSITION_EQUIVALENT  = 0x10,
+00235         TREE_POSITION_SAME_NODE   = 0x20,
+00236         TREE_POSITION_DISCONNECTED = 0x00
+00237     };
+00239 
+00240     <font class="comment">// -----------------------------------------------------------------------</font>
+00241     <font class="comment">//  Virtual DOMNode interface</font>
+00242     <font class="comment">// -----------------------------------------------------------------------</font>
+00245 <font class="comment"></font>    <font class="comment">// -----------------------------------------------------------------------</font>
+00246     <font class="comment">//  Getter methods</font>
+00247     <font class="comment">// -----------------------------------------------------------------------</font>
+00252 <font class="comment"></font>    <font class="keyword">virtual</font> <font class="keyword">const</font> XMLCh *   getNodeName() <font class="keyword">const</font> = 0;
+00253 
+00261     <font class="keyword">virtual</font> <font class="keyword">const</font> XMLCh *       getNodeValue() <font class="keyword">const</font> = 0;
+00262 
+00267     <font class="keyword">virtual</font> <font class="keywordtype">short</font>           getNodeType() <font class="keyword">const</font> = 0;
+00268 
+00279     <font class="keyword">virtual</font> <a class="code" href="classDOMNode.html">DOMNode</a>        *getParentNode() <font class="keyword">const</font> = 0;
+00280 
+00295     <font class="keyword">virtual</font> <a class="code" href="classDOMNodeList.html">DOMNodeList</a>    *getChildNodes() <font class="keyword">const</font> = 0;
+00302     <font class="keyword">virtual</font> <a class="code" href="classDOMNode.html">DOMNode</a>        *getFirstChild() <font class="keyword">const</font> = 0;
+00303 
+00310     <font class="keyword">virtual</font> <a class="code" href="classDOMNode.html">DOMNode</a>        *getLastChild() <font class="keyword">const</font> = 0;
+00311 
+00318     <font class="keyword">virtual</font> <a class="code" href="classDOMNode.html">DOMNode</a>        *getPreviousSibling() <font class="keyword">const</font> = 0;
+00319 
+00326     <font class="keyword">virtual</font> <a class="code" href="classDOMNode.html">DOMNode</a>        *getNextSibling() <font class="keyword">const</font> = 0;
+00327 
+00333     <font class="keyword">virtual</font> <a class="code" href="classDOMNamedNodeMap.html">DOMNamedNodeMap</a>  *getAttributes() <font class="keyword">const</font> = 0;
+00334 
+00346     <font class="keyword">virtual</font> <a class="code" href="classDOMDocument.html">DOMDocument</a>      *getOwnerDocument() <font class="keyword">const</font> = 0;
+00347 
+00348     <font class="comment">// -----------------------------------------------------------------------</font>
+00349     <font class="comment">//  Node methods</font>
+00350     <font class="comment">// -----------------------------------------------------------------------</font>
+00370 <font class="comment"></font>    <font class="keyword">virtual</font> <a class="code" href="classDOMNode.html">DOMNode</a>        * cloneNode(<font class="keywordtype">bool</font> deep) <font class="keyword">const</font> = 0;
+00371 
+00399     <font class="keyword">virtual</font> <a class="code" href="classDOMNode.html">DOMNode</a>       *insertBefore(<a class="code" href="classDOMNode.html">DOMNode</a> *newChild,
+00400                                           <a class="code" href="classDOMNode.html">DOMNode</a> *refChild) = 0;
+00401 
+00402 
+00426     <font class="keyword">virtual</font> <a class="code" href="classDOMNode.html">DOMNode</a>  *replaceChild(<a class="code" href="classDOMNode.html">DOMNode</a> *newChild,
+00427                                      <a class="code" href="classDOMNode.html">DOMNode</a> *oldChild) = 0;
+00440     <font class="keyword">virtual</font> <a class="code" href="classDOMNode.html">DOMNode</a>        *removeChild(<a class="code" href="classDOMNode.html">DOMNode</a> *oldChild) = 0;
+00441 
+00462     <font class="keyword">virtual</font> <a class="code" href="classDOMNode.html">DOMNode</a>        *appendChild(<a class="code" href="classDOMNode.html">DOMNode</a> *newChild) = 0;
+00463 
+00464     <font class="comment">// -----------------------------------------------------------------------</font>
+00465     <font class="comment">//  Query methods</font>
+00466     <font class="comment">// -----------------------------------------------------------------------</font>
+00475 <font class="comment"></font>    <font class="keyword">virtual</font> <font class="keywordtype">bool</font>             hasChildNodes() <font class="keyword">const</font> = 0;
+00476 
+00477     <font class="comment">// -----------------------------------------------------------------------</font>
+00478     <font class="comment">//  Setter methods</font>
+00479     <font class="comment">// -----------------------------------------------------------------------</font>
+00494 <font class="comment"></font>    <font class="keyword">virtual</font> <font class="keywordtype">void</font>              setNodeValue(<font class="keyword">const</font> XMLCh  *nodeValue) = 0;
+00496 
+00519     <font class="keyword">virtual</font> <font class="keywordtype">void</font>              normalize() = 0;
+00520 
+00536     <font class="keyword">virtual</font> <font class="keywordtype">bool</font>              isSupported(<font class="keyword">const</font> XMLCh *feature,
+00537                                            <font class="keyword">const</font> XMLCh *version) <font class="keyword">const</font> = 0;
+00538 
+00554     <font class="keyword">virtual</font> <font class="keyword">const</font> XMLCh *         getNamespaceURI() <font class="keyword">const</font> = 0;
+00555 
+00562     <font class="keyword">virtual</font> <font class="keyword">const</font> XMLCh *          getPrefix() <font class="keyword">const</font> = 0;
+00563 
+00573     <font class="keyword">virtual</font> <font class="keyword">const</font> XMLCh *          getLocalName() <font class="keyword">const</font> = 0;
+00574 
+00608     <font class="keyword">virtual</font> <font class="keywordtype">void</font>              setPrefix(<font class="keyword">const</font> XMLCh * prefix) = 0;
+00609 
+00616     <font class="keyword">virtual</font> <font class="keywordtype">bool</font>              hasAttributes() <font class="keyword">const</font> = 0;
+00618 
+00638     <font class="keyword">virtual</font> <font class="keywordtype">bool</font>              isSameNode(<font class="keyword">const</font> <a class="code" href="classDOMNode.html">DOMNode</a>* other) <font class="keyword">const</font> = 0;
+00639 
+00682     <font class="keyword">virtual</font> <font class="keywordtype">bool</font>              isEqualNode(<font class="keyword">const</font> <a class="code" href="classDOMNode.html">DOMNode</a>* arg) <font class="keyword">const</font> = 0;
+00683 
+00684 
+00712     <font class="keyword">virtual</font> <font class="keywordtype">void</font>*             setUserData(<font class="keyword">const</font> XMLCh* key,
+00713                                           <font class="keywordtype">void</font>* data,
+00714                                           <a class="code" href="classDOMUserDataHandler.html">DOMUserDataHandler</a>* handler) = 0;
+00715 
+00729     <font class="keyword">virtual</font> <font class="keywordtype">void</font>*             getUserData(<font class="keyword">const</font> XMLCh* key) <font class="keyword">const</font> = 0;
+00730 
+00731 
+00750     <font class="keyword">virtual</font> <font class="keyword">const</font> XMLCh*           getBaseURI() <font class="keyword">const</font> = 0;
+00751 
+00764     <font class="keyword">virtual</font> <font class="keywordtype">short</font>                  compareTreePosition(<font class="keyword">const</font> <a class="code" href="classDOMNode.html">DOMNode</a>* other) <font class="keyword">const</font> = 0;
+00765 
+00814     <font class="keyword">virtual</font> <font class="keyword">const</font> XMLCh*           getTextContent() <font class="keyword">const</font> = 0;
+00815 
+00864     <font class="keyword">virtual</font> <font class="keywordtype">void</font>                   setTextContent(<font class="keyword">const</font> XMLCh* textContent) = 0;
+00865 
+00883     <font class="keyword">virtual</font> <font class="keyword">const</font> XMLCh*           lookupNamespacePrefix(<font class="keyword">const</font> XMLCh* namespaceURI,
+00884                                                          <font class="keywordtype">bool</font> useDefault) <font class="keyword">const</font> = 0;
+00885 
+00897     <font class="keyword">virtual</font> <font class="keywordtype">bool</font>                   isDefaultNamespace(<font class="keyword">const</font> XMLCh* namespaceURI) <font class="keyword">const</font> = 0;
+00898 
+00912     <font class="keyword">virtual</font> <font class="keyword">const</font> XMLCh*           lookupNamespaceURI(<font class="keyword">const</font> XMLCh* prefix) <font class="keyword">const</font>  = 0;
+00913 
+00930     <font class="keyword">virtual</font> <a class="code" href="classDOMNode.html">DOMNode</a>*               getInterface(<font class="keyword">const</font> XMLCh* feature) = 0;
+00932 
+00933     <font class="comment">// -----------------------------------------------------------------------</font>
+00934     <font class="comment">//  Non-standard Extension</font>
+00935     <font class="comment">// -----------------------------------------------------------------------</font>
+00951 <font class="comment"></font>    <font class="keyword">virtual</font> <font class="keywordtype">void</font>              release() = 0;
+00953 <font class="preprocessor">#if defined(XML_DOMREFCOUNT_EXPERIMENTAL)</font>
+00954 <font class="preprocessor"></font>    <font class="comment">// -----------------------------------------------------------------------</font>
+00955     <font class="comment">//  Non-standard Extension</font>
+00956     <font class="comment">// -----------------------------------------------------------------------</font>
+00966 <font class="comment"></font>    <font class="keyword">virtual</font> <font class="keywordtype">void</font> decRefCount() {}
+00968 
+00969     <font class="comment">// -----------------------------------------------------------------------</font>
+00970     <font class="comment">//  Non-standard Extension</font>
+00971     <font class="comment">// -----------------------------------------------------------------------</font>
+00978 <font class="comment"></font>    <font class="keyword">virtual</font> <font class="keywordtype">void</font> incRefCount() {}
+00980 <font class="preprocessor">#endif</font>
+00981 <font class="preprocessor"></font>};
+00982 
+00983 <font class="comment">/***</font>
+00984 <font class="comment"> * Utilities macros for getting memory manager within DOM</font>
+00985 <font class="comment">***/</font>
+<a name="l00986"></a><a class="code" href="DOMNode_8hpp.html#a0">00986</a> <font class="preprocessor">#define GET_OWNER_DOCUMENT(ptr)      \</font>
+00987 <font class="preprocessor">        ((DOMDocumentImpl*)(ptr-&gt;getOwnerDocument()))</font>
+00988 <font class="preprocessor"></font>
+<a name="l00989"></a><a class="code" href="DOMNode_8hpp.html#a1">00989</a> <font class="preprocessor">#define GET_DIRECT_MM(ptr)           \</font>
+00990 <font class="preprocessor">        ptr ? ((DOMDocumentImpl*)ptr)-&gt;getMemoryManager() : XMLPlatformUtils::fgMemoryManager        </font>
+00991 <font class="preprocessor"></font>
+<a name="l00992"></a><a class="code" href="DOMNode_8hpp.html#a2">00992</a> <font class="preprocessor">#define GET_INDIRECT_MM(ptr)                                                    \</font>
+00993 <font class="preprocessor">        !ptr ? XMLPlatformUtils::fgMemoryManager :                              \</font>
+00994 <font class="preprocessor">        GET_OWNER_DOCUMENT(ptr) ? GET_OWNER_DOCUMENT(ptr)-&gt;getMemoryManager() : \</font>
+00995 <font class="preprocessor">        XMLPlatformUtils::fgMemoryManager</font>
+00996 <font class="preprocessor"></font>
+00997 <font class="comment">/***</font>
+00998 <font class="comment"> * For DOMNode and its derivatives</font>
+00999 <font class="comment">***/</font>
+<a name="l01000"></a><a class="code" href="DOMNode_8hpp.html#a3">01000</a> <font class="preprocessor">#define GetDOMNodeMemoryManager GET_INDIRECT_MM(this)</font>
+01001 <font class="preprocessor"></font>
+01002 <a class="code" href="XercesDefs_8hpp.html#a3">XERCES_CPP_NAMESPACE_END</a>
+01003 
+01004 <font class="preprocessor">#endif</font>
+01005 <font class="preprocessor"></font>
+</pre></div>    </FONT></TD></TR></TABLE><BR>
+</TD></TR></TABLE></TD></TR></TABLE><BR><TABLE border="0" cellpadding="0" cellspacing="0" width="620"><TR><TD bgcolor="#0086b2"><IMG height="1" src="images/dot.gif" width="1" alt=""></TD></TR><TR><TD align="center"><FONT color="#0086b2" size="-1"><I>
+              Copyright &copy; 1994-2004 The Apache Software Foundation.
+              All Rights Reserved.
+            </I></FONT></TD></TR></TABLE></BODY></HTML>
