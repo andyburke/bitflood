@@ -7,6 +7,7 @@ use RPC::XML::Server;
 
 use base qw(Class::Accessor);
 use base qw(RPC::XML::Server);
+__PACKAGE__->mk_accessors(qw(filehashClientList lastCleanupTime));
 
 use Digest::MD5 qw(md5_base64); # for passwords
 
@@ -24,9 +25,7 @@ sub new {
 
   my $self = RPC::XML::Server->new(port => $args{port} || 10101);
   bless $self, $class;
-  $self->mk_accessors(qw(port filehashClientList lastCleanupTime));
 
-  $self->port($args{port} || 10101);
   $self->filehashClientList({});
 
   $self->add_method({
@@ -41,13 +40,14 @@ sub new {
       my $ip = shift;
       my $port = shift;
 
+      print "registering: ip: $ip port: $port fh: $filehash\n";
       push(@{$self->filehashClientList->{$filehash}}, {ip => $ip, port => $port, timestamp => time()});
     },
       
   });
 
   $self->add_method({
-    name => 'Request', # the name of the method
+    name => 'RequestPeers', # the name of the method
     version => '0.0.1', # the method version
     hidden => undef,    # is it hidden? undef = no, 1 = yes
     signature => ['array string'], # return array, take filehash
@@ -56,8 +56,14 @@ sub new {
       my $self = shift;
       my $filehash = shift;
 
+      print "requested peers for: $filehash\n";
+
       $self->CleanFilehashClientList($filehash);
-      return $self->{filehashClientList}->{$filehash};
+      my @peers;
+      foreach my $peer (@{$self->filehashClientList->{$filehash}}) {
+        push(@peers, "http://$peer->{ip}:$peer->{port}/RPCSERV");
+      }
+      return \@peers;
     },
       
   });
@@ -94,7 +100,7 @@ sub CleanFilehashClientList {
   # requests...
   return if(time() - $self->lastCleanupTime < ($TIMEOUT / 2));
 
-  $self->lastCleanupTime = time();
+  $self->lastCleanupTime(time());
 
   my $index = 0;
   foreach my $client (@{$self->{filehashClientList}->{$filehash}}) {
