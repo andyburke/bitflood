@@ -80,7 +80,7 @@ sub SendMessage {
   Debug(">>>", 10);
   
   unshift(@methodArgs, $flood->contentHash);
-  Debug("method $methodName (" . scalar(@methodArgs) . " args)", 5);
+  Debug("method $methodName (" . scalar(@methodArgs) . " args) -> " . $self->host, 5);
   my $request = RPC::XML::request->new($methodName, @methodArgs);
   Debug("  queueing to: " . $self->id . " (" . $self->host . ":" . $self->port . ")", 15);
   $self->writeBuffer($self->writeBuffer . $request->as_string . "\n");
