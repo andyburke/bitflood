@@ -48,9 +48,9 @@ public class FloodFile
 
   public class TargetFile implements Comparable
   {
-    public String  name;
-    public long    size;
-    public Vector  chunks = new Vector();
+    public String name;
+    public long   size;
+    public Vector chunks = new Vector();
 
     public int compareTo( Object anotherTargetFile ) throws ClassCastException
     {
@@ -69,11 +69,11 @@ public class FloodFile
     public String id;
   }
 
-  public Vector         trackers    = new Vector();
-  public Vector         files       = new Vector();
-  public int            chunkSize;
-  public String         filePath;
-  public String         contentHash;
+  public Vector    trackers    = new Vector();
+  public Hashtable targetFiles = new Hashtable();
+  public int       chunkSize;
+  public String    filePath;
+  public String    contentHash;
 
   public FloodFile(String filePath)
   {
@@ -91,7 +91,7 @@ public class FloodFile
   {
     this.filePath = filePath;
     this.chunkSize = chunkSize;
-   
+
   }
 
   public boolean Read()
@@ -154,11 +154,6 @@ public class FloodFile
 
   public void Dump()
   {
-    if ( files == null )
-    {
-      System.out.println( "No files defined..." );
-      return;
-    }
     if ( trackers == null )
     {
       System.out.println( "No trackers defined..." );
@@ -166,14 +161,20 @@ public class FloodFile
     }
 
     System.out.println( "ContentHash: " + contentHash );
-    System.out.println( "# Files    : " + files.size() );
+    System.out.println( "# Files    : " + targetFiles.size() );
     System.out.println( "# Trackers : " + trackers.size() );
 
     System.out.println( "Files:" );
-    Iterator fileiter = files.iterator();
-    for ( ; fileiter.hasNext(); )
+    TargetFile[] sortedTargetFiles = (TargetFile[]) targetFiles.values().toArray();
+    Arrays.sort( sortedTargetFiles );
+    for ( int targetFileIndex = 0; targetFileIndex < sortedTargetFiles.length; targetFileIndex++ )
     {
-      TargetFile file = (TargetFile) fileiter.next();
+      TargetFile file = sortedTargetFiles[targetFileIndex];
+      if ( file == null )
+      {
+        System.out.println( "Error: null targetfile?" );
+        continue;
+      }
       System.out.println( "  name: " + file.name );
       System.out.println( "    size: " + file.size + " chunks:" + file.chunks.size() );
     }
@@ -224,14 +225,15 @@ public class FloodFile
       TrackerInfo tracker = (TrackerInfo) trackeriter.next();
       item = document.createElement( "Tracker" );
       item.setAttribute( "host", tracker.host );
-      item.setAttribute( "port", Integer.toString( tracker.port) );
+      item.setAttribute( "port", Integer.toString( tracker.port ) );
       root.appendChild( item );
     }
 
-    Iterator fileiter = files.iterator();
-    for ( ; fileiter.hasNext(); )
+    TargetFile[] sortedTargetFiles = (TargetFile[]) targetFiles.values().toArray();
+    Arrays.sort( sortedTargetFiles );
+    for ( int targetFileIndex = 0; targetFileIndex < sortedTargetFiles.length; targetFileIndex++ )
     {
-      TargetFile file = (TargetFile) fileiter.next();
+      TargetFile file = sortedTargetFiles[targetFileIndex];
 
       Element fileNode = document.createElement( "File" );
       fileNode.setAttribute( "name", file.name ); // FIXME: have to cleanse the filename to spec (unix)
@@ -320,8 +322,6 @@ public class FloodFile
         NodeList fileList = fileinfo.getElementsByTagName( "File" );
         if ( fileList.getLength() > 0 )
         {
-          files.setSize( fileList.getLength() );
-
           for ( int fileIndex = 0; fileIndex < fileList.getLength(); fileIndex++ )
           {
             Element file = (Element) fileList.item( fileIndex );
@@ -349,7 +349,7 @@ public class FloodFile
               }
             }
 
-            files.set( fileIndex, targetFile );
+            targetFiles.put( targetFile.name, targetFile );
           }
         }
       }
@@ -376,10 +376,9 @@ public class FloodFile
             System.out.println( "Could not resolve: " + tempTracker.host + ": " + uhe );
           }
 
-          
           String idstring = tempTracker.host + tempTracker.port;
           tempTracker.id = Encoder.SHA1Base64Encode( idstring );
-          
+
           trackers.set( trackerIndex, tempTracker );
         }
       }
@@ -400,8 +399,8 @@ public class FloodFile
   public boolean AddTracker( final String trackerAddress )
   {
     TrackerInfo tracker = new TrackerInfo();
-    
-    int h_start = trackerAddress.indexOf( "http://" ) + (new String( "http://" ).length());
+
+    int h_start = trackerAddress.indexOf( "http://" ) + ( new String( "http://" ).length() );
     int p_start = trackerAddress.indexOf( ':', h_start ) + 1;
     int u_start = trackerAddress.indexOf( '/', p_start ) + 1;
 
@@ -458,8 +457,7 @@ public class FloodFile
       }
 
       // FIXME i'm do a lot of shit on this one line...
-      if ( !AddFile( childFiles[childIndex], childFiles[childIndex].replaceFirst( absDirPath,
-          absDirPath.substring( absDirPath.lastIndexOf( '/' ) ) ) ) )
+      if ( !AddFile( childFiles[childIndex], childFiles[childIndex].replaceFirst( absDirPath, absDirPath.substring( absDirPath.lastIndexOf( '/' ) ) ) ) )
       {
         return false;
       }
@@ -496,11 +494,10 @@ public class FloodFile
       return false;
     }
 
-    // grow our array of files if necessary
     TargetFile file = new TargetFile();
     file.name = targetPath;
     file.size = fileToAdd.length();
-    files.add( file );
+    targetFiles.put( file.name, file );
 
     InputStream inputFileStream = null;
     try
@@ -539,7 +536,7 @@ public class FloodFile
       }
 
       Chunk chunk = new Chunk();
-      chunk.hash = Encoder.SHA1Base64Encode( chunkData , bytesRead );
+      chunk.hash = Encoder.SHA1Base64Encode( chunkData, bytesRead );
       chunk.index = chunkIndex;
       chunk.size = bytesRead;
       chunk.weight = weight;
@@ -565,30 +562,28 @@ public class FloodFile
     if ( contentHash == null )
     {
       // calculate the content hash
-      if ( files != null )
+      String content = "";
+
+      TargetFile[] sortedTargetFiles = (TargetFile[]) targetFiles.values().toArray();
+      Arrays.sort( sortedTargetFiles );
+
+      Iterator fileiter = Arrays.asList( sortedTargetFiles ).iterator();
+      for ( ; fileiter.hasNext(); )
       {
-        String content = "";
+        TargetFile file = (TargetFile) fileiter.next();
+        content = content + file.name;
 
-        java.util.Collections.sort( files );
-
-        Iterator fileiter = files.iterator();
-        for ( ; fileiter.hasNext(); )
+        java.util.Collections.sort( file.chunks );
+        Iterator chunkiter = file.chunks.iterator();
+        for ( ; chunkiter.hasNext(); )
         {
-          TargetFile file = (TargetFile) fileiter.next();
-          content = content + file.name;
-          
-          java.util.Collections.sort( file.chunks );
-          Iterator chunkiter = file.chunks.iterator();
-          for ( ; chunkiter.hasNext(); )
-          {
-            Chunk chunk = (Chunk) chunkiter.next();
-            content = content + chunk.hash;
-          }
+          Chunk chunk = (Chunk) chunkiter.next();
+          content = content + chunk.hash;
         }
-        
-        System.out.println( "Hashing on: " + content );
-        contentHash = Encoder.SHA1Base64Encode( content );
       }
+
+      System.out.println( "Hashing on: " + content );
+      contentHash = Encoder.SHA1Base64Encode( content );
     }
   }
 

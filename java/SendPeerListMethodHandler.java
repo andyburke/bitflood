@@ -42,7 +42,7 @@ public class SendPeerListMethodHandler implements MethodHandler
         if ( peer == null )
         {
           peer = new PeerConnection( receiver.flood, peerHost, peerPort, peerId );
-          receiver.flood.peers.add( peer );
+          receiver.flood.peerConnections.add( peer );
         }
       }
     }

@@ -27,7 +27,7 @@ public class RequestPeerListMethodHandler implements MethodHandler
     
     Vector responseParams = new Vector();
     
-    Iterator peeriter = receiver.flood.peers.iterator();
+    Iterator peeriter = receiver.flood.peerConnections.iterator();
     while( peeriter.hasNext() )
     {
       final PeerConnection peer = (PeerConnection)peeriter.next();

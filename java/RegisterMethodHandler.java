@@ -48,6 +48,6 @@ public class RegisterMethodHandler implements MethodHandler
     receiver.id = peerId;
     receiver.listenPort = peerListen.intValue();
     receiver.flood = flood;
-    flood.peers.add( receiver );
+    flood.peerConnections.add( receiver );
   }
 }

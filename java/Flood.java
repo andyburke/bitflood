@@ -6,10 +6,7 @@
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Vector;
-import java.util.HashSet;
-import java.util.Date;
-import java.util.Iterator;
+import java.util.*;
 import java.io.BufferedInputStream;
 
 /**
@@ -19,13 +16,14 @@ import java.io.BufferedInputStream;
 public class Flood
 {
   public Peer      localPeer         = null;
-  public Vector    peers             = new Vector();
+  public Vector    peerConnections   = new Vector();
   public FloodFile floodFile         = null;
   private Date     lastTrackerUpdate = null;
 
   // runtime flood data
   public class RuntimeTargetFile
   {
+    String           nameOnDisk    = null;
     int[]            chunkOffsets  = null;
     char[]           chunkMap      = null;
   }
@@ -41,7 +39,7 @@ public class Flood
   public int                 bytesMissing      = 0;
   public int                 bytesDownloading  = 0;
 
-  public RuntimeTargetFile[] runtimeFileData   = null;
+  public Hashtable           runtimeTargetFiles = null;
   public Vector              chunksToDownload  = new Vector();
   public HashSet             chunksDownloading = new HashSet();
 
@@ -66,8 +64,8 @@ public class Flood
   {
     // clone the peers Vector and then process them
     {
-      Vector peersClone = (Vector) peers.clone();
-      Iterator peeriter = peersClone.iterator();
+      Vector peerConnectionsClone = (Vector) peerConnections.clone();
+      Iterator peeriter = peerConnectionsClone.iterator();
       for ( ; peeriter.hasNext(); )
       {
         PeerConnection peer = (PeerConnection) peeriter.next();
@@ -76,7 +74,7 @@ public class Flood
     }
 
     // reap disconnected peers
-    Iterator peeriter = peers.iterator();
+    Iterator peeriter = peerConnections.iterator();
     for ( ; peeriter.hasNext(); )
     {
       PeerConnection peer = (PeerConnection) peeriter.next();
@@ -109,7 +107,7 @@ public class Flood
           if ( peer == null )
           {
             peer = new PeerConnection( this, tracker.host, tracker.port, tracker.id );
-            peers.add( peer );
+            peerConnections.add( peer );
           }
 
           // Request the tracker's peer list
@@ -122,7 +120,7 @@ public class Flood
   public PeerConnection FindPeer( final String peerId )
   {
     PeerConnection retVal = null;
-    Iterator peeriter = peers.iterator();
+    Iterator peeriter = peerConnections.iterator();
     for ( ; peeriter.hasNext(); )
     {
       PeerConnection peer = (PeerConnection) peeriter.next();
@@ -137,44 +135,44 @@ public class Flood
 
   protected void SetupFilesAndChunks()
   {
-    if ( floodFile.files.size() > 0 )
+    if ( floodFile.targetFiles.size() > 0 )
     {
-      runtimeFileData = new RuntimeTargetFile[floodFile.files.size()];
 
-      Iterator fileiter = floodFile.files.iterator();
-      for ( int fileIndex = 0; fileiter.hasNext(); ++fileIndex )
+      Iterator targetFileIter = Arrays.asList(floodFile.targetFiles.values().toArray()).iterator();
+      for ( int fileIndex = 0; targetFileIter.hasNext(); ++fileIndex )
       {
-        FloodFile.TargetFile file = (FloodFile.TargetFile) fileiter.next();
-        RuntimeTargetFile rtf = new RuntimeTargetFile();
-        runtimeFileData[fileIndex] = rtf;
+        FloodFile.TargetFile targetFile = (FloodFile.TargetFile) targetFileIter.next();
+        RuntimeTargetFile runtimeTargetFile = new RuntimeTargetFile();
+        runtimeTargetFile.nameOnDisk = targetFile.name;  // having the rtf have a name lets us rename the target 
+        runtimeTargetFiles.put( targetFile.name, runtimeTargetFile );
 
         // track some stats
-        totalBytes += file.size;
+        totalBytes += targetFile.size;
 
-        int numChunks = file.chunks.size();
-        rtf.chunkOffsets = new int[numChunks];
-        rtf.chunkMap = new char[numChunks];
+        int numChunks = targetFile.chunks.size();
+        runtimeTargetFile.chunkOffsets = new int[numChunks];
+        runtimeTargetFile.chunkMap = new char[numChunks];
 
         InputStream inputFileStream = null;
         try
         {
-          inputFileStream = new BufferedInputStream( new FileInputStream( file.name ) );
+          inputFileStream = new BufferedInputStream( new FileInputStream( runtimeTargetFile.nameOnDisk ) );
           inputFileStream.mark( inputFileStream.available() );
         }
         catch ( Exception e )
         {
         }
 
-        Iterator chunkiter = file.chunks.iterator();
+        Iterator chunkiter = targetFile.chunks.iterator();
         for ( int nextOffset = 0; chunkiter.hasNext(); )
         {
           FloodFile.Chunk chunk = (FloodFile.Chunk) chunkiter.next();
 
           // track the offsets
-          rtf.chunkOffsets[chunk.index] = nextOffset;
+          runtimeTargetFile.chunkOffsets[chunk.index] = nextOffset;
 
           // mark it as invalid
-          rtf.chunkMap[chunk.index] = '0';
+          runtimeTargetFile.chunkMap[chunk.index] = '0';
 
           // see if the existing chunk is valid
           if ( inputFileStream != null )
@@ -189,7 +187,7 @@ public class Flood
                 String existingHash = Encoder.SHA1Base64Encode( chunkData, chunk.size );
                 if ( existingHash.compareTo( chunk.hash ) == 0 )
                 {
-                  rtf.chunkMap[chunk.index] = '1';
+                  runtimeTargetFile.chunkMap[chunk.index] = '1';
 
                   // how many bytes did we start with
                   bytesAtStartup += chunk.size;
