@@ -337,22 +337,23 @@ namespace libBitFlood
 
     for( ; trackeriter != trackerend; ++trackeriter )
     {
+      TrackerInfo info;
       const std::string& trackerurl = *trackeriter;
 
       U32 h_start = trackerurl.find( "http://" ) + strlen( "http://" );
       U32 p_start = trackerurl.find( ':', h_start ) + 1;
       U32 u_start = trackerurl.find( '/', p_start ) + 1;
 
-      std::string host = trackerurl.substr( h_start, p_start - h_start - 1 );
-      std::string uri  = trackerurl.substr( u_start, std::string::npos );
-
-      U32 port;
+      info.m_host = trackerurl.substr( h_start, p_start - h_start - 1 );
       std::stringstream port_converter;
       port_converter << trackerurl.substr( p_start, u_start - p_start - 1 );
-      port_converter >> port;
+      port_converter >> info.m_port;
 
-      XmlRpcClient* client = new XmlRpcClient( host.c_str(), port, uri.c_str() );
-      m_trackerConnections.push_back( client );
+      std::stringstream idstrm;
+      idstrm << info.m_host << info.m_port;
+
+      Encoder::Base64Encode( (const U8*)idstrm.str().c_str(), idstrm.str().length(), info.m_id );
+      m_trackerinfos.push_back( info );
     }
 
     // here we setup our internal representation of the state of the files
@@ -362,6 +363,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
+  /*
   Error::ErrorCode Flood::Register( const Client& i_client )
   {
     XmlRpcValue args, result;
@@ -473,6 +475,7 @@ namespace libBitFlood
 
     return Error::NO_ERROR_LBF;
   }
+  */
 
   Error::ErrorCode Flood::_SetupFilesAndChunks( void )
   {

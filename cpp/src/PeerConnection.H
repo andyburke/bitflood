@@ -86,21 +86,8 @@ namespace libBitFlood
 
     Error::ErrorCode LoopOnce( void );
 
-    // messages
-    Error::ErrorCode Register( const std::string& i_floodhash,
-			       const std::string& i_clientid );
-    Error::ErrorCode RequestChunkMaps( const std::string& i_floodhash );
-    Error::ErrorCode SendChunkMaps( const std::string& i_floodhash );
-    Error::ErrorCode NotifyHaveChunk( const std::string& i_floodhash,
-                                      const std::string& i_filename,
-                                      U32                i_chunkindex );
-    Error::ErrorCode RequestChunk( const std::string& i_floodhash,
-				   const std::string& i_filename,
-				   U32                i_chunkindex );
-    Error::ErrorCode SendChunk( const std::string& i_floodhash,
-				const std::string& i_filename,
-				U32                i_chunkindex );
-
+    /// send a message to the peer on the other end of the wire
+    Error::ErrorCode SendMessage( const std::string& i_methodName, const XmlRpcValue& i_args );
 
     // member variables
   public:
@@ -111,26 +98,18 @@ namespace libBitFlood
     bool        m_connected;
     std::string m_host;
     U32         m_port;
-    M_StrToMessageHandler m_messageHandlers;
+    U32         m_listenport;
     FakeClient            m_fakeClient;
     FakeServer            m_fakeServer;
     Reader                m_reader;
     Writer                m_writer;
-    M_StrToStrToStr       m_chunkMaps;
     S_String              m_registeredFloods;
 
   protected:
-    Error::ErrorCode _SetupMessageHandlers( void );
     Error::ErrorCode _Connect( void );
     Error::ErrorCode _ReadOnce( void );
     Error::ErrorCode _WriteOnce( void );
     Error::ErrorCode _ProcessReadBuffer( void );
-
-    Error::ErrorCode _SendMessage( const std::string& i_methodName,
-      const XmlRpcValue& i_args );
-    Error::ErrorCode _DispatchMessage( const std::string& i_methodName,
-      XmlRpcValue& i_args );
-
   };
 
   typedef std::vector< PeerConnectionSPtr > V_PeerConnectionSPtr;

@@ -10,6 +10,7 @@
 
 #include <Flood.H>
 #include <Client.H>
+#include <ChunkHandler.H>
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
 #include <sstream>
@@ -66,9 +67,12 @@ int main(int argc, char* argv[])
     convert >> setup.m_localPort;
   }
 
-  Client client;
-  client.Initialize( setup );
-  client.AddFloodFile( theflood );
+  ClientSPtr client( new Client() );
+  client->Initialize( setup );
+  client->AddFloodFile( theflood );
+
+  ChunkMessageHandlerSPtr chunk_handler( new ChunkMessageHandler() );
+  client->AddMessageHandler( (Client::MessageHandlerSPtr&)chunk_handler );
 
   time_t last_update = 0;
   while( !quit )
@@ -77,18 +81,14 @@ int main(int argc, char* argv[])
     time( &now );
     if ( now - last_update >= UPDATE_INTERVAL )
     {
-      client.Register();
-      client.UpdatePeerList();
+      client->UpdateTrackers();
       time( &last_update );
     }
 
-    client.GetChunks();
-    client.LoopOnce();
+    chunk_handler->GetChunks( client );
+    client->LoopOnce();
     Sleep( 100 );
   }
-
-  // 
-  client.Disconnect();
 }
 
 void ParseFloodFile( const std::string& file, FloodFile& floodfile )

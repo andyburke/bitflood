@@ -14,24 +14,6 @@
 
 namespace libBitFlood
 {
-  namespace PeerConnectionMessages
-  {
-    const char* Register         = "Register";
-    const char* RequestChunkMaps = "RequestChunkMaps";
-    const char* SendChunkMaps    = "SendChunkMaps";
-    const char* NotifyHaveChunk  = "NotifyHaveChunk";
-    const char* RequestChunk     = "RequestChunk";
-    const char* SendChunk        = "SendChunk";
-  }
-
-  // forward declare our message handlers
-  Error::ErrorCode _HandleRegister( PeerConnection& i_receiver, XmlRpcValue& i_args );
-  Error::ErrorCode _HandleRequestChunkMaps( PeerConnection& i_receiver, XmlRpcValue& i_args );
-  Error::ErrorCode _HandleSendChunkMaps( PeerConnection& i_receiver, XmlRpcValue& i_args );
-  Error::ErrorCode _HandleNotifyHaveChunk( PeerConnection& i_receiver, XmlRpcValue& i_args );
-  Error::ErrorCode _HandleRequestChunk( PeerConnection& i_receiver, XmlRpcValue& i_args );
-  Error::ErrorCode _HandleSendChunk( PeerConnection& i_receiver, XmlRpcValue& i_args );
-
   Error::ErrorCode PeerConnection::InitializeCommon( Client* i_client,
     const std::string& i_peerHost,
     U32                i_peerPort )
@@ -41,9 +23,6 @@ namespace libBitFlood
     m_client = i_client;
     m_host   = i_peerHost;
     m_port   = i_peerPort;
-
-    // setup our message handlers
-    _SetupMessageHandlers();
 
     return Error::NO_ERROR_LBF;
   }
@@ -102,6 +81,33 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
+  Error::ErrorCode PeerConnection::SendMessage( const std::string& i_methodName,
+                                                const XmlRpcValue& i_args )
+  {
+    printf( "%s >> %s\n", m_id.c_str(), i_methodName.c_str() );
+    m_fakeClient.ExternalGenerateRequest( i_methodName.c_str(), i_args );
+
+    std::string& request = m_fakeClient.AccessRequest();
+
+    U32 request_index;
+    U32 request_size = request.size();
+    for ( request_index = 0; request_index < request_size; ++request_index )
+    {
+      if ( request[ request_index ] == '\n' ||
+           request[ request_index ] == '\r' )
+      {
+        request[ request_index ] = ' ';
+      }
+    }
+    
+    m_writer.m_buffer.append( request );
+    m_writer.m_buffer.append( 1, '\n' );
+    m_writer.m_buffersize += request_size + 1;
+
+    return Error::NO_ERROR_LBF;
+  }
+
+  /*
   Error::ErrorCode PeerConnection::Register( const std::string& i_floodhash,
     const std::string& i_clientid )
   {
@@ -258,6 +264,7 @@ namespace libBitFlood
 
     return Error::NO_ERROR_LBF;
   }
+  */
 
   Error::ErrorCode PeerConnection::_Connect( void )
   {
@@ -334,46 +341,8 @@ namespace libBitFlood
       XmlRpcValue args;
       std::string methodName = m_fakeServer.ExternalParseRequest( args );
 
-      _DispatchMessage( methodName, args );
+      m_client->DispatchMessage( methodName, PeerConnectionSPtr( this ), args );
     } 
-
-    return Error::NO_ERROR_LBF;
-  }
-
-  Error::ErrorCode PeerConnection::_SendMessage( const std::string& i_methodName,
-    const XmlRpcValue& i_args )
-  {
-    m_fakeClient.ExternalGenerateRequest( i_methodName.c_str(), i_args );
-
-    std::string& request = m_fakeClient.AccessRequest();
-
-    U32 request_index;
-    U32 request_size = request.size();
-    for ( request_index = 0; request_index < request_size; ++request_index )
-    {
-      if ( request[ request_index ] == '\n' ||
-           request[ request_index ] == '\r' )
-      {
-        request[ request_index ] = ' ';
-      }
-    }
-    
-    m_writer.m_buffer.append( request );
-    m_writer.m_buffer.append( 1, '\n' );
-    m_writer.m_buffersize += request_size + 1;
-
-    return Error::NO_ERROR_LBF;
-  }
-
-  Error::ErrorCode PeerConnection::_DispatchMessage( const std::string& i_methodName,
-    XmlRpcValue& i_args )
-  {
-    M_StrToMessageHandler::iterator iter = m_messageHandlers.find( i_methodName );
-    if ( iter != m_messageHandlers.end() )
-    {
-      // call the function
-      (*(*iter).second)( *this, i_args );
-    }
 
     return Error::NO_ERROR_LBF;
   }
@@ -405,6 +374,7 @@ namespace libBitFlood
     return Error::NO_ERROR_LBF;
   }
 
+  /*
   Error::ErrorCode _HandleRegister( PeerConnection& i_receiver, XmlRpcValue& i_args )
   {
     std::string floodId = i_args[0];
@@ -591,5 +561,6 @@ namespace libBitFlood
 
     return Error::NO_ERROR_LBF;
   }
+  */
 };
 

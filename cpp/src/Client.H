@@ -16,7 +16,7 @@ namespace libBitFlood
     public:
       virtual Error::ErrorCode QueryAPI( V_String& o_supportedmessages ) = 0;
       virtual Error::ErrorCode HandleMessage( const std::string& i_message, 
-					      const PeerConnectionSPtr& i_receiver,
+					      PeerConnectionSPtr& i_receiver,
 					      XmlRpcValue& i_args ) = 0;
     };
     typedef ReferenceCountTemplate< MessageHandler > MessageHandlerSPtr;
@@ -26,13 +26,19 @@ namespace libBitFlood
     {
     public:
       // define our message names
+      static const char ReceivePeerList[];
       static const char RegisterWithPeer[];
       static const char AcknowledgePeer[];
 
       Error::ErrorCode QueryAPI( V_String& o_supportedmessages );
-      Error::ErrorCode HandleMessage( const std::string& i_message, 
-				      const PeerConnectionSPtr& i_receiver,
-				      XmlRpcValue& i_args );
+      Error::ErrorCode HandleMessage( const std::string&  i_message, 
+				      PeerConnectionSPtr& i_receiver,
+				      XmlRpcValue&        i_args );
+
+    protected:
+      Error::ErrorCode _HandleReceivePeerList( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
+      Error::ErrorCode _HandleRegisterWithPeer( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
+      Error::ErrorCode _HandleAcknowledgePeer( PeerConnectionSPtr& i_receiver, XmlRpcValue& i_args );
     };
 
     struct Setup
@@ -55,13 +61,13 @@ namespace libBitFlood
   public:
     Error::ErrorCode Initialize( const Setup& i_setup );
     Error::ErrorCode AddFloodFile( const FloodFile& i_floodfile );
-    Error::ErrorCode Register( void );
-    Error::ErrorCode UpdatePeerList( void );
-    Error::ErrorCode GetChunks( void );
+    Error::ErrorCode UpdateTrackers( void );
     Error::ErrorCode LoopOnce( void );
-    Error::ErrorCode Disconnect( void );
 
     Error::ErrorCode AddMessageHandler( MessageHandlerSPtr& i_handler );
+    Error::ErrorCode DispatchMessage( const std::string& i_message, 
+                                      PeerConnectionSPtr& i_receiver, 
+                                      XmlRpcValue& i_args );
 
   public:
     Error::ErrorCode InqFlood( const std::string& i_floodid, FloodSPtr& o_flood );

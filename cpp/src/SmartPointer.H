@@ -19,6 +19,7 @@ namespace libBitFlood
     T* operator->( void ) { return m_pointer; }
 
     const T* Get() const { return m_pointer; }
+    T* Get() { return m_pointer; }
     
     ReferenceCountTemplate<T>& operator=(const ReferenceCountTemplate<T>& i_rhs );
     
@@ -31,7 +32,6 @@ namespace libBitFlood
   {
     if ( m_pointer )
     {
-      assert( m_pointer->m_referencecount == 0 );
       m_pointer->m_referencecount++;
     }
   }
@@ -50,8 +50,9 @@ namespace libBitFlood
     if ( m_pointer && --m_pointer->m_referencecount == 0 )
     {
       delete m_pointer;
-      m_pointer = NULL;
     }
+
+    m_pointer = NULL;
   }
   
   template <class T> ReferenceCountTemplate<T> & ReferenceCountTemplate<T>::operator=(const ReferenceCountTemplate<T>& i_rhs)

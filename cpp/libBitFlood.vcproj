@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\built\$(ConfigurationName)"
-			IntermediateDirectory=".\built\$(ConfigurationName)"
+			OutputDirectory=".\built\Win32\VC7\$(ConfigurationName)"
+			IntermediateDirectory=".\built\Win32\VC7\$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -54,8 +54,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\built\$(ConfigurationName)"
-			IntermediateDirectory=".\built\$(ConfigurationName)"
+			OutputDirectory=".\built\Win32\VC7\$(ConfigurationName)"
+			IntermediateDirectory=".\built\Win32\VC7\$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -98,6 +98,12 @@
 		<Filter
 			Name="src"
 			Filter="">
+			<File
+				RelativePath=".\src\ChunkHandler.cpp">
+			</File>
+			<File
+				RelativePath=".\src\ChunkHandler.H">
+			</File>
 			<File
 				RelativePath=".\src\Client.cpp">
 			</File>

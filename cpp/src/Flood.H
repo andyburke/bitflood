@@ -1,8 +1,6 @@
 #ifndef _LBF_FLOOD_H_
 #define _LBF_FLOOD_H_
 
-#include <XmlRpc.h>
-using namespace XmlRpc;
 namespace libBitFlood
 {
   // forward declare
@@ -39,19 +37,19 @@ namespace libBitFlood
     Error::ErrorCode FromXML( const std::string& i_xml );
     Error::ErrorCode ComputeHash( std::string& o_hash );
   };
-
   typedef std::vector< FloodFile > V_FloodFile;
 
-  typedef std::vector< class XmlRpcClient* > V_XmlRpcClientPtr;
-  
   typedef ReferenceCountTemplate< class Flood > FloodSPtr;
   class Flood : public ReferenceCountBase
   {
   public:
     Error::ErrorCode Initialize( const FloodFile& i_floodfile );
+
+    /*
     Error::ErrorCode Register( const Client& i_client );
     Error::ErrorCode UpdatePeerList( Client& i_client );
     Error::ErrorCode Disconnect( Client& i_client );
+    */
 
     typedef std::map< std::string, U32 > M_StrToU32;
     struct RuntimeFile
@@ -61,17 +59,25 @@ namespace libBitFlood
       std::string m_chunkmap;
     };
 
+    struct TrackerInfo
+    {
+      std::string m_host;
+      U32         m_port;
+      std::string m_id;
+    };
+
     typedef std::pair< U32, U32 > P_ChunkKey;
     typedef std::set< P_ChunkKey > S_ChunkKey;
     typedef std::vector< P_ChunkKey > V_ChunkKey;
     typedef std::vector< RuntimeFile > V_RuntimeFile;
+    typedef std::vector< TrackerInfo > V_TrackerInfo;
     
     FloodFile         m_floodfile;
-    V_XmlRpcClientPtr m_trackerConnections;
+    V_TrackerInfo     m_trackerinfos;
     V_RuntimeFile     m_runtimefiles;
     U32               m_totalbytes;
     V_ChunkKey        m_chunkstodownload;
-    S_ChunkKey        m_chunksDownloading;
+    S_ChunkKey        m_chunksdownloading;
 
   protected:
     Error::ErrorCode _SetupFilesAndChunks( void );

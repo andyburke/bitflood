@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="test_encoder"
-	ProjectGUID="{284B5175-B4EE-4AA5-9179-D48D9DD40798}"
+	ProjectGUID="{328ED0BD-5FB5-43e0-8109-445CD5A8123E}"
 	RootNamespace="test_encoder"
 	Keyword="Win32Proj">
 	<Platforms>
@@ -13,8 +13,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\built\$(ConfigurationName)"
-			IntermediateDirectory=".\built\$(ConfigurationName)"
+			OutputDirectory=".\built\Win32\VC7\$(ConfigurationName)"
+			IntermediateDirectory=".\built\Win32\VC7\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
@@ -36,7 +36,7 @@
 				AdditionalDependencies="libBitFlood.lib Ws2_32.lib"
 				OutputFile="$(OutDir)/test_encoder.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\built\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\built\Win32\VC7\$(ConfigurationName)"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/test_encoder.pdb"
 				SubSystem="1"
@@ -65,8 +65,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\built\$(ConfigurationName)"
-			IntermediateDirectory=".\built\$(ConfigurationName)"
+			OutputDirectory=".\built\Win32\VC7\$(ConfigurationName)"
+			IntermediateDirectory=".\built\Win32\VC7\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
@@ -85,7 +85,7 @@
 				AdditionalDependencies="libBitFlood.lib Ws2_32.lib"
 				OutputFile="$(OutDir)/test_encoder.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\built\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\built\Win32\VC7\$(ConfigurationName)"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
