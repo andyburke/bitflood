@@ -1,0 +1,43 @@
+# Index created by AutoSplit for blib/lib/RPC/XML/Server.pm
+#    (file acts as timestamp)
+package RPC::XML::Server;
+sub add_proc 
+;
+sub method_from_file 
+;
+sub proc_from_file  ;
+sub get_method 
+;
+sub get_proc  ;
+sub server_loop 
+;
+sub post_configure_hook 
+;
+sub pre_loop_hook 
+;
+sub process_request 
+;
+sub dispatch 
+;
+sub call 
+;
+sub add_default_methods 
+;
+sub add_methods_in_dir 
+;
+sub add_procs_in_dir  ;
+sub delete_method 
+;
+sub delete_proc  ;
+sub list_methods 
+;
+sub list_procs  ;
+sub share_methods 
+;
+sub share_procs  ;
+sub copy_methods 
+;
+sub copy_procs  ;
+sub timeout 
+;
+1;

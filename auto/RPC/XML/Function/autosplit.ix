@@ -1,0 +1,10 @@
+# Index created by AutoSplit for blib/lib/RPC/XML/Function.pm
+#    (file acts as timestamp)
+package RPC::XML::Function;
+sub clone 
+;
+sub is_valid 
+;
+sub match_signature 
+;
+1;
