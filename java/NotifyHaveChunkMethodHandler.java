@@ -31,29 +31,24 @@ public class NotifyHaveChunkMethodHandler implements MethodHandler
 
     if ( targetFilename == null )
     {
-      throw new Exception( "Unknown target file specified in NotifyHaveChunk" );
+      throw new Exception( "No target file specified in NotifyHaveChunk" );
     }
-    
     if ( chunkIndex == null )
     {
       throw new Exception( "No chunk index specified in NotifyHaveChunk");
     }
 
-    Flood.RuntimeTargetFile runtimeTargetFile = (Flood.RuntimeTargetFile) receiver.flood.runtimeTargetFiles.get( targetFilename );
-    if ( runtimeTargetFile != null )
+    char[] peerChunkMap = (char[]) receiver.chunkMaps.get(targetFilename);
+    if( peerChunkMap == null )
     {
-      if ( chunkIndex.intValue() > 0 && chunkIndex.intValue() < runtimeTargetFile.chunkMap.length )
-      {
-        runtimeTargetFile.chunkMap[chunkIndex.intValue()] = '1';
-      }
-      else
-      {
-        throw new Exception( "Chunk index out of bounds in NotifyHaveChunk for " );
-      }
+      throw new Exception( "Unknown target file specified in NotifyHaveChunk");
     }
-    else
+
+    if(chunkIndex.intValue() > peerChunkMap.length)
     {
-      // FIXME throw exception? we don't know about this targetFile
+      throw new Exception( "Chunk index out of bounds in NotifyHaveChunk");
     }
+    
+    peerChunkMap[chunkIndex.intValue()] = '1';
   }
 }
