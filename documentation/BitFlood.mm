@@ -61,5 +61,8 @@
 <node TEXT="does it even have enough information to do that?"/>
 </node>
 </node>
+<node TEXT="references" POSITION="right">
+<node LINK="http://groups.google.com/groups?q=perl+win32+non-blocking+connect&amp;hl=en&amp;lr=&amp;c2coff=1&amp;selm=rt-3.0.8-27044-79741.19.7659858633568%40perl.org&amp;rnum=1" TEXT="p5p: IO::Socket::INET nonblocking mode fails on Win32 - here is the fix "/>
+</node>
 </node>
 </map>
