@@ -151,6 +151,7 @@ sub GetChunk {
     $targetFile->seek($chunk->{offset}, 0);
     print "  -> making RPC call\n";
     my $chunkData = $flood->peers->[0]->simple_request('RequestChunk', $floodFileHash, $targetFilename, $index); # FIXME choose which peer
+  print "    -> Chunk data length: " . length($chunkData) . "\n";
     print "  -> finished RPC call\n";
 
     if(sha1_base64($chunkData) eq $chunk->{hash}) {
@@ -202,34 +203,31 @@ sub GetChunks {
 
 }
 
-sub do_one_loop
-{
+sub do_one_loop {
   my $self = shift;
   
   if ($self->{__daemon})
   {
-    my ($conn, $req, $resp, $reqxml, $return, $respxml, $timeout);
+    my ($conn);
 
-    my %args = @_;
+    $self->started('set');
 
-    $timeout = $self->{__daemon}->timeout(1);
+    $self->{__daemon}->timeout(1);
 
     $conn = $self->{__daemon}->accept;
         
     return unless $conn;
     $conn->timeout($self->timeout);
-    $self->process_request($conn);
+    print Dumper $conn;
+    $self->process_request($conn); 
+    print "\n\n";
+    print Dumper $conn;
     $conn->close;
-    undef $conn; # Free up any lingering resources
-
-    $self->{__daemon}->timeout($timeout) if defined $timeout;
   }
   else
   {
     die("Do one loop not supported by Net::Server implementation!");
   }
-  
-  return;
 }
 
 1;
