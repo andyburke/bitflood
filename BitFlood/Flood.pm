@@ -143,12 +143,12 @@ sub InitializeFiles {
       my $validChunkCount = 0;
       foreach my $chunk (@{$file->{Chunk}}) {
 	printf("Checking: %-35.35s [%6.2f%%]\r", substr($file->{name}, -35), 100 * $chunk->{index} / $totalChunks);
-        $outfile->read($buffer, $chunk->{size});
+        $outfile->sysread($buffer, $chunk->{size});
         my $hash = sha1_base64($buffer);
         if($hash eq $chunk->{hash}) {
 	  $validChunkCount++;
           $file->{chunkMap}->Bit_On($chunk->{index});
-	  $self->downloadBytes($self->downloadBytes + $chunk->{length});
+	  $self->downloadBytes($self->downloadBytes + $chunk->{size});
         } else {
 	  push(@{$self->neededChunksByWeight}, { filename => $file->{name}, chunk => $chunk});
 	}
