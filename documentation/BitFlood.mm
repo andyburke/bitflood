@@ -48,8 +48,9 @@
 <node LINK="http://www.neurogrid.net/php/results.php" TEXT="NeuroGrid"/>
 </node>
 <node TEXT="simulation packages">
-<node LINK="http://www.omnetpp.org/" TEXT="OMNet++"/>
+<node LINK="http://picolibre.enst-bretagne.fr/projects/flan/" TEXT="Flan"/>
 <node LINK="http://www.isi.edu/nsnam/ns/" TEXT="NS2"/>
+<node LINK="http://www.omnetpp.org/" TEXT="OMNet++"/>
 </node>
 </node>
 </node>
