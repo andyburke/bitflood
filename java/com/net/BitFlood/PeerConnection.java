@@ -31,7 +31,7 @@ public class PeerConnection
   public int            port              = 0;
   public int            listenPort        = 0;
   public String         id                = "";
-  public Flood          flood             = null;
+  public Flood          flood             = null;                              
   public Hashtable      chunkMaps         = new Hashtable();
   public int            chunksDownloading = 0;
 
@@ -111,6 +111,11 @@ public class PeerConnection
       disconnected = true;
       Logger.LogError( "Error setting up incoming connection: " + e );
     }
+  }
+  
+  public void finalize() {
+    localPeer = null;
+    flood = null;
   }
 
   public void LoopOnce()
