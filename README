@@ -1,0 +1,16 @@
+# Protocol
+---
+
+The concept behind the bitflood protocol is similar to BitTorrent in that files are divided into
+chunks with associated hashes and traded between peers.  However, with bitflood, each chunk can
+be assigned a priority which can help to influence how urgently it is sought by the client.  In
+theory, this should allow for using p2p distribution for streaming.
+
+The code is quite old and has little documentation.  There are a handful of reference
+implementations.
+
+Things that would be good directions for work:
+
+- Support a JSON torrent file format
+- Write some more modern reference implementations
+
